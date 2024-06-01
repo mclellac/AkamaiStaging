@@ -3,7 +3,6 @@
 <interface>
   <!-- interface-name window.ui -->
   <!-- interface-description The main window UI file for Akamai Staging application. -->
-  <!-- interface-copyright (c) 2024 Canadian Broadcasting Corporation -->
   <!-- interface-authors Carey McLelland -->
   <requires lib="Adw" version="1.0"/>
   <requires lib="gio" version="2.44"/>
@@ -46,7 +45,7 @@
                 <property name="margin-end">5</property>
                 <property name="margin-start">15</property>
                 <property name="max-length">120</property>
-                <property name="placeholder-text">eg: www.cbc.ca</property>
+                <property name="placeholder-text">www.example.com</property>
                 <property name="valign">baseline-center</property>
                 <layout>
                   <property name="column">0</property>

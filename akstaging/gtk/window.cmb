@@ -2,7 +2,7 @@
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
 <cambalache-project version="0.17.3" target_tk="gtk-4.0">
   <ui>
-	(1,1,"window.ui","window.ui","The main window UI file for Akamai Staging application.","(c) 2024 Canadian Broadcasting Corporation","Carey McLelland",None,None,None,None)
+	(1,1,"window.ui","window.ui","The main window UI file for Akamai Staging application.",None,"Carey McLelland",None,None,None,None)
   </ui>
   <ui_library>
 	(1,"Adw","1.0",None),
