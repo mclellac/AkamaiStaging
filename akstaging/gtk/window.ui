@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Created with Cambalache 0.90.2 -->
+<interface>
+  <!-- interface-name window.ui -->
+  <!-- interface-description The main window UI file for Akamai Staging application. -->
+  <!-- interface-copyright (c) 2024 Canadian Broadcasting Corporation -->
+  <!-- interface-authors Carey McLelland -->
+  <requires lib="Adw" version="1.0"/>
+  <requires lib="gio" version="2.44"/>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.5"/>
+  <template class="AkamaiStagingWindow" parent="AdwApplicationWindow">
+    <property name="default-height">600</property>
+    <property name="default-width">800</property>
+    <property name="title" translatable="yes">Akamai Staging Network Spoof</property>
+    <child>
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="menu-model">primary_menu</property>
+                <property name="primary">True</property>
+                <property name="tooltip-text" translatable="yes">Menu</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <!-- Begin Akamai Staging Network DNS Spoof UI -->
+          <object class="GtkGrid" id="grid">
+            <property name="column-spacing">5</property>
+            <property name="margin-bottom">15</property>
+            <property name="margin-end">15</property>
+            <property name="margin-start">15</property>
+            <property name="margin-top">15</property>
+            <property name="row-spacing">5</property>
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkEntry" id="entry_domain">
+                <property name="activates-default">True</property>
+                <property name="hexpand">True</property>
+                <property name="hexpand-set">True</property>
+                <property name="margin-bottom">5</property>
+                <property name="margin-end">5</property>
+                <property name="margin-start">15</property>
+                <property name="max-length">120</property>
+                <property name="placeholder-text">eg: www.cbc.ca</property>
+                <property name="valign">baseline-center</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="column-span">2</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_add_ip">
+                <property name="css-classes">suggested-action
+</property>
+                <property name="label">Add Akamai Staging IP</property>
+                <property name="margin-bottom">5</property>
+                <property name="margin-end">15</property>
+                <property name="margin-start">5</property>
+                <property name="margin-top">15</property>
+                <property name="valign">center</property>
+                <layout>
+                  <property name="column">2</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFrame" id="label_frame">
+                <property name="halign">baseline-fill</property>
+                <property name="margin-end">15</property>
+                <property name="margin-start">15</property>
+                <child>
+                  <object class="GtkLabel" id="label_domain">
+                    <property name="halign">baseline-center</property>
+                    <property name="justify">center</property>
+                    <property name="label">Enter the domain or URL you want to spoof to the Akamai Staging Network</property>
+                    <property name="margin-bottom">15</property>
+                    <property name="margin-top">15</property>
+                    <property name="use-markup">True</property>
+                    <property name="valign">start</property>
+                    <property name="xalign">0.0</property>
+                    <property name="yalign">0.0</property>
+                  </object>
+                </child>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="column-span">3</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_delete">
+                <property name="can-shrink">True</property>
+                <property name="child">
+                  <object class="GtkImage"/>
+                </property>
+                <property name="css-classes">destructive-action</property>
+                <property name="hexpand">True</property>
+                <property name="icon-name">budgie-trash-full-symbolic</property>
+                <property name="label" translatable="yes" context="button">Delete Selected Host</property>
+                <property name="margin-bottom">15</property>
+                <property name="margin-end">15</property>
+                <property name="margin-start">15</property>
+                <property name="margin-top">15</property>
+                <property name="tooltip-text">Select the line from /etc/hosts you want to remove and click this button to delete it.</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="column-span">3</property>
+                  <property name="row">4</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkFrame">
+                <property name="hexpand">True</property>
+                <property name="label" translatable="yes">Contents of /etc/hosts file</property>
+                <property name="label-xalign">0.5</property>
+                <property name="margin-bottom">15</property>
+                <property name="margin-end">15</property>
+                <property name="margin-start">15</property>
+                <property name="margin-top">15</property>
+                <property name="vexpand">True</property>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="halign">baseline</property>
+                    <property name="hexpand">True</property>
+                    <property name="propagate-natural-height">True</property>
+                    <property name="propagate-natural-width">True</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="GtkColumnView" id="column_view_entries">
+                        <property name="css-classes">my-column-view
+column-view
+column-header
+view</property>
+                        <property name="enable-rubberband">True</property>
+                        <property name="focusable">True</property>
+                        <property name="halign">baseline-fill</property>
+                        <property name="hexpand">True</property>
+                        <property name="hexpand-set">True</property>
+                        <property name="margin-bottom">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-top">5</property>
+                        <property name="receives-default">True</property>
+                        <property name="reorderable">False</property>
+                        <property name="show-column-separators">true</property>
+                        <property name="show-row-separators">True</property>
+                        <property name="valign">start</property>
+                        <property name="vexpand">True</property>
+                        <property name="vexpand-set">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="column-span">3</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label_status">
+                <property name="css-classes">label</property>
+                <property name="hexpand">True</property>
+                <property name="justify">fill</property>
+                <property name="lines">2</property>
+                <property name="receives-default">True</property>
+                <property name="selectable">True</property>
+                <property name="use-markup">True</property>
+                <property name="vexpand">True</property>
+                <property name="vexpand-set">True</property>
+                <property name="wrap">True</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="column-span">3</property>
+                  <property name="row">3</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="action">app.preferences</attribute>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.show-help-overlay</attribute>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="action">app.about</attribute>
+        <attribute name="label" translatable="yes">_About AkamaiStaging</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

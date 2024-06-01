@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=akamaistaging
+Exec=akamaistaging
+Icon=com.github.mclellac.AkamaiStaging
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true
