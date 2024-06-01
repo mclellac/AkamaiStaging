@@ -61,7 +61,7 @@ gnome.post_install(
 )
 
 # The polkit Policy file
-#policy_file = files('ca.cbc.akamaistaging.policy')
+#policy_file = files('com.github.mclellac.AkamaiStaging.policy')
 #install_data(policy_file, install_dir: '/usr/share/polkit-1/actions')
 
 meson.add_install_script('meson-postinstall.py')

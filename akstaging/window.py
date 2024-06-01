@@ -18,12 +18,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import gi
+
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib
 import sys
 import logging
-import platform
 
 from akstaging.aklib import AkamaiLib as akl
 from akstaging.dns_utils import DNSUtils as ns
@@ -44,16 +44,14 @@ style_provider.load_from_resource("/com/github/mclellac/AkamaiStaging/gtk/window
 
 # Apply the CSS to the default screen
 Gtk.StyleContext.add_provider_for_display(
-    Gdk.Display.get_default(),
-    style_provider,
-    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    Gdk.Display.get_default(), style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 )
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 
-@Gtk.Template(resource_path='/com/github/mclellac/AkamaiStaging/gtk/window.ui')
+@Gtk.Template(resource_path="/com/github/mclellac/AkamaiStaging/gtk/window.ui")
 class AkamaiStagingWindow(Adw.ApplicationWindow):
     __gtype_name__ = "AkamaiStagingWindow"
 
@@ -104,11 +102,13 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Connect UI signals to their respective handlers."""
         self.button_add_ip.connect(
             "clicked",
-            lambda btn: self.on_get_ip_button_clicked(btn, self.entry_domain, self.label_status)
+            lambda btn: self.on_get_ip_button_clicked(
+                btn, self.entry_domain, self.label_status
+            ),
         )
         self.button_delete.connect(
             "clicked",
-            lambda btn: self.on_delete_button_clicked(btn, self.column_view_entries)
+            lambda btn: self.on_delete_button_clicked(btn, self.column_view_entries),
         )
 
     def do_activate(self):
@@ -127,11 +127,11 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         about = Adw.AboutWindow(
             transient_for=self.get_root(),
             application_name="Akamai Staging",
-            application_icon="ca.cbc.akamaistaging",
+            application_icon="com.github.mclellac.AkamaiStaging",
             developer_name="Carey McLelland",
             version="0.1.0",
             developers=["Carey McLelland"],
-            copyright="© 2024 Canadian Broadcasting Corporation",
+            copyright="© 2024 Carey McLelland",
         )
         about.present()
 
@@ -155,14 +155,14 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         ip_column = self._create_and_append_column(
             title="IP Address",
             setup_func=self.setup_ip_column,
-            bind_func=self.bind_ip_column
+            bind_func=self.bind_ip_column,
         )
 
         # Create and append the hostname column
         hostname_column = self._create_and_append_column(
             title="Hostname",
             setup_func=self.setup_hostname_column,
-            bind_func=self.bind_hostname_column
+            bind_func=self.bind_hostname_column,
         )
 
         # Populate the store after setting up the columns
@@ -236,19 +236,28 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         sanitized_domain = self.akl.is_valid_domain(domain, status_label)
 
         if sanitized_domain and not sanitized_domain.endswith(".ca"):
-            self.akl.print_to_textview(status_label, "Error: Invalid domain. The domain must end with .ca.")
+            self.akl.print_to_textview(
+                status_label, "Error: Invalid domain. The domain must end with .ca."
+            )
             return
 
         status_label.set_margin_top(12)
         staging_ip = self.ns.get_akamai_staging_ip(sanitized_domain, status_label)
 
         if staging_ip:
-            self.hfe.update_hosts_file_content(staging_ip, sanitized_domain, False, status_label)
+            self.hfe.update_hosts_file_content(
+                staging_ip, sanitized_domain, False, status_label
+            )
             self.populate_store(self.store)
-            self.akl.print_to_textview(status_label, f"Added Akamai Staging IP for {sanitized_domain} as {staging_ip}")
+            self.akl.print_to_textview(
+                status_label,
+                f"Added Akamai Staging IP for {sanitized_domain} as {staging_ip}",
+            )
         else:
-            self.akl.print_to_textview(status_label, f"Error: Failed to get Akamai Staging IP for {sanitized_domain}")
-
+            self.akl.print_to_textview(
+                status_label,
+                f"Error: Failed to get Akamai Staging IP for {sanitized_domain}",
+            )
 
     def on_delete_button_clicked(self, button, column_view_entries):
         """Handle the Delete button click."""
@@ -269,6 +278,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
 
 class DataObject(GObject.Object):
     """Data object for storing IP and hostname entries."""
+
     ip = GObject.Property(type=str)
     hostname = GObject.Property(type=str)
 
