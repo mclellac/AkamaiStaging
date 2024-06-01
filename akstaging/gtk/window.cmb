@@ -2,7 +2,7 @@
 <!DOCTYPE cambalache-project SYSTEM "cambalache-project.dtd">
 <cambalache-project version="0.17.3" target_tk="gtk-4.0">
   <ui>
-	(1,1,"window.ui","window.ui","The main window UI file for Akamai Staging application.",None,"Carey McLelland",None,None,None,None)
+	(1,1,"window.ui","window.ui","The main window UI file for Akamai Staging application.","Copyright ©- Carey McLelland - All Rights Reserved.","Carey McLelland",None,None,None,None)
   </ui>
   <ui_library>
 	(1,"Adw","1.0",None),
@@ -22,21 +22,22 @@
 	(1,3,"AdwHeaderBar","header_bar",2,None,"top",None,None,None,None),
 	(1,4,"GtkMenuButton",None,3,None,"end",None,None,None,None),
 	(1,5,"GtkGrid","grid",2,None,None," Begin Akamai Staging Network DNS Spoof UI ",1,None,None),
-	(1,7,"GtkEntry","entry_domain",5,None,None,None,None,None,None),
-	(1,8,"GtkButton","button_add_ip",5,None,None,None,1,None,None),
+	(1,7,"GtkEntry","entry_domain",5,None,None,None,1,None,None),
+	(1,8,"GtkButton","button_add_ip",5,None,None,None,2,None,None),
 	(1,9,"GtkButton","button_delete",5,None,None,None,3,None,None),
 	(1,10,"GtkFrame",None,5,None,None,None,4,None,None),
 	(1,11,"GtkScrolledWindow",None,10,None,None,None,None,None,None),
 	(1,12,"GtkColumnView","column_view_entries",11,None,None,None,None,None,None),
-	(1,17,"GtkLabel","label_status",5,None,None,None,5,None,None),
 	(1,18,"(menu)","primary_menu",None,None,None,None,None,None,None),
 	(1,19,"(section)",None,18,None,None,None,None,None,None),
 	(1,20,"(item)",None,19,None,None,None,None,None,None),
 	(1,21,"(item)",None,19,None,None,None,1,None,None),
 	(1,22,"(item)",None,19,None,None,None,2,None,None),
-	(1,24,"GtkFrame","label_frame",5,None,None,None,2,None,None),
+	(1,24,"GtkFrame","label_frame",5,None,None,None,None,None,None),
 	(1,25,"GtkLabel","label_domain",24,None,None,None,None,None,None),
-	(1,26,"GtkImage",None,9,None,None,None,-1,None,None)
+	(1,26,"GtkImage",None,9,None,None,None,-1,None,None),
+	(1,28,"GtkFrame",None,5,None,None,None,5,None,None),
+	(1,29,"GtkTextView","textview_status",28,None,None,None,None,None,None)
   </object>
   <object_property>
 	(1,1,"GtkWindow","default-height","600",None,None,None,None,None,None,None,None,None),
@@ -110,16 +111,6 @@
 	(1,12,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
 	(1,12,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
 	(1,12,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkLabel","justify","fill",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkLabel","lines","2",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkLabel","selectable","True",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkLabel","use-markup","True",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkLabel","wrap","True",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkWidget","css-classes","label",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkWidget","receives-default","True",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
-	(1,17,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
 	(1,20,"(item)","action","app.preferences",None,None,None,None,None,None,None,None,None),
 	(1,20,"(item)","label","_Preferences",1,None,None,None,None,None,None,None,None),
 	(1,21,"(item)","action","win.show-help-overlay",None,None,None,None,None,None,None,None,None),
@@ -137,7 +128,23 @@
 	(1,25,"GtkWidget","halign","baseline-center",None,None,None,None,None,None,None,None,None),
 	(1,25,"GtkWidget","margin-bottom","15",None,None,None,None,None,None,None,None,None),
 	(1,25,"GtkWidget","margin-top","15",None,None,None,None,None,None,None,None,None),
-	(1,25,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None)
+	(1,25,"GtkWidget","valign","start",None,None,None,None,None,None,None,None,None),
+	(1,28,"GtkFrame","label-xalign","0.5",None,None,None,None,None,None,None,None,None),
+	(1,28,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(1,28,"GtkWidget","margin-bottom","15",None,None,None,None,None,None,None,None,None),
+	(1,28,"GtkWidget","margin-end","15",None,None,None,None,None,None,None,None,None),
+	(1,28,"GtkWidget","margin-start","15",None,None,None,None,None,None,None,None,None),
+	(1,28,"GtkWidget","margin-top","15",None,None,None,None,None,None,None,None,None),
+	(1,28,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkTextView","wrap-mode","word-char",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","hexpand","True",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","hexpand-set","True",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","margin-bottom","5",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","margin-end","5",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","margin-start","5",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","margin-top","5",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
+	(1,29,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None)
   </object_property>
   <object_layout_property>
 	(1,5,7,"GtkGridLayoutChild","column-span","2",None,None,None,None),
@@ -146,14 +153,13 @@
 	(1,5,8,"GtkGridLayoutChild","row","1",None,None,None,None),
 	(1,5,9,"GtkGridLayoutChild","column","0",None,None,None,None),
 	(1,5,9,"GtkGridLayoutChild","column-span","3",None,None,None,None),
-	(1,5,9,"GtkGridLayoutChild","row","4",None,None,None,None),
+	(1,5,9,"GtkGridLayoutChild","row","3",None,None,None,None),
 	(1,5,10,"GtkGridLayoutChild","column","0",None,None,None,None),
 	(1,5,10,"GtkGridLayoutChild","column-span","3",None,None,None,None),
 	(1,5,10,"GtkGridLayoutChild","row","2",None,None,None,None),
-	(1,5,17,"GtkGridLayoutChild","column","0",None,None,None,None),
-	(1,5,17,"GtkGridLayoutChild","column-span","3",None,None,None,None),
-	(1,5,17,"GtkGridLayoutChild","row","3",None,None,None,None),
 	(1,5,24,"GtkGridLayoutChild","column-span","3",None,None,None,None),
-	(1,5,24,"GtkGridLayoutChild","row","0",None,None,None,None)
+	(1,5,24,"GtkGridLayoutChild","row","0",None,None,None,None),
+	(1,5,28,"GtkGridLayoutChild","column-span","3",None,None,None,None),
+	(1,5,28,"GtkGridLayoutChild","row","4",None,None,None,None)
   </object_layout_property>
 </cambalache-project>

@@ -16,6 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+import re
 from gi.repository import Gtk
 
 class AkamaiLib:
@@ -43,7 +44,8 @@ class AkamaiLib:
 
         return sanitized_domain
 
-    def print_to_textview(self, widget, message):
+    @staticmethod
+    def print_to_textview(widget, message):
         """
         Prints a message to the specified widget.
 
@@ -58,8 +60,6 @@ class AkamaiLib:
             buffer = widget.get_buffer()
             end_iter = buffer.get_end_iter()
             buffer.insert(end_iter, message + "\n")
-        elif isinstance(widget, Gtk.Label):
-            widget.set_text(message)
         else:
             raise ValueError(f"Unsupported widget type: {type(widget)}")
 
@@ -101,3 +101,5 @@ class AkamaiLib:
                         hosts_file.write(line)
         except IOError as e:
             raise IOError(f"Error modifying /etc/hosts file: {e}") from e
+
+

@@ -52,35 +52,6 @@ class HostsFileEdit:
         except IOError as e:
             raise IOError(f"Error removing /etc/hosts entry: {e}") from e
 
-    def on_delete_hosts_entry(self, entry):
-        """
-        Removes the specified entry from the /etc/hosts file.
-
-        Args:
-            entry (str): The entry to be removed.
-
-        Returns:
-            str: A message indicating the success of the operation.
-
-        Raises:
-            FileNotFoundError: If the /etc/hosts file is not found.
-            Exception: If there is an error removing the entry.
-        """
-        try:
-            with open(self.HOSTS_FILE, "r", encoding="utf-8") as hosts_file:
-                lines = hosts_file.readlines()
-
-            lines = [line for line in lines if entry not in line]
-
-            with open(self.HOSTS_FILE, "w", encoding="utf-8") as hosts_file:
-                hosts_file.writelines(lines)
-
-            return f"Removed /etc/hosts entry for: {entry}"
-        except FileNotFoundError as e:
-            raise FileNotFoundError(f"Error reading {self.HOSTS_FILE}: {e}") from e
-        except IOError as e:
-            raise IOError(f"Error removing /etc/hosts entry: {e}") from e
-
     def update_hosts_file_content(self,
                                   staging_ip,
                                   sanitized_domain,
@@ -113,14 +84,14 @@ class HostsFileEdit:
                         hosts_file.write(f"{staging_ip} {sanitized_domain}\n")
 
                 message = f"{'Deleted' if delete else 'Added'} {sanitized_domain} {staging_ip} to /etc/hosts"
-                AkamaiLib.print_to_textview(self, status_label, message)
+                AkamaiLib.print_to_textview(status_label, message)
             except FileNotFoundError as e:
                 raise FileNotFoundError(
                     f"Error reading/writing {self.HOSTS_FILE}: {e}"
                 ) from e
         else:
-            message = "The obtained IP is the same as the existing IP for {sanitized_domain}. Not updating."
-            AkamaiLib.print_to_textview(self, status_label, message)
+            message = f"The obtained IP is the same as the existing IP for {sanitized_domain}. Not updating."
+            AkamaiLib.print_to_textview(status_label, message)
 
     def get_existing_ip_for_domain(self, sanitized_domain):
         """

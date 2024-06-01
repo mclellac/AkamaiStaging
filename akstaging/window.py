@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
+import re
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -58,7 +58,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     button_add_ip: Gtk.Button = Gtk.Template.Child()
     button_delete: Gtk.Button = Gtk.Template.Child()
     column_view_entries: Gtk.ColumnView = Gtk.Template.Child()
-    label_status: Gtk.Label = Gtk.Template.Child()
+    textview_status: Gtk.TextView = Gtk.Template.Child()
     entry_domain: Gtk.Entry = Gtk.Template.Child()
 
     def __init__(self, application=None):
@@ -77,7 +77,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         assert self.button_add_ip is not None, "button_add_ip is not loaded"
         assert self.button_delete is not None, "button_delete is not loaded"
         assert self.column_view_entries is not None, "column_view_entries is not loaded"
-        assert self.label_status is not None, "label_status is not loaded"
+        assert self.textview_status is not None, "textview_status is not loaded"
         assert self.entry_domain is not None, "entry_domain is not loaded"
 
     def _initialize_helpers(self):
@@ -103,7 +103,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.button_add_ip.connect(
             "clicked",
             lambda btn: self.on_get_ip_button_clicked(
-                btn, self.entry_domain, self.label_status
+                btn, self.entry_domain, self.textview_status
             ),
         )
         self.button_delete.connect(
@@ -229,35 +229,52 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             logger.error(f"Error reading {self.hfe.HOSTS_FILE}: {e}")
             sys.exit(1)
 
-    def on_get_ip_button_clicked(self, button, entry, status_label):
+    def on_get_ip_button_clicked(self, button, entry, textview_status):
         """Handle the Get IP button click."""
         logger.debug("Get IP button clicked")
         domain = entry.get_text()
-        sanitized_domain = self.akl.sanitize_domain(domain, status_label)
+        sanitized_domain = self.akl.sanitize_domain(domain, textview_status)
 
-        status_label.set_margin_top(12)
-        staging_ip = self.ns.get_akamai_staging_ip(sanitized_domain, status_label)
+        textview_status.set_margin_top(12)
+        text_buffer = textview_status.get_buffer()
+        text_buffer.set_text("")  # Clear the text buffer
 
-        if staging_ip:
-            self.hfe.update_hosts_file_content(
-                staging_ip, sanitized_domain, False, status_label
-            )
-            self.populate_store(self.store)
+        try:
+            print(sanitized_domain)
+            if sanitized_domain and re.match(r'^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', sanitized_domain):
+                staging_ip = self.ns.get_akamai_staging_ip(sanitized_domain, textview_status)
+                if staging_ip:
+                    self.hfe.update_hosts_file_content(
+                        staging_ip, sanitized_domain, False, textview_status
+                    )
+                    self.populate_store(self.store)
+                    self.akl.print_to_textview(
+                        textview_status,
+                        f"Added Akamai Staging IP for {sanitized_domain} as {staging_ip}",
+                    )
+                else:
+                    self.akl.print_to_textview(
+                        textview_status,
+                        f"Error: Failed to get Akamai Staging IP for {sanitized_domain}",
+                    )
+            else:
+                self.akl.print_to_textview(
+                    textview_status,
+                    "Invalid domain. Please enter a valid domain."
+                )
+        except Exception as e:
             self.akl.print_to_textview(
-                status_label,
-                f"Added Akamai Staging IP for {sanitized_domain} as {staging_ip}",
+                textview_status,
+                f"Error: {e}",
             )
-        else:
-            self.akl.print_to_textview(
-                status_label,
-                f"Error: Failed to get Akamai Staging IP for {sanitized_domain}",
-            )
+
+
 
     def on_delete_button_clicked(self, button, column_view_entries):
         """Handle the Delete button click."""
         selected_item = self.selection_model.get_selected_item()
         if not selected_item:
-            self.label_status.set_text("No entry selected for deletion.")
+            self.textview_status.set_text("No entry selected for deletion.")
             return
 
         entry = f"{selected_item.ip} {selected_item.hostname}"
@@ -266,9 +283,12 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         removed_entry = self.hfe.remove_hosts_entry(entry)
         self.populate_store(self.store)
 
-        # Update the status label with a message indicating the removed entry
-        self.label_status.set_text(f"{removed_entry}")
+        # Clear the text buffer of textview_status
+        text_buffer = self.textview_status.get_buffer()
+        text_buffer.set_text("")  # Clear the text buffer
 
+        # Update the status label with a message indicating the removed entry
+        self.textview_status.set_text(f"{removed_entry}")
 
 class DataObject(GObject.Object):
     """Data object for storing IP and hostname entries."""
@@ -280,3 +300,4 @@ class DataObject(GObject.Object):
         super().__init__()
         self.ip = ip
         self.hostname = hostname
+
