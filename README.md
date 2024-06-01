@@ -105,3 +105,4 @@ All you need to do is edit the akamaistaging file and uncomment the line:
 ```python
         #self.style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
 ```
+

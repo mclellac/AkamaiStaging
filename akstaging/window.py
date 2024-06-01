@@ -233,13 +233,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Handle the Get IP button click."""
         logger.debug("Get IP button clicked")
         domain = entry.get_text()
-        sanitized_domain = self.akl.is_valid_domain(domain, status_label)
-
-        if sanitized_domain and not sanitized_domain.endswith(".ca"):
-            self.akl.print_to_textview(
-                status_label, "Error: Invalid domain. The domain must end with .ca."
-            )
-            return
+        sanitized_domain = self.akl.sanitize_domain(domain, status_label)
 
         status_label.set_margin_top(12)
         staging_ip = self.ns.get_akamai_staging_ip(sanitized_domain, status_label)

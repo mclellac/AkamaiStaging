@@ -18,41 +18,30 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 from gi.repository import Gtk
 
-
 class AkamaiLib:
     """
-    A class that provides methods for interacting with DNS with the intention
-    obtaining the the Akamai Staging IP for a given domain and IP spoofing the
-    /etc/hosts file to direct the host computer to the Akamai Staging network.
+    A class that provides methods for interacting with DNS to obtain the Akamai Staging IP
+    for a given domain and to spoof the /etc/hosts file to direct the host computer to the Akamai Staging network.
     """
 
-    DOMAIN_SUFFIX = ".ca"
-
-    def is_valid_domain(self, domain, status_label):
+    def sanitize_domain(self, domain, status_label):
         """
-        Checks if the given domain is a valid domain.
+        Sanitizes the given domain by removing URL schemes and any paths.
 
         Args:
-            domain (str): The domain to be checked.
+            domain (str): The domain to be sanitized.
             status_label: The textview widget to print messages to.
 
         Returns:
-            str: The sanitized domain if it is valid, otherwise None.
+            str: The sanitized domain.
         """
-        # Check the domain and remove "http://" or "https:// or any paths"
-        domain = domain.replace("http://", "").replace("https://", "")
-        domain_parts = domain.split("/")
-        sanitized_domain = domain_parts[0]
+        # Remove URL schemes and any paths
+        sanitized_domain = domain.replace("http://", "").replace("https://", "").split("/")[0]
 
         # Print messages related to domain sanitization
-        self.print_to_textview(
-            status_label, f"Original domain {domain} modified to {sanitized_domain}"
-        )
+        self.print_to_textview(status_label, f"Original domain {domain} modified to {sanitized_domain}")
 
-        # Check if the sanitized domain ends with ".ca"
-        return (
-            sanitized_domain if sanitized_domain.endswith(self.DOMAIN_SUFFIX) else None
-        )
+        return sanitized_domain
 
     def print_to_textview(self, widget, message):
         """
@@ -74,4 +63,41 @@ class AkamaiLib:
         else:
             raise ValueError(f"Unsupported widget type: {type(widget)}")
 
+    def update_hosts_file(self, domain, ip_address):
+        """
+        Updates the /etc/hosts file to map the given domain to the specified IP address.
 
+        Args:
+            domain (str): The domain to be mapped.
+            ip_address (str): The IP address to map the domain to.
+
+        Raises:
+            IOError: If there is an error accessing or modifying the /etc/hosts file.
+        """
+        hosts_line = f"{ip_address} {domain}\n"
+        try:
+            with open("/etc/hosts", "a", encoding="utf-8") as hosts_file:
+                hosts_file.write(hosts_line)
+        except IOError as e:
+            raise IOError(f"Error updating /etc/hosts file: {e}") from e
+
+    def remove_from_hosts_file(self, domain):
+        """
+        Removes the given domain entry from the /etc/hosts file.
+
+        Args:
+            domain (str): The domain to be removed.
+
+        Raises:
+            IOError: If there is an error accessing or modifying the /etc/hosts file.
+        """
+        try:
+            with open("/etc/hosts", "r", encoding="utf-8") as hosts_file:
+                lines = hosts_file.readlines()
+
+            with open("/etc/hosts", "w", encoding="utf-8") as hosts_file:
+                for line in lines:
+                    if domain not in line:
+                        hosts_file.write(line)
+        except IOError as e:
+            raise IOError(f"Error modifying /etc/hosts file: {e}") from e

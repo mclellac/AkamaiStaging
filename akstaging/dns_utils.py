@@ -19,13 +19,39 @@
 import socket
 import dns.exception
 import dns.resolver
+from gi.repository import Gtk
 
-from akstaging.aklib import AkamaiLib
+class AkamaiLib:
+    """
+    A class that provides methods for interacting with DNS with the intention
+    of obtaining the Akamai Staging IP for a given domain and IP spoofing the
+    /etc/hosts file to direct the host computer to the Akamai Staging network.
+    """
+
+    def print_to_textview(self, widget, message):
+        """
+        Prints a message to the specified widget.
+
+        Args:
+            widget: The widget to print the message to.
+            message (str): The message to be printed.
+
+        Raises:
+            ValueError: If the widget type is not supported.
+        """
+        if isinstance(widget, Gtk.TextView):
+            buffer = widget.get_buffer()
+            end_iter = buffer.get_end_iter()
+            buffer.insert(end_iter, message + "\n")
+        elif isinstance(widget, Gtk.Label):
+            widget.set_text(message)
+        else:
+            raise ValueError(f"Unsupported widget type: {type(widget)}")
+
 
 class DNSUtils:
 
-    CNAME_SUFFIX = "edgekey.net"
-
+    CNAME_SUFFIXES = ["edgesuite.net", "edgekey.net"]
 
     def configure_dns_resolver(self, dns_server=None):
         """
@@ -59,7 +85,6 @@ class DNSUtils:
                 for line in resolv_conf:
                     if line.startswith("nameserver"):
                         resolver.nameservers.append(line.split()[1])
-                        break
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Error reading /etc/resolv.conf: {e}") from e
 
@@ -75,33 +100,25 @@ class DNSUtils:
             str: The CNAME record.
 
         Raises:
-            Exception: If there is an error resolving the CNAME.
+            ValueError: If the CNAME does not match Akamai's expected suffixes.
+            dns.exception.DNSException: If there is an error resolving the CNAME.
         """
         resolver = self.configure_dns_resolver()
-        dns_server_ip = (
-            resolver.nameservers[0] if resolver.nameservers else "Default system DNS"
-        )
-        AkamaiLib.print_to_textview(self,
-                                    status_label,
-                                    message="Using DNS server {dns_server_ip} to get the records.")
+        dns_server_ip = resolver.nameservers[0] if resolver.nameservers else "Default system DNS"
+        AkamaiLib().print_to_textview(status_label, f"Using DNS server {dns_server_ip} to get the records.")
 
         try:
             answers = resolver.resolve(domain, "CNAME")
             cname = answers[0].target.to_text().strip(".")
-            if not cname.endswith(self.CNAME_SUFFIX):
-                raise ValueError(
-                    f"Invalid CNAME for {domain}. Must end with {self.CNAME_SUFFIX}"
-                )
-            AkamaiLib.print_to_textview(self,
-                                        status_label,
-                                        message="Retrieved CNAME {cname} when looking up {domain}")
+            if not any(cname.endswith(suffix) for suffix in self.CNAME_SUFFIXES):
+                raise ValueError(f"Invalid CNAME for {domain}. Must end with one of {self.CNAME_SUFFIXES}")
+            AkamaiLib().print_to_textview(status_label, f"Retrieved CNAME {cname} when looking up {domain}")
             return cname
-        except (
-            dns.resolver.NoNameservers,
-            dns.resolver.NXDOMAIN,
-            dns.resolver.NoAnswer,
-            dns.exception.DNSException,
-        ) as e:
+        except dns.resolver.NoAnswer:
+            AkamaiLib().print_to_textview(status_label, f"The DNS response does not contain a CNAME record for {domain}.")
+            raise dns.exception.DNSException(f"The DNS response does not contain a CNAME record for {domain}.")
+        except (dns.resolver.NoNameservers, dns.resolver.NXDOMAIN, dns.exception.DNSException) as e:
+            AkamaiLib().print_to_textview(status_label, f"Error resolving CNAME for {domain}. Exception: {e}")
             raise dns.exception.DNSException(f"Error resolving CNAME for {domain}. Exception: {e}") from e
 
     def get_akamai_staging_ip(self, sanitized_domain, status_label):
@@ -110,30 +127,23 @@ class DNSUtils:
 
         Args:
             sanitized_domain (str): The sanitized domain.
-            output_textview: The textview widget to print messages to.
+            status_label: The textview widget to print messages to.
 
         Returns:
             str: The Akamai staging IP.
 
         Raises:
-            Exception: If there is an error getting the staging IP.
+            dns.exception.DNSException: If there is an error getting the staging IP.
         """
         try:
-            # Correct the reference to get_akamai_cname
             cname = self.get_akamai_cname(sanitized_domain, status_label)
             modified_cname = f"{cname[:-4]}-staging.net"
             staging_ip = self.resolve_ip_address(modified_cname)
-            message = f"Obtained the Akamai staging IP {staging_ip} when looking up {modified_cname}"
-            AkamaiLib.print_to_textview(self, status_label, message)
+            AkamaiLib().print_to_textview(status_label, f"Obtained the Akamai staging IP {staging_ip} when looking up {modified_cname}")
             return staging_ip
-        except (
-            dns.resolver.NoNameservers,
-            dns.resolver.NXDOMAIN,
-            dns.resolver.NoAnswer,
-            dns.exception.DNSException,
-        ) as e:
-            raise type(e)(f"Error getting staging IP for {sanitized_domain} -> {e}") from e
-
+        except (dns.resolver.NoNameservers, dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.DNSException, ValueError) as e:
+            AkamaiLib().print_to_textview(status_label, f"Error getting staging IP for {sanitized_domain} -> {e}")
+            raise dns.exception.DNSException(f"Error getting staging IP for {sanitized_domain} -> {e}") from e
 
     def resolve_ip_address(self, hostname):
         """
@@ -146,7 +156,7 @@ class DNSUtils:
             str: The resolved IP address.
 
         Raises:
-            Exception: If there is an error resolving the IP address.
+            socket.gaierror: If there is an error resolving the IP address.
         """
         try:
             return socket.gethostbyname(hostname)
