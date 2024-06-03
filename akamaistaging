@@ -19,7 +19,7 @@ class AkamaiApp(Adw.Application):
 
     def on_activate(self, app):
         self.style_manager = Adw.StyleManager.get_default()
-        self.style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+        #self.style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
 
         if not self.window:  # Only create a new window if there isn't one
             self.window = AkamaiStagingWindow(application=app)
