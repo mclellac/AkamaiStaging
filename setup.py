@@ -8,23 +8,32 @@ import platform
 import os
 from pathlib import Path
 
+
+distros = {
+    "debian": "debian",
+    "ubuntu": "debian",  # Use the same config as Debian
+    "linuxmint": "debian",  # Use the same config as Debian
+    "fedora": "fedora",
+    "centos": "fedora",
+    "rhel": "fedora",
+    "arch": "arch"
+}
+
+# Package data for different OS and distributions
 package_data = {
     "Linux": {
         "debian": {
             "manager": "apt-get",
             "update": ["update", "-y"],
             "options": ["install", "-y"],
-            "packages": ["meson", "meson-python", "ninja-build", "libgtk-4-dev", "libadwaita-1-dev", "desktop-file-utils", "python3-dnspython", "python3-gi", "libglib2.0-dev"]
+            "packages": ["meson", "python3-mesonpy", "ninja-build", "libgtk-4-dev", "libadwaita-1-dev", "desktop-file-utils", "python3-dnspython", "python3-gi", "libglib2.0-dev", "python-gi-dev", "gettext"]
         },
-        "ubuntu": "debian",  
         "fedora": {
             "manager": "dnf",
             "update": ["update", "-y"],
             "options": ["install", "-y"],
             "packages": ["meson", "python3-meson-python", "ninja-build", "gtk4-devel", "libadwaita-devel", "desktop-file-utils", "python3-dns", "python3-gobject", "glib2-devel"]
         },
-        "centos": "fedora",
-        "rhel": "fedora",
         "arch": {
             "manager": "pacman",
             "update": ["-Syu", "--noconfirm"],
@@ -46,37 +55,57 @@ def run_command(cmd):
         result = subprocess.run(cmd, check=True, text=True, capture_output=True)
         print(result.stdout)
     except subprocess.CalledProcessError as e:
-        print(f"Error: Command {' '.join(cmd)} failed.")
+        print(f"Error: Command {' '.join(map(str, cmd))} failed.")
         print(e.stderr)
         sys.exit(1)
 
-def install_packages(os_type, distro_id=None):
-    """Install packages based on the OS type and distribution ID."""
-    data = package_data.get(os_type, {}).get(distro_id)
-    if data is None:
-        print(f"Unsupported OS/distribution: {os_type}/{distro_id}")
-        sys.exit(1)
-
-    manager = data["manager"]
-    packages = data.get("packages", [])
-    update = data.get("update", [])
-    options = data.get("options", [])
-
-    if os_type == "Linux" and os.geteuid() != 0:
-        cmd = ["sudo"] + [manager] + update + options + packages
+def detect_os_and_distro():
+    os_type = platform.system()
+    if os_type == "Linux":
+        try:
+            with open('/etc/os-release') as f:
+                lines = f.readlines()
+                distro_info = {}
+                for line in lines:
+                    key, value = line.strip().split('=')
+                    distro_info[key] = value.strip('"')
+                distro = distro_info.get('ID', 'unknown')
+        except Exception as e:
+            raise RuntimeError(f"Could not determine Linux distribution: {str(e)}")
+    elif os_type == "Darwin":
+        distro = "darwin"
     else:
-        cmd = [manager] + update + options + packages
+        raise ValueError(f"Unsupported operating system: {os_type}")
 
-    run_command(cmd)
+    return os_type, distro
 
-    if os_type == "Darwin":
-        run_command(["pip3", "install", "pythondns", "--break-system-packages"])
+def install_packages():
+    os_type, distro = detect_os_and_distro()
+    distro_key = distros.get(distro, None)  # Map distro to its config key or None if not found
+
+    if os_type in package_data and distro_key in package_data[os_type]:
+        data = package_data[os_type][distro_key]
+        manager = data["manager"]
+        update_cmd = [manager] + data["update"]
+        install_cmd = [manager] + data["options"] + data["packages"]
+        
+        if os_type == "Linux" and os.geteuid() != 0:
+            update_cmd.insert(0, "sudo")
+            install_cmd.insert(0, "sudo")
+        
+        # Running the commands
+        print("Running command:", " ".join(update_cmd))
+        run_command(update_cmd)
+        print("Running command:", " ".join(install_cmd))
+        run_command(install_cmd)
+    else:
+        raise ValueError(f"Unsupported OS or distribution: {os_type}, {distro}")
 
 def check_and_delete_directory(directory):
     """Check if a directory exists and delete it if it does, with user message."""
     if os.path.exists(directory):
         print(f"[Cleanup] Removing existing directory: {directory}")
-        subprocess.run(["sudo", "rm", "-rf", directory], check=True)
+        run_command(["sudo", "rm", "-rf", directory])
 
 def build_application(os_type):
     """Build and install the application with informative messages."""
@@ -111,28 +140,11 @@ def build_application(os_type):
         else:
             print(">> Failed to determine Python site-packages directory.")
 
-def get_linux_distribution():
-    """Retrieve the Linux distribution ID."""
-    distro_id = ""
-    if os.path.isfile("/etc/os-release"):
-        with open("/etc/os-release") as f:
-            for line in f:
-                if line.startswith("ID="):
-                    distro_id = line.strip().split("=")[1].lower()
-                    break
-    else:
-        try:
-            distro_id = subprocess.check_output(["lsb_release", "-is"]).decode().strip().lower()
-        except (FileNotFoundError, subprocess.CalledProcessError):
-            pass
-    return distro_id
-
 def check_homebrew():
     """Check if Homebrew is installed on macOS."""
     if shutil.which("brew") is None:
         print(">> Homebrew not found. Please install it or install the dependencies manually.")
         sys.exit(1)
-
 
 def main():
     parser = argparse.ArgumentParser(description="Dependency installer and application builder")
@@ -144,25 +156,22 @@ def main():
         parser.print_help()
         sys.exit(0)
 
-    os_type = platform.system()
+    os_type, distro = detect_os_and_distro()
     print(f"[System] Detected operating system: {os_type}")
+    print(f"[System] Detected distribution: {distro}")
 
     if args.install_deps:
         print("\n--- Installing Dependencies ---") 
-        if os_type == "Linux":
-            distro_id = get_linux_distribution()
-            print(f"[System] Linux distribution: {distro_id}")
-            install_packages(os_type, distro_id)
-        elif os_type == "Darwin":
+        if os_type == "Linux" or os_type == "Darwin":
+            install_packages()
+        if os_type == "Darwin":
             check_homebrew()
-            install_packages(os_type)
 
         print("\n[Success] Dependencies installed successfully!\n")
 
     if args.build:
         print("\n--- Building Application ---")
         build_application(os_type)
-
 
 if __name__ == "__main__":
     main()
