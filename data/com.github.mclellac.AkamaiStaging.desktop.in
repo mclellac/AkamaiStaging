@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Akamai Staging
-#Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY /usr/local/bin/akamaistaging
-Exec=akamaistaging
+Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY /usr/local/bin/akamaistaging
+#Exec=akamaistaging
 #Exec=sh -c "pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY akamaistaging"
 Icon=com.github.mclellac.AkamaiStaging
 Terminal=false
