@@ -206,7 +206,7 @@ view</property>
     <section>
       <item>
         <attribute name="action">app.preferences</attribute>
-        <attribute name="label" translatable="yes">_Preferences</attribute>
+        <attribute name="label" translatable="yes">_Preferences (TODO)</attribute>
       </item>
       <item>
         <attribute name="action">win.show-help-overlay</attribute>

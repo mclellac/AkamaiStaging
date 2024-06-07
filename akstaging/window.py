@@ -28,6 +28,7 @@ import logging
 from akstaging.aklib import AkamaiLib as akl
 from akstaging.dns_utils import DNSUtils as ns
 from akstaging.hosts import HostsFileEdit as hfe
+from akstaging.defs import VERSION, COPYRIGHT, APP_NAME
 
 # Load and register the resource bundle
 resource_path = "/usr/local/share/akamaistaging/akamaistaging.gresource"
@@ -90,7 +91,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Initialize application actions."""
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
-        self.create_action("preferences", self.on_preferences_action)
+        #self.create_action("preferences", self.on_preferences_action)
 
     def _initialize_store(self):
         """Initialize the data store for the column view."""
@@ -126,12 +127,13 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Show the About dialog."""
         about = Adw.AboutWindow(
             transient_for=self.get_root(),
-            application_name="Akamai Staging",
+            application_name=APP_NAME,
             application_icon="com.github.mclellac.AkamaiStaging",
             developer_name="Carey McLelland",
-            version="0.1.0",
-            developers=["Carey McLelland"],
-            copyright="© 2024 Carey McLelland",
+            version=VERSION,
+            developers=["Carey McLelland <careymclelland@gmail.com>"],
+            copyright=COPYRIGHT,
+            license_type=Gtk.License.GPL_3_0_ONLY,
         )
         about.present()
 
