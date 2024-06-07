@@ -1,10 +1,10 @@
 [Desktop Entry]
 Name=Akamai Staging
-Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY /usr/local/bin/akamaistaging
-#Exec=akamaistaging
-#Exec=sh -c "pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY akamaistaging"
+#Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY /usr/local/bin/akamaistaging
+Exec=akamaistaging
+#Exec=pkexec bash -c 'echo DISPLAY=$DISPLAY >> /tmp/akamaistaging.log; echo XAUTHORITY=$XAUTHORITY >> /tmp/akamaistaging.log; DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY /usr/local/bin/akamaistaging >> /tmp/akamaistaging.log 2>&1'
 Icon=com.github.mclellac.AkamaiStaging
 Terminal=false
 Type=Application
-Categories=GTK;
+Categories=GTK;Utility;
 StartupNotify=true

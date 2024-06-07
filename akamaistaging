@@ -48,8 +48,7 @@ if __name__ == "__main__":
     print("Starting application...")
     if not is_root():
         if platform.system() == "Linux":
-            # escalate_privileges_linux()
-            print("User not root on linux")
+            escalate_privileges_linux()
         elif platform.system() == "Darwin":
             escalate_privileges_mac()
         else:
