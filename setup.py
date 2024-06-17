@@ -79,7 +79,7 @@ package_data = {
     "Darwin": {
         "darwin": {  # Adjusted the structure to match how other OSes are defined
             "manager": "brew",
-            "update": ["update"],
+            "update": ["upgrade"],
             "options": ["install"],
             "packages": [
                 "meson",
@@ -180,17 +180,17 @@ def build_application(os_type):
         site_packages_dir = next((p for p in sys.path if "site-packages" in p), None)
         if site_packages_dir:
             old_path = Path("/usr/local" + site_packages_dir) / "akstaging"
-            new_path = Path(site_packages_dir)
-
+            new_path = Path(site_packages_dir) / "akstaging"
+            
+            if new_path.exists():
+                print(f"[macOS Fix] Removing old directory: {new_path}")
+                run_command(["sudo", "rm", "-rf", str(new_path)])
+            
             if old_path.exists():
                 print(
-                    "\n[macOS Fix] Moving akstaging to correct site-packages location..."
+                    "[macOS Fix] Moving akstaging to correct site-packages location..."
                 )
-                run_command(["sudo", "mv", str(old_path), str(new_path)])
-            else:
-                print(
-                    "\n[macOS Fix] Not needed: akstaging not found in expected location."
-                )
+                run_command(["sudo", "mv", "-v", str(old_path), str(new_path)])
         else:
             print(">> Failed to determine Python site-packages directory.")
 

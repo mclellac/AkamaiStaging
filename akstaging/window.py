@@ -91,7 +91,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Initialize application actions."""
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
-        #self.create_action("preferences", self.on_preferences_action)
+        # self.create_action("preferences", self.on_preferences_action)
 
     def _initialize_store(self):
         """Initialize the data store for the column view."""
@@ -224,9 +224,26 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                     line_parts = line.split(maxsplit=1)
                     ip = line_parts[0]
                     hostname = line_parts[1] if len(line_parts) > 1 else ""
-                    # Ignore localhost, 127.0.0.1, and IPv6 entries
-                    if ip == "127.0.0.1" or ip == "::1" or hostname in ["localhost", "localhost.localdomain", "localhost6", "localhost6.localdomain6"]:
+                    # Lets add a filter to ignore things that could be in the
+                    # hosts file that we don't want to display or edit as they
+                    # are not related.
+                    if (
+                        ip in ["127.0.0.1", "::1", "255.255.255.255"] 
+                        or hostname is None
+                        or any(
+                            word in hostname.lower() for word in ["container", "registry", "docker"]
+                        )  
+                        or hostname.lower() 
+                        in [
+                            "localhost",
+                            "localhost.localdomain",
+                            "localhost6",
+                            "localhost6.localdomain6",
+                        ]
+                    ):
                         continue
+
+
 
                     logger.debug(f"Appending to store: IP={ip}, Hostname={hostname}")
                     obj = DataObject(ip, hostname)
@@ -247,8 +264,12 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
 
         try:
             print(sanitized_domain)
-            if sanitized_domain and re.match(r'^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', sanitized_domain):
-                staging_ip = self.ns.get_akamai_staging_ip(sanitized_domain, textview_status)
+            if sanitized_domain and re.match(
+                r"^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", sanitized_domain
+            ):
+                staging_ip = self.ns.get_akamai_staging_ip(
+                    sanitized_domain, textview_status
+                )
                 if staging_ip:
                     self.hfe.update_hosts_file_content(
                         staging_ip, sanitized_domain, False, textview_status
@@ -265,8 +286,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                     )
             else:
                 self.akl.print_to_textview(
-                    textview_status,
-                    "Invalid domain. Please enter a valid domain."
+                    textview_status, "Invalid domain. Please enter a valid domain."
                 )
         except Exception as e:
             self.akl.print_to_textview(
@@ -278,7 +298,9 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Handle the Delete button click."""
         selected_item = self.selection_model.get_selected_item()
         if not selected_item:
-            self.akl.print_to_textview(self.textview_status, "No entry selected for deletion.")
+            self.akl.print_to_textview(
+                self.textview_status, "No entry selected for deletion."
+            )
             return
 
         entry = f"{selected_item.ip} {selected_item.hostname}"
@@ -304,4 +326,3 @@ class DataObject(GObject.Object):
         super().__init__()
         self.ip = ip
         self.hostname = hostname
-
