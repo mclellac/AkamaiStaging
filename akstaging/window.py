@@ -224,6 +224,10 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                     line_parts = line.split(maxsplit=1)
                     ip = line_parts[0]
                     hostname = line_parts[1] if len(line_parts) > 1 else ""
+                    # Ignore localhost, 127.0.0.1, and IPv6 entries
+                    if ip == "127.0.0.1" or ip == "::1" or hostname in ["localhost", "localhost.localdomain", "localhost6", "localhost6.localdomain6"]:
+                        continue
+
                     logger.debug(f"Appending to store: IP={ip}, Hostname={hostname}")
                     obj = DataObject(ip, hostname)
                     store.append(obj)
@@ -270,18 +274,15 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                 f"Error: {e}",
             )
 
-
-
     def on_delete_button_clicked(self, button, column_view_entries):
         """Handle the Delete button click."""
         selected_item = self.selection_model.get_selected_item()
         if not selected_item:
-            self.textview_status.set_text("No entry selected for deletion.")
+            self.akl.print_to_textview(self.textview_status, "No entry selected for deletion.")
             return
 
         entry = f"{selected_item.ip} {selected_item.hostname}"
         logger.debug(f"Deleting entry: {entry}")
-        self.hfe.remove_hosts_entry(entry)
         removed_entry = self.hfe.remove_hosts_entry(entry)
         self.populate_store(self.store)
 
@@ -290,7 +291,8 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         text_buffer.set_text("")  # Clear the text buffer
 
         # Update the status label with a message indicating the removed entry
-        self.textview_status.set_text(f"{removed_entry}")
+        self.akl.print_to_textview(self.textview_status, f"{removed_entry}")
+
 
 class DataObject(GObject.Object):
     """Data object for storing IP and hostname entries."""
