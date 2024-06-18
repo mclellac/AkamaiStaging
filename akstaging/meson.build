@@ -30,7 +30,7 @@ else
 endif
 
 conf.set('RESOURCE_PATH', resource_path)
-conf.set('APPID', meson.project_name())  # Assuming `pkgappid` is the project name
+conf.set('APPID', meson.project_name())
 
 configure_file(
   input: 'defs.py.in',
