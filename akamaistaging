@@ -1,40 +1,79 @@
 #!/usr/bin/env python3
+# akamaistaging
+#
+# Copyright 2024 Carey McLelland
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+import gi
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+
 import os
 import platform
 import subprocess
 import sys
 
-def is_running_inside_flatpak():
-    return "FLATPAK_SANDBOX_DIR" in os.environ
+from gi.repository import Adw
+from akstaging.window import AkamaiStagingWindow
+
+class AkamaiApp(Adw.Application):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.window = None  # Store a reference to the main window
+        self.connect("activate", self.on_activate)
+
+    def on_activate(self, app):
+        self.style_manager = Adw.StyleManager.get_default()
+        # self.style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
+
+        if not self.window:  # Only create a new window if there isn't one
+            self.window = AkamaiStagingWindow(application=app)
+            self.window.present()
+
+def is_root():
+    return os.geteuid() == 0
 
 def escalate_privileges_linux():
     print("Requesting root privileges on Linux...")
-    if is_running_inside_flatpak():
-        # Use flatpak-spawn for privilege escalation inside Flatpak
-        print("Running inside Flatpak, using flatpak-spawn...")
-        subprocess.run(["flatpak-spawn", "--host", sys.executable] + sys.argv)
-    else:
-        # Use sudo for privilege escalation outside Flatpak
-        print("Not running inside Flatpak, using sudo...")
+    if not is_root():
+        print("Not running as root, escalating privileges...")
         sudo_command = ["sudo", sys.executable] + sys.argv
         os.execvp("sudo", sudo_command)
+    else:
+        print("Already running with root privileges.")
+        app = AkamaiApp(application_id="com.github.mclellac.AkamaiStaging")
+        app.run(sys.argv)
 
 def escalate_privileges_mac():
     print("Requesting root privileges on macOS...")
-    script = f'do shell script "{sys.executable} {os.path.abspath(sys.argv[0])}" with administrator privileges'
-    subprocess.call(["osascript", "-e", script])
-    sys.exit(0)
+    if not is_root():
+        print("Not running as root, escalating privileges...")
+        script = f'do shell script "{sys.executable} {os.path.abspath(sys.argv[0])}" with administrator privileges'
+        subprocess.call(["osascript", "-e", script])
+        sys.exit(0)
+    else:
+        print("Already running with root privileges.")
+        app = AkamaiApp(application_id="com.github.mclellac.AkamaiStaging")
+        app.run(sys.argv)
 
 if __name__ == "__main__":
     print("Starting application...")
-    if not os.geteuid() == 0:
-        if platform.system() == "Linux":
-            escalate_privileges_linux()
-        elif platform.system() == "Darwin":
-            escalate_privileges_mac()
-        else:
-            raise OSError("Unsupported operating system for privilege escalation")
+    if platform.system() == "Linux":
+        escalate_privileges_linux()
+    elif platform.system() == "Darwin":
+        escalate_privileges_mac()
     else:
-        print("Escalated privileges to write to /etc/hosts.")
-        # Initialize your application here after privilege escalation
-
+        raise OSError("Unsupported operating system for privilege escalation")
