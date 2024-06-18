@@ -37,8 +37,7 @@
       ],
       "build-options": {
         "env": {
-          "FLATPAK_BUILD": "1",
-          "FLATPAK_SANDBOX_DIR": "/run/flatpak"
+          "FLATPAK_BUILD": "1"
         },
         "build-args": [
           "--share=network"
@@ -53,8 +52,7 @@
       ],
       "build-options": {
         "env": {
-          "FLATPAK_BUILD": "1",
-          "FLATPAK_SANDBOX_DIR": "/run/flatpak"
+          "FLATPAK_BUILD": "1"
         },
         "build-args": [
           "--share=network"
