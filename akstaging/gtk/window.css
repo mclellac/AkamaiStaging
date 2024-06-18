@@ -1,12 +1,11 @@
-#label {
-	font-size: 14px;
-	color: #fff;
+label {
+	font-size: 16px;
 }
 
 frame {
-    border: 2px solid #cccccc;
+    border: 1px solid #cccccc;
     border-radius: 8px;
-    box-shadow: 2 10px 18px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Fixed missing 0 before 2 */
     padding: 10px;
 }
 

@@ -10,7 +10,6 @@
     "--socket=fallback-x11",
     "--device=dri",
     "--socket=wayland",
-    "--env=FLATPAK_SANDBOX_DIR=/run/flatpak",
     "--filesystem=host",
     "--filesystem=/etc",
     "--talk-name=org.freedesktop.Flatpak",
@@ -38,7 +37,8 @@
       ],
       "build-options": {
         "env": {
-          "FLATPAK_BUILD": "1"
+          "FLATPAK_BUILD": "1",
+          "FLATPAK_SANDBOX_DIR": "/run/flatpak"
         },
         "build-args": [
           "--share=network"
@@ -53,27 +53,18 @@
       ],
       "build-options": {
         "env": {
-          "FLATPAK_BUILD": "1"
+          "FLATPAK_BUILD": "1",
+          "FLATPAK_SANDBOX_DIR": "/run/flatpak"
         },
         "build-args": [
           "--share=network"
         ]
       }
-    },
-    {
-      "name": "polkit-policy",
-      "buildsystem": "simple",
-      "build-commands": [
-        "install -Dm644 com.github.mclellac.AkamaiStaging.policy /etc/polkit-1/actions/com.github.mclellac.AkamaiStaging.policy"
-      ],
-      "sources": [
-        {
-          "type": "file",
-          "path": "com.github.mclellac.AkamaiStaging.policy"
-        }
-      ]
     }
   ],
+  "env": {
+    "FLATPAK_SANDBOX_DIR": "/run/flatpak"
+  },
   "cleanup": [
     "*.pyc",
     "*.pyo",
