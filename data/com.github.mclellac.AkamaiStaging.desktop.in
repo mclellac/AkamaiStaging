@@ -1,10 +1,13 @@
 [Desktop Entry]
+Version=1.0
 Name=Akamai Staging
-#Exec=pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY /usr/local/bin/akamaistaging
+Comment=Akamai Staging is an application designed to manage and apply Akamai Staging IPs for testing configurations on Akamaized domains.
 Exec=akamaistaging
-#Exec=pkexec bash -c 'echo DISPLAY=$DISPLAY >> /tmp/akamaistaging.log; echo XAUTHORITY=$XAUTHORITY >> /tmp/akamaistaging.log; DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY /usr/local/bin/akamaistaging >> /tmp/akamaistaging.log 2>&1'
 Icon=com.github.mclellac.AkamaiStaging
 Terminal=false
 Type=Application
 Categories=GTK;Utility;
 StartupNotify=true
+
+X-AppStream-Ignore=true
+X-AppStream-Metadata-Origin=com.github.mclellac.AkamaiStaging
