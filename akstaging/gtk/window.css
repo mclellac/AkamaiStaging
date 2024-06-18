@@ -3,12 +3,19 @@
 	color: #fff;
 }
 
+frame {
+    border: 2px solid #cccccc;
+    border-radius: 8px;
+    box-shadow: 2 10px 18px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
 column-header {
 	font-weight: bold;
 }
 
 column-view-row label {
-	font-size: 13px;
+	font-size: 15px;
 	color: #666;
 	padding-left: 3px;
 	padding-right: 5px;

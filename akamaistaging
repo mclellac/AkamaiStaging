@@ -52,9 +52,9 @@ def is_root():
 def escalate_privileges_linux():
     print("Requesting root privileges on Linux...")
     if "FLATPAK_SANDBOX_DIR" in os.environ:
-        # Use flatpak-spawn when running inside Flatpak
+        # Handle privileged operations inside Flatpak without pkexec
         print("Running inside Flatpak, using flatpak-spawn...")
-        subprocess.run(["flatpak-spawn", "--host", "pkexec", sys.executable] + sys.argv)
+        subprocess.run(["flatpak-spawn", "--host", "sudo", sys.executable] + sys.argv)
     else:
         # Use sudo for regular Linux environments
         print("Not running inside Flatpak, using sudo...")

@@ -10,7 +10,11 @@
     "--socket=fallback-x11",
     "--device=dri",
     "--socket=wayland",
-    "--env=FLATPAK_SANDBOX_DIR=/run/flatpak"
+    "--env=FLATPAK_SANDBOX_DIR=/run/flatpak",
+    "--filesystem=host",
+    "--filesystem=/etc",
+    "--talk-name=org.freedesktop.Flatpak",
+    "--talk-name=org.freedesktop.portal.*"
   ],
   "cleanup": [
     "*.pyc",
