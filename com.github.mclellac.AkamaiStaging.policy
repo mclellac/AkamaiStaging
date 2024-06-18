@@ -1,18 +1,14 @@
-<!-- com.github.mclellac.AkamaiStaging.policy -->
-<!DOCTYPE policyconfig PUBLIC
- "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
- "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN" "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
 <policyconfig>
-
-  <action id="org.freedesktop.policykit.pkexec.run-AkamaiStaging">
-    <description>Run Akamai Staging application as root</description>
-    <message>Authentication is required to run Akamai Staging application as root</message>
+  <action id="com.github.mclellac.AkamaiStaging">
+    <description>Perform privileged operations in AkamaiStaging</description>
+    <message>Authentication is required to perform privileged operations in AkamaiStaging</message>
     <defaults>
-      <allow_any>no</allow_any>
-      <allow_inactive>no</allow_inactive>
-      <allow_active>auth_admin_keep</allow_active>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
     </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/bin/bin/akamaistaging</annotate>
-    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
   </action>
 </policyconfig>
+
