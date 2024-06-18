@@ -28,10 +28,11 @@ import logging
 from akstaging.aklib import AkamaiLib as akl
 from akstaging.dns_utils import DNSUtils as ns
 from akstaging.hosts import HostsFileEdit as hfe
-from akstaging.defs import VERSION, COPYRIGHT, APP_NAME
+from akstaging.defs import VERSION, COPYRIGHT, APP_NAME, RESOURCE_PATH
 
 # Load and register the resource bundle
-resource_path = "/usr/local/share/akamaistaging/akamaistaging.gresource"
+#resource_path = "/usr/local/share/akamaistaging/akamaistaging.gresource"
+resource_path = RESOURCE_PATH
 try:
     resource = Gio.Resource.load(resource_path)
     Gio.resources_register(resource)

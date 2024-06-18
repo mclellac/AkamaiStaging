@@ -23,7 +23,6 @@ if host_machine.system() == 'darwin'
     prefix = '/usr/local'
 endif
 
-
 # Declare runtime dependency versions here to make packaging more obvious
 dependency('glib-2.0', version: '>= 2.78.0')
 dependency('gtk4', version: '>= 4.14.0')
