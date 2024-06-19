@@ -1,6 +1,6 @@
 /* Apply style to widgets */
 * {
-    font-family: Cantarell, Ubuntu, sans-serif; /* Use GNOME default fonts */
+    font-family: Cantarell, Ubuntu, sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif; /* Use GNOME default fonts with macOS fallbacks */
 }
 
 /* Header Bar */
