@@ -1,0 +1,32 @@
+label {
+	font-size: 15px;
+}
+
+frame {
+    border: 1px solid #dfdfdf;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Fixed missing 0 before 2 */
+    padding: 10px;
+}
+
+.column-header {
+	font-weight: bold;
+}
+
+.column-view-row label {
+	font-size: 15px;
+	color: #4a4a4a;
+	padding-left: 3px;
+	padding-right: 5px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+}
+
+.text-view-entry {
+    font-weight: bold;
+    color: #FFA500;
+}
+
+.view {
+	font-size: 15px; 
+}
