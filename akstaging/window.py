@@ -74,6 +74,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.create_column_view_columns()
         self._connect_signals()
 
+    # Initialization methods
     def _verify_ui_elements(self):
         """Verify that all UI elements are correctly loaded."""
         assert self.button_add_ip is not None, "button_add_ip is not loaded"
@@ -102,6 +103,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
 
     def _connect_signals(self):
         """Connect UI signals to their respective handlers."""
+        self.entry_domain.connect("activate", self.on_entry_domain_activate)
         self.button_add_ip.connect(
             "clicked",
             lambda btn: self.on_get_ip_button_clicked(
@@ -113,16 +115,14 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             lambda btn: self.on_delete_button_clicked(btn, self.column_view_entries),
         )
 
-    def do_activate(self):
-        """Activate the application window."""
-        win = self.props.active_window
-        if not win:
-            logger.debug("Creating new AkamaiStagingWindow instance")
-            win = AkamaiStagingWindow(application=self)
-            logger.debug("Presenting window")
-            win.present()
-        else:
-            self.props.active_window.present()
+    # Action methods
+    def create_action(self, name, callback, shortcuts=None):
+        """Create and register a new action."""
+        action = Gio.SimpleAction.new(name, None)
+        action.connect("activate", callback)
+        self.get_application().add_action(action)
+        if shortcuts:
+            self.get_application().set_accels_for_action(f"app.{name}", shortcuts)
 
     def on_about_action(self, widget, _):
         """Show the About dialog."""
@@ -142,14 +142,18 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Handle the Preferences action."""
         logger.info("Preferences action activated")
 
-    def create_action(self, name, callback, shortcuts=None):
-        """Create and register a new action."""
-        action = Gio.SimpleAction.new(name, None)
-        action.connect("activate", callback)
-        self.get_application().add_action(action)
-        if shortcuts:
-            self.get_application().set_accels_for_action(f"app.{name}", shortcuts)
+    def do_activate(self):
+        """Activate the application window."""
+        win = self.props.active_window
+        if not win:
+            logger.debug("Creating new AkamaiStagingWindow instance")
+            win = AkamaiStagingWindow(application=self)
+            logger.debug("Presenting window")
+            win.present()
+        else:
+            self.props.active_window.present()
 
+    # Column view methods
     def create_column_view_columns(self):
         """Create and append columns to the column view."""
         logger.debug("Creating column view columns")
@@ -212,6 +216,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         logger.debug(f"Setting hostname label text: {obj.hostname}")
         label.set_text(obj.hostname)
 
+    # Store methods
     def populate_store(self, store):
         """Populate the store with data from the hosts file."""
         logger.debug("Populating store with hosts file data")
@@ -244,14 +249,18 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                     ):
                         continue
 
-
-
                     logger.debug(f"Appending to store: IP={ip}, Hostname={hostname}")
                     obj = DataObject(ip, hostname)
                     store.append(obj)
         except FileNotFoundError as e:
             logger.error(f"Error reading {self.hfe.HOSTS_FILE}: {e}")
             sys.exit(1)
+
+    # Event handlers
+    def on_entry_domain_activate(self, entry):
+        """Handle the Enter key press in the domain entry."""
+        logger.debug("Enter key pressed in domain entry")
+        self.on_get_ip_button_clicked(self.button_add_ip, self.entry_domain, self.textview_status)
 
     def on_get_ip_button_clicked(self, button, entry, textview_status):
         """Handle the Get IP button click."""
@@ -327,3 +336,4 @@ class DataObject(GObject.Object):
         super().__init__()
         self.ip = ip
         self.hostname = hostname
+
