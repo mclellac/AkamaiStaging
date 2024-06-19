@@ -42,7 +42,7 @@ except GLib.Error as e:
 
 # Load CSS styles from the resource bundle
 style_provider = Gtk.CssProvider()
-style_provider.load_from_resource("/com/github/mclellac/AkamaiStaging/gtk/window.css")
+style_provider.load_from_resource("/com/github/mclellac/AkamaiStaging/gtk/style.css")
 
 # Apply the CSS to the default screen
 Gtk.StyleContext.add_provider_for_display(

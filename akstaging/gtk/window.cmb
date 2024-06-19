@@ -11,10 +11,12 @@
 	(1,"libadwaita","1.5",None)
   </ui_library>
   <css>
-	(1,"window.css",None,1)
+	(1,"style.css",None,1),
+	(2,"style-dark.css",None,1)
   </css>
   <css_ui>
-	(1,1)
+	(1,1),
+	(2,1)
   </css_ui>
   <object>
 	(1,1,"AdwApplicationWindow","AkamaiStagingWindow",None,None,None,None,None,None,None),
