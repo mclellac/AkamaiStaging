@@ -58,6 +58,7 @@ akamaistaging_sources = files(
   'hosts.py',
   'aklib.py',
   'dns_utils.py',
+  'preferences.py',
 )
 
 # Use the python3.install_sources method to install the Python source files.

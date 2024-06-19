@@ -208,7 +208,7 @@
     <section>
       <item>
         <attribute name="action">app.preferences</attribute>
-        <attribute name="label" translatable="yes">_Preferences (TODO)</attribute>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
       </item>
       <item>
         <attribute name="action">win.show-help-overlay</attribute>

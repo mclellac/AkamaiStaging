@@ -16,22 +16,25 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
 import re
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib
+import os
 import sys
+import configparser
 import logging
 
 from akstaging.aklib import AkamaiLib as akl
 from akstaging.dns_utils import DNSUtils as ns
 from akstaging.hosts import HostsFileEdit as hfe
 from akstaging.defs import VERSION, COPYRIGHT, APP_NAME, RESOURCE_PATH
+from akstaging.preferences import Preferences
 
 # Load and register the resource bundle
-#resource_path = "/usr/local/share/akamaistaging/akamaistaging.gresource"
 resource_path = RESOURCE_PATH
 try:
     resource = Gio.Resource.load(resource_path)
@@ -52,6 +55,7 @@ Gtk.StyleContext.add_provider_for_display(
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
+PREFERENCES_FILE = os.path.expanduser("~/.config/akamai_staging/preferences.conf")
 
 @Gtk.Template(resource_path="/com/github/mclellac/AkamaiStaging/gtk/window.ui")
 class AkamaiStagingWindow(Adw.ApplicationWindow):
@@ -74,6 +78,9 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.create_column_view_columns()
         self._connect_signals()
 
+        self.load_preferences()
+
+
     # Initialization methods
     def _verify_ui_elements(self):
         """Verify that all UI elements are correctly loaded."""
@@ -93,7 +100,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Initialize application actions."""
         self.create_action("quit", lambda *_: self.quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
-        # self.create_action("preferences", self.on_preferences_action)
+        self.create_action("preferences", self.on_preferences_action)
 
     def _initialize_store(self):
         """Initialize the data store for the column view."""
@@ -139,8 +146,44 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         about.present()
 
     def on_preferences_action(self, widget, _):
-        """Handle the Preferences action."""
         logger.info("Preferences action activated")
+        dialog = Preferences(self)
+        dialog.present()
+
+    def on_preferences_dialog_close(self, dialog):
+        if not dialog.is_revealing():  # Check if the dialog was confirmed
+            font_size = dialog.font_size_row.get_value()
+            self.apply_font_size(font_size)  # Call to apply font size changes
+            dialog.destroy()
+
+    def apply_font_size(self, font_size):
+        """Apply the selected font size to UI elements."""
+        css_provider = Gtk.CssProvider()
+
+        # Base styles, scaled by font_size
+        css = f"""
+        * {{
+            font-family: Cantarell, Ubuntu, sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+            font-size: {font_size}pt;
+        }}
+
+        /* Other styles adjusted for better readability with larger fonts */
+        GtkLabel, GtkEntry, GtkButton, GtkFrame, GtkScrolledWindow, GtkColumnView, GtkTextView {{
+            padding: calc({font_size}pt * 0.1); /* Adjust padding based on font size */
+        }}
+        """
+
+        css_provider.load_from_data(css.encode())
+        Gtk.StyleContext.add_provider_for_display(
+            Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
+    def load_preferences(self):
+        if os.path.exists(PREFERENCES_FILE):
+            config = configparser.ConfigParser()
+            config.read(PREFERENCES_FILE)
+            font_size = config.getfloat('Preferences', 'font_size', fallback=12)
+            self.apply_font_size(font_size)
 
     def do_activate(self):
         """Activate the application window."""

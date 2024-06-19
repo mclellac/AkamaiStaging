@@ -117,7 +117,7 @@
 	(1,12,"GtkWidget","vexpand","True",None,None,None,None,None,None,None,None,None),
 	(1,12,"GtkWidget","vexpand-set","True",None,None,None,None,None,None,None,None,None),
 	(1,20,"(item)","action","app.preferences",None,None,None,None,None,None,None,None,None),
-	(1,20,"(item)","label","_Preferences (TODO)",1,None,None,None,None,None,None,None,None),
+	(1,20,"(item)","label","_Preferences",1,None,None,None,None,None,None,None,None),
 	(1,21,"(item)","action","win.show-help-overlay",None,None,None,None,None,None,None,None,None),
 	(1,21,"(item)","label","_Keyboard Shortcuts",1,None,None,None,None,None,None,None,None),
 	(1,22,"(item)","action","app.about",None,None,None,None,None,None,None,None,None),

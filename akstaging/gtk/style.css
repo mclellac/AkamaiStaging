@@ -47,6 +47,8 @@ GtkFrame {
     border: 1px solid #ccc;
     padding: 1rem;
     margin: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: #f6f6f6;
 }
 
@@ -75,42 +77,4 @@ GtkTextView {
 GtkTextBuffer {
     font-weight: bold;
     color: #ff7f00;
-}
-
-/* Increase font size on macOS */
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    /* Labels */
-    GtkLabel {
-        font-size: 1.1rem;
-    }
-
-    /* Entry */
-    GtkEntry {
-        font-size: 1rem;
-    }
-
-    /* Buttons */
-    GtkButton {
-        font-size: 0.95rem;
-    }
-
-    /* Frame */
-    GtkFrame {
-        font-size: 1rem;
-    }
-
-    /* Scrolled Window */
-    GtkScrolledWindow {
-        font-size: 1rem;
-    }
-
-    /* Column View */
-    GtkColumnView {
-        font-size: 1rem;
-    }
-
-    /* TextView */
-    GtkTextView {
-        font-size: 1rem;
-    }
 }
