@@ -122,6 +122,7 @@
 	(1,21,"(item)","label","_Keyboard Shortcuts",1,None,None,None,None,None,None,None,None),
 	(1,22,"(item)","action","app.about",None,None,None,None,None,None,None,None,None),
 	(1,22,"(item)","label","_About AkamaiStaging",1,None,None,None,None,None,None,None,None),
+	(1,24,"GtkWidget","css-classes","frame-etch-out",None,None,None,None,None,None,None,None,None),
 	(1,24,"GtkWidget","halign","baseline-fill",None,None,None,None,None,None,None,None,None),
 	(1,24,"GtkWidget","margin-end","15",None,None,None,None,None,None,None,None,None),
 	(1,24,"GtkWidget","margin-start","15",None,None,None,None,None,None,None,None,None),

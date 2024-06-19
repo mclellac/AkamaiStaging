@@ -41,6 +41,7 @@
             <property name="visible">True</property>
             <child>
               <object class="GtkFrame" id="label_frame">
+                <property name="css-classes">frame-etch-out</property>
                 <property name="halign">baseline-fill</property>
                 <property name="margin-end">15</property>
                 <property name="margin-start">15</property>

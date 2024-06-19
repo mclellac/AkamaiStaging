@@ -18,6 +18,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 import gi
+
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
@@ -28,6 +29,7 @@ import sys
 
 from gi.repository import Adw
 from akstaging.window import AkamaiStagingWindow
+
 
 class AkamaiApp(Adw.Application):
     def __init__(self, **kwargs):
@@ -43,8 +45,10 @@ class AkamaiApp(Adw.Application):
             self.window = AkamaiStagingWindow(application=app)
             self.window.present()
 
+
 def is_root():
     return os.geteuid() == 0
+
 
 def escalate_privileges_linux():
     print("Requesting root privileges on Linux...")
@@ -57,6 +61,7 @@ def escalate_privileges_linux():
         app = AkamaiApp(application_id="com.github.mclellac.AkamaiStaging")
         app.run(sys.argv)
 
+
 def escalate_privileges_mac():
     print("Requesting root privileges on macOS...")
     if not is_root():
@@ -68,6 +73,7 @@ def escalate_privileges_mac():
         print("Already running with root privileges.")
         app = AkamaiApp(application_id="com.github.mclellac.AkamaiStaging")
         app.run(sys.argv)
+
 
 if __name__ == "__main__":
     print("Starting application...")

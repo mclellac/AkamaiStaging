@@ -34,6 +34,8 @@ from akstaging.hosts import HostsFileEdit as hfe
 from akstaging.defs import VERSION, COPYRIGHT, APP_NAME, RESOURCE_PATH
 from akstaging.preferences import Preferences
 
+PREFERENCES_FILE = os.path.expanduser("~/.config/akamai_staging/preferences.conf")
+
 # Load and register the resource bundle
 resource_path = RESOURCE_PATH
 try:
@@ -54,8 +56,6 @@ Gtk.StyleContext.add_provider_for_display(
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
-
-PREFERENCES_FILE = os.path.expanduser("~/.config/akamai_staging/preferences.conf")
 
 @Gtk.Template(resource_path="/com/github/mclellac/AkamaiStaging/gtk/window.ui")
 class AkamaiStagingWindow(Adw.ApplicationWindow):
