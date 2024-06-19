@@ -1,27 +1,78 @@
-label {
-	font-size: 15px;
+/* Apply style to widgets */
+* {
+    font-family: Cantarell, Ubuntu, sans-serif; /* Use GNOME default fonts */
 }
 
-frame {
-    border: 1px solid #dfdfdf;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Fixed missing 0 before 2 */
-    padding: 10px;
+/* Header Bar */
+.AdwHeaderBar {
+    padding: 0.75rem 1rem; /* Padding in rem units for better scaling */
 }
 
-column-header {
-	font-weight: bold;
+/* Menu Button */
+GtkMenuButton {
+    color: #ffffff; /* White text */
 }
 
-column-view-row label {
-	font-size: 15px;
-	color: #4a4a4a;
-	padding-left: 3px;
-	padding-right: 5px;
-	padding-top: 1px;
-	padding-bottom: 1px;
+/* Labels */
+GtkLabel {
+    color: #2e3436; /* Dark text */
+    font-weight: bold;
+    font-size: 1rem; /* Base font size in rem units */
 }
 
-.view {
-	font-size: 15px; 
+/* Entry */
+GtkEntry {
+    background-color: #ffffff;
+    padding: 0.375rem 0.625rem; /* Padding in rem units */
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Buttons */
+GtkButton {
+    padding: 0.5rem 0.75rem; /* Padding in rem units */
+    background-color: #4e9a06; /* GNOME green */
+    color: #ffffff;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 0.875rem; /* Smaller font size in rem units */
+    margin: 0.25rem 0.5rem;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+/* Frame */
+GtkFrame {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    margin: 1rem;
+    background-color: #f6f6f6; /* Lighter background */
+}
+
+/* Scrolled Window */
+GtkScrolledWindow {
+    padding: 1rem;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+}
+
+/* Column View */
+GtkColumnView {
+    background-color: #ffffff;
+    padding: 1rem;
+    border: 1px solid #ccc;
+}
+
+/* TextView */
+GtkTextView {
+    background-color: #ffffff;
+    padding: 1rem;
+    border: 1px solid #ccc;
+}
+
+/* Text Buffer */
+GtkTextBuffer {
+    font-weight: bold;
+    color: #ff7f00; /* Brighter orange */
 }

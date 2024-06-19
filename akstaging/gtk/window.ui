@@ -10,15 +10,17 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.5"/>
   <template class="AkamaiStagingWindow" parent="AdwApplicationWindow">
-    <property name="default-height">800</property>
+    <property name="default-height">600</property>
     <property name="default-width">800</property>
     <property name="title" translatable="yes">Akamai Staging Network Spoof</property>
     <child>
       <object class="AdwToolbarView">
         <child type="top">
           <object class="AdwHeaderBar" id="header_bar">
+            <property name="css-classes">AdwHeaderBar</property>
             <child type="end">
               <object class="GtkMenuButton">
+                <property name="css-classes">GtkMenuButton</property>
                 <property name="icon-name">open-menu-symbolic</property>
                 <property name="menu-model">primary_menu</property>
                 <property name="primary">True</property>
@@ -44,6 +46,7 @@
                 <property name="margin-start">15</property>
                 <child>
                   <object class="GtkLabel" id="label_domain">
+                    <property name="css-classes">GtkLabel</property>
                     <property name="halign">baseline-center</property>
                     <property name="justify">center</property>
                     <property name="label">Enter the domain or URL you want to spoof to the Akamai Staging Network</property>
@@ -65,6 +68,7 @@
             <child>
               <object class="GtkEntry" id="entry_domain">
                 <property name="activates-default">True</property>
+                <property name="css-classes">GtkEntry</property>
                 <property name="hexpand">True</property>
                 <property name="hexpand-set">True</property>
                 <property name="margin-bottom">5</property>
@@ -99,9 +103,6 @@
             <child>
               <object class="GtkButton" id="button_delete">
                 <property name="can-shrink">True</property>
-                <property name="child">
-                  <object class="GtkImage"/>
-                </property>
                 <property name="css-classes">destructive-action</property>
                 <property name="hexpand">True</property>
                 <property name="icon-name">budgie-trash-full-symbolic</property>
@@ -120,6 +121,7 @@
             </child>
             <child>
               <object class="GtkFrame">
+                <property name="css-classes">GtkFrame</property>
                 <property name="hexpand">True</property>
                 <property name="label" translatable="yes">Contents of /etc/hosts file</property>
                 <property name="label-xalign">0.5</property>
@@ -130,6 +132,7 @@
                 <property name="vexpand">True</property>
                 <child>
                   <object class="GtkScrolledWindow">
+                    <property name="css-classes">GtkScrolledWindow</property>
                     <property name="halign">baseline</property>
                     <property name="hexpand">True</property>
                     <property name="propagate-natural-height">True</property>
@@ -137,10 +140,7 @@
                     <property name="vexpand">True</property>
                     <child>
                       <object class="GtkColumnView" id="column_view_entries">
-                        <property name="css-classes">my-column-view
-column-view
-column-header
-view</property>
+                        <property name="css-classes">GtkColumnView</property>
                         <property name="enable-rubberband">True</property>
                         <property name="focusable">True</property>
                         <property name="halign">baseline-fill</property>
@@ -170,6 +170,7 @@ view</property>
             </child>
             <child>
               <object class="GtkFrame">
+                <property name="css-classes">GtkFrame</property>
                 <property name="hexpand">True</property>
                 <property name="label-xalign">0.5</property>
                 <property name="margin-bottom">15</property>
@@ -179,6 +180,7 @@ view</property>
                 <property name="vexpand">True</property>
                 <child>
                   <object class="GtkTextView" id="textview_status">
+                    <property name="css-classes">GtkTextView</property>
                     <property name="hexpand">True</property>
                     <property name="hexpand-set">True</property>
                     <property name="margin-bottom">5</property>
