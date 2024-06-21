@@ -21,6 +21,7 @@ PREFERENCES_FILE = os.path.expanduser("~/.config/akamai_staging/preferences.conf
 
 # Load and register the resource bundle
 resource_path = RESOURCE_PATH
+print(resource_path)
 try:
     resource = Gio.Resource.load(resource_path)
     Gio.resources_register(resource)
@@ -33,6 +34,7 @@ style_provider = Gtk.CssProvider()
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
+
 
 @Gtk.Template(resource_path="/com/github/mclellac/AkamaiStaging/gtk/window.ui")
 class AkamaiStagingWindow(Adw.ApplicationWindow):
@@ -142,7 +144,9 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """
         css_provider.load_from_data(css.encode())
         Gtk.StyleContext.add_provider_for_display(
-            Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            Gdk.Display.get_default(),
+            css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
     def apply_theme(self, dark_theme_enabled):
@@ -157,10 +161,12 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         if os.path.exists(PREFERENCES_FILE):
             config = configparser.ConfigParser()
             config.read(PREFERENCES_FILE)
-            dark_theme_enabled = config.getboolean('Preferences', 'dark_theme', fallback=True)
+            dark_theme_enabled = config.getboolean(
+                "Preferences", "dark_theme", fallback=True
+            )
             self.apply_theme(dark_theme_enabled)
             # Load and apply font size preference
-            font_size = config.get('Preferences', 'font_size', fallback=12)
+            font_size = config.get("Preferences", "font_size", fallback=12)
             self.apply_font_size(font_size)
 
     def do_activate(self):
@@ -254,12 +260,13 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                     # hosts file that we don't want to display or edit as they
                     # are not related.
                     if (
-                        ip in ["127.0.0.1", "::1", "255.255.255.255"] 
+                        ip in ["127.0.0.1", "::1", "255.255.255.255"]
                         or hostname is None
                         or any(
-                            word in hostname.lower() for word in ["container", "registry", "docker"]
-                        )  
-                        or hostname.lower() 
+                            word in hostname.lower()
+                            for word in ["container", "registry", "docker"]
+                        )
+                        or hostname.lower()
                         in [
                             "localhost",
                             "localhost.localdomain",
