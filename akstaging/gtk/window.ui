@@ -10,7 +10,7 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="libadwaita" version="1.5"/>
   <template class="AkamaiStagingWindow" parent="AdwApplicationWindow">
-    <property name="default-height">600</property>
+    <property name="default-height">800</property>
     <property name="default-width">800</property>
     <property name="title" translatable="yes">Akamai Staging Network Spoof</property>
     <child>
@@ -50,7 +50,7 @@
                     <property name="css-classes">GtkLabel</property>
                     <property name="halign">baseline-center</property>
                     <property name="justify">center</property>
-                    <property name="label">Enter the domain or URL you want to spoof to the Akamai Staging Network</property>
+                    <property name="label">Enter the domain or URL you want to test on the Akamai staging network</property>
                     <property name="margin-bottom">15</property>
                     <property name="margin-top">15</property>
                     <property name="use-markup">True</property>
@@ -140,24 +140,34 @@
                     <property name="propagate-natural-width">True</property>
                     <property name="vexpand">True</property>
                     <child>
-                      <object class="GtkColumnView" id="column_view_entries">
-                        <property name="css-classes">GtkColumnView</property>
-                        <property name="enable-rubberband">True</property>
-                        <property name="focusable">True</property>
-                        <property name="halign">baseline-fill</property>
-                        <property name="hexpand">True</property>
-                        <property name="hexpand-set">True</property>
-                        <property name="margin-bottom">5</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-top">5</property>
-                        <property name="receives-default">True</property>
-                        <property name="reorderable">False</property>
-                        <property name="show-column-separators">true</property>
-                        <property name="show-row-separators">True</property>
-                        <property name="valign">start</property>
-                        <property name="vexpand">True</property>
-                        <property name="vexpand-set">True</property>
+                      <object class="GtkFrame">
+                        <property name="margin-bottom">15</property>
+                        <property name="margin-end">15</property>
+                        <property name="margin-start">15</property>
+                        <property name="margin-top">15</property>
+                        <child>
+                          <object class="GtkColumnView" id="column_view_entries">
+                            <property name="css-classes">GtkColumnView</property>
+                            <property name="show-column-separators">true</property>
+                            <property name="show-row-separators">true</property>
+                            <property name="enable-rubberband">True</property>
+                            <property name="focusable">True</property>
+                            <property name="halign">baseline-fill</property>
+                            <property name="hexpand">True</property>
+                            <property name="hexpand-set">True</property>
+                            <property name="margin-bottom">5</property>
+                            <property name="margin-end">5</property>
+                            <property name="margin-start">5</property>
+                            <property name="margin-top">5</property>
+                            <property name="receives-default">True</property>
+                            <property name="reorderable">False</property>
+                            <property name="show-column-separators">true</property>
+                            <property name="show-row-separators">True</property>
+                            <property name="valign">start</property>
+                            <property name="vexpand">True</property>
+                            <property name="vexpand-set">True</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                   </object>

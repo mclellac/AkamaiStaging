@@ -1,32 +1,15 @@
 # window.py
-#
-# Copyright 2024 Carey McLelland
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
 
-import re
 import gi
+import os
+import re
+import sys
+import configparser
+import logging
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib
-import os
-import sys
-import configparser
-import logging
 
 from akstaging.aklib import AkamaiLib as akl
 from akstaging.dns_utils import DNSUtils as ns
@@ -47,12 +30,6 @@ except GLib.Error as e:
 
 # Load CSS styles from the resource bundle
 style_provider = Gtk.CssProvider()
-style_provider.load_from_resource("/com/github/mclellac/AkamaiStaging/gtk/style.css")
-
-# Apply the CSS to the default screen
-Gtk.StyleContext.add_provider_for_display(
-    Gdk.Display.get_default(), style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-)
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
@@ -77,9 +54,10 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self._initialize_store()
         self.create_column_view_columns()
         self._connect_signals()
-
+        # Set minimum size
+        self.set_size_request(700, 650)  # Minimum width of 600 and height of 400
+        self.style_manager = Adw.StyleManager.get_for_display(Gdk.Display.get_default())
         self.load_preferences()
-
 
     # Initialization methods
     def _verify_ui_elements(self):
@@ -151,38 +129,38 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         dialog.present()
 
     def on_preferences_dialog_close(self, dialog):
-        if not dialog.is_revealing():  # Check if the dialog was confirmed
+        if not dialog.is_revealing():
             font_size = dialog.font_size_row.get_value()
-            self.apply_font_size(font_size)  # Call to apply font size changes
+            self.apply_font_size(font_size)
             dialog.destroy()
 
     def apply_font_size(self, font_size):
-        """Apply the selected font size to UI elements."""
+        """Apply the selected font size to UI elements using CSS."""
         css_provider = Gtk.CssProvider()
-
-        # Base styles, scaled by font_size
         css = f"""
-        * {{
-            font-family: Cantarell, Ubuntu, sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
-            font-size: {font_size}pt;
-        }}
-
-        /* Other styles adjusted for better readability with larger fonts */
-        GtkLabel, GtkEntry, GtkButton, GtkFrame, GtkScrolledWindow, GtkColumnView, GtkTextView {{
-            padding: calc({font_size}pt * 0.1); /* Adjust padding based on font size */
-        }}
+        * {{ font-size: {font_size}pt; }}  /* Apply to all widgets */
         """
-
         css_provider.load_from_data(css.encode())
         Gtk.StyleContext.add_provider_for_display(
             Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
 
+    def apply_theme(self, dark_theme_enabled):
+        """Apply the selected theme (dark or light)."""
+        if dark_theme_enabled:
+            self.style_manager.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
+        else:
+            self.style_manager.set_color_scheme(Adw.ColorScheme.PREFER_LIGHT)
+
     def load_preferences(self):
+        """Load preferences from the configuration file."""
         if os.path.exists(PREFERENCES_FILE):
             config = configparser.ConfigParser()
             config.read(PREFERENCES_FILE)
-            font_size = config.getfloat('Preferences', 'font_size', fallback=12)
+            dark_theme_enabled = config.getboolean('Preferences', 'dark_theme', fallback=True)
+            self.apply_theme(dark_theme_enabled)
+            # Load and apply font size preference
+            font_size = config.get('Preferences', 'font_size', fallback=12)
             self.apply_font_size(font_size)
 
     def do_activate(self):
@@ -207,7 +185,6 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             setup_func=self.setup_ip_column,
             bind_func=self.bind_ip_column,
         )
-
         # Create and append the hostname column
         hostname_column = self._create_and_append_column(
             title="Hostname",
@@ -302,8 +279,10 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     # Event handlers
     def on_entry_domain_activate(self, entry):
         """Handle the Enter key press in the domain entry."""
-        logger.debug("Enter key pressed in domain entry")
-        self.on_get_ip_button_clicked(self.button_add_ip, self.entry_domain, self.textview_status)
+        domain = entry.get_text()
+
+        # Call on_get_ip_button_clicked to handle domain validation and further processing
+        self.on_get_ip_button_clicked(self.button_add_ip, entry, self.textview_status)
 
     def on_get_ip_button_clicked(self, button, entry, textview_status):
         """Handle the Get IP button click."""
@@ -332,6 +311,8 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                         textview_status,
                         f"Added Akamai Staging IP for {sanitized_domain} as {staging_ip}",
                     )
+                    # Clear the domain entry text
+                    entry.set_text("")
                 else:
                     self.akl.print_to_textview(
                         textview_status,
@@ -379,4 +360,3 @@ class DataObject(GObject.Object):
         super().__init__()
         self.ip = ip
         self.hostname = hostname
-

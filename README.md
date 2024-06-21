@@ -22,6 +22,7 @@ A Python-based GTK4 application for managing Akamai staging environments through
 - **View Current Entries:** A clear list view displays the active entries in your `/etc/hosts` file.
 - **Domain Validation:** Basic validation ensures that you enter valid domain.
 - **Error Handling:** Provides informative messages in case of errors.
+- **Customization:** Simple font size and dark/light theme toggle in Preferences.
 
 ## Installation
 
