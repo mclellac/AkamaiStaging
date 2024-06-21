@@ -84,7 +84,7 @@ Get the code and build/install it (installs to /usr/local, and the akamaistaging
 Run it:
 
 ```
-> sudo /usr/local/bin/akamaistaging
+> /usr/local/bin/akamaistaging
 ```
 
 ## Usage
@@ -95,14 +95,4 @@ Run it:
 4. The application will fetch the staging IP and add an entry to your `/etc/hosts` file.
 5. The entry will be displayed in the tree view.
 6. To remove an entry, select it in the tree view and click "Delete Selected Hosts Entry."
-
-## Prefer dark? Here's how to enable it:
-
-![Akamai Staging](images/screenshot.png)
-
-All you need to do is edit the akamaistaging file and uncomment the line:
-
-```python
-        #self.style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
-```
 
