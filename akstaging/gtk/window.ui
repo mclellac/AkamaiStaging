@@ -17,10 +17,14 @@
       <object class="AdwToolbarView">
         <child type="top">
           <object class="AdwHeaderBar" id="header_bar">
-            <property name="css-classes">AdwHeaderBar</property>
+            <style>
+              <class name="AdwHeaderBar"/>
+            </style>
             <child type="end">
               <object class="GtkMenuButton">
-                <property name="css-classes">GtkMenuButton</property>
+                <style>
+                  <class name="GtkMenuButton"/>
+                </style>
                 <property name="icon-name">open-menu-symbolic</property>
                 <property name="menu-model">primary_menu</property>
                 <property name="primary">True</property>
@@ -46,7 +50,9 @@
                 <property name="margin-start">15</property>
                 <child>
                   <object class="GtkLabel" id="label_domain">
-                    <property name="css-classes">GtkLabel</property>
+                    <style>
+                      <class name="GtkLabel"/>
+                    </style>
                     <property name="halign">baseline-center</property>
                     <property name="justify">center</property>
                     <property name="label">Enter the domain or URL you want to spoof to the Akamai Staging Network</property>
@@ -68,7 +74,9 @@
             <child>
               <object class="GtkEntry" id="entry_domain">
                 <property name="activates-default">True</property>
-                <property name="css-classes">GtkEntry</property>
+                <style>
+                  <class name="GtkEntry"/>
+                </style>
                 <property name="hexpand">True</property>
                 <property name="hexpand-set">True</property>
                 <property name="input-purpose">url</property>
@@ -87,8 +95,9 @@
             </child>
             <child>
               <object class="GtkButton" id="button_add_ip">
-                <property name="css-classes">suggested-action
-</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
                 <property name="label">Add Akamai Staging IP</property>
                 <property name="margin-bottom">5</property>
                 <property name="margin-end">15</property>
@@ -104,7 +113,9 @@
             <child>
               <object class="GtkButton" id="button_delete">
                 <property name="can-shrink">True</property>
-                <property name="css-classes">destructive-action</property>
+                <style>
+                  <class name="destructive-action"/>
+                </style>
                 <property name="hexpand">True</property>
                 <property name="icon-name">budgie-trash-full-symbolic</property>
                 <property name="label" translatable="yes" context="button">Delete Selected Host</property>
@@ -134,7 +145,9 @@
                 <property name="vexpand-set">True</property>
                 <child>
                   <object class="GtkScrolledWindow">
-                    <property name="css-classes">GtkScrolledWindow</property>
+                    <style>
+                      <class name="GtkScrolledWindow"/>
+                    </style>
                     <property name="halign">baseline</property>
                     <property name="hexpand">True</property>
                     <property name="propagate-natural-height">True</property>
@@ -142,14 +155,18 @@
                     <property name="vexpand">True</property>
                     <child>
                       <object class="GtkFrame">
-                        <property name="css-classes">frame</property>
+                        <style>
+                          <class name="frame"/>
+                        </style>
                         <property name="margin-bottom">15</property>
                         <property name="margin-end">15</property>
                         <property name="margin-start">15</property>
                         <property name="margin-top">5</property>
                         <child>
                           <object class="GtkColumnView" id="column_view_entries">
-                            <property name="css-classes">GtkColumnView</property>
+                            <style>
+                              <class name="GtkColumnView"/>
+                            </style>
                             <property name="enable-rubberband">True</property>
                             <property name="focusable">True</property>
                             <property name="halign">baseline-fill</property>
@@ -190,6 +207,9 @@
                 <property name="vexpand">True</property>
                 <child>
                   <object class="GtkTextView" id="textview_status">
+                    <style>
+                      <class name="GtkTextView"/>
+                    </style>
                     <property name="css-classes">GtkTextView</property>
                     <property name="cursor-visible">False</property>
                     <property name="editable">False</property>
@@ -233,3 +253,5 @@
     </section>
   </menu>
 </interface>
+
+

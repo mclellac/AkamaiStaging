@@ -61,14 +61,14 @@ class DNSUtils:
         """
         resolver = self.configure_dns_resolver()
         dns_server_ip = resolver.nameservers[0] if resolver.nameservers else "Default system DNS"
-        akl.print_to_textview(status_textview, f"Using DNS server {dns_server_ip} to get the records.")
+        akl.print_to_textview(status_textview, f"Using DNS server {dns_server_ip} for record retrieval.")
 
         try:
             answers = resolver.resolve(domain, "CNAME")
             cname = answers[0].target.to_text().strip(".")
             if not any(cname.endswith(suffix) for suffix in self.CNAME_SUFFIXES):
                 raise ValueError(f"Invalid CNAME for {domain}. Must end with one of {self.CNAME_SUFFIXES}")
-            akl.print_to_textview(status_textview, f"Retrieved CNAME {cname} when looking up {domain}")
+            akl.print_to_textview(status_textview, f"Found {domain} CNAME'd to {cname}")
             return cname
         except dns.resolver.NoAnswer:
             akl.print_to_textview(status_textview, f"The DNS response does not contain a CNAME record for {domain}.")
@@ -95,7 +95,7 @@ class DNSUtils:
             cname = self.get_akamai_cname(sanitized_domain, status_textview)
             modified_cname = f"{cname[:-4]}-staging.net"
             staging_ip = self.resolve_ip_address(modified_cname)
-            akl.print_to_textview(status_textview, f"Obtained the Akamai staging IP {staging_ip} when looking up {modified_cname}")
+            akl.print_to_textview(status_textview, f"Acquired staging IP {staging_ip} for {modified_cname}")
             return staging_ip
         except (dns.resolver.NoNameservers, dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.exception.DNSException, ValueError) as e:
             akl.print_to_textview(status_textview, f"Error getting staging IP for {sanitized_domain} -> {e}")

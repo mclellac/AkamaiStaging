@@ -2,21 +2,21 @@
     font-family: Cantarell, Ubuntu, sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
 }
 
-GtkFrame{
-    border: 1px solid #dfdfdf;
+.frame{
+    border: 1px solid @border_color;
     border-radius: 8px;
     box-shadow: 0 8px 8px rgba(0, 0, 0, 0.1), 0 8px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
 }
 
 :root {
-    --background-color: var(--theme_bg_color);
-    --foreground-color: var(--theme_fg_color);
-    --accent-color: var(--theme_selected_bg_color);
-    --header-color: var(--theme_header_color);
-    --success-color: var(--success_color);
-    --warning-color: var(--warning_color);
-    --error-color: var(--error_color);
+    --background-color: @theme_bg_color;
+    --foreground-color: @theme_fg_color;
+    --accent-color: @accent_color;
+    --header-color: @header_color;
+    --success-color: @success_color;
+    --warning-color: @warning_color;
+    --error-color: @error_color;
 }
 
 window {
@@ -39,11 +39,11 @@ button {
 }
 
 button:hover {
-    background-color: shade(var(--accent-color), 1.1);
+    background-color: shade(@accent_color, 1.1);
 }
 
 button:active {
-    background-color: shade(var(--accent-color), 0.9);
+    background-color: shade(@accent_color, 0.9);
 }
 
 entry {

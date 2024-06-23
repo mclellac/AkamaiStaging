@@ -314,10 +314,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                         staging_ip, sanitized_domain, False, textview_status
                     )
                     self.populate_store(self.store)
-                    self.akl.print_to_textview(
-                        textview_status,
-                        f"Added Akamai Staging IP for {sanitized_domain} as {staging_ip}",
-                    )
+
                     # Clear the domain entry text
                     entry.set_text("")
                 else:
