@@ -1,0 +1,122 @@
+[MASTER]
+# Add your project directory to the PYTHONPATH
+init-hook='import sys; sys.path.append(".")'
+
+# List of plugins (as comma separated values of python module names) to load, usually to register additional checkers.
+load-plugins=
+
+# A comma-separated list of package or module names from where C extensions may be loaded.
+extension-pkg-whitelist=
+
+# Add files or directories to the blacklist. They should be base names, not paths.
+ignore=tests
+
+# Add files or directories matching the regex patterns to the blacklist. The regex matches against base names, not paths.
+ignore-patterns=
+
+# Files or directories to be skipped. They should be base names, not paths.
+ignore-paths=
+
+# List of directories whose submodules should not be checked.
+ignored-modules=
+
+# Pickle collected data for later comparisons.
+persistent=yes
+
+# Maximum number of jobs to run in parallel.
+jobs=1
+
+[MESSAGES CONTROL]
+# Enable the message, report, category or checker with the given id(s). You can either give multiple identifiers separated by comma (,) or put this option multiple times.
+enable=
+
+# Disable the message, report, category or checker with the given id(s). You can either give multiple identifiers separated by comma (,) or put this option multiple times (use msg ids).
+disable=C0114, C0115, C0301, C0302, C0411, R0903, W0212, W0511, W0603
+
+[REPORTS]
+# Set the output format. Available formats are text, parseable, colorized, json, json-rp, and msvs (visual studio).
+output-format=colorized
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=100
+
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+
+# Allow the body of a class to be fully empty.
+empty-body=yes
+
+[BASIC]
+# Good variable names which should always be accepted, separated by a comma.
+good-names=i,j,k,e,x,_,pk
+
+# List of builtins function names that should not be used, separated by a comma.
+bad-functions=map,filter,input
+
+# List of builtins variable names that should not be used, separated by a comma.
+bad-names=
+
+[LOGGING]
+# Format style used to check logging format string. `old` means using % formatting, `new` means using str.format() formatting, and `fstr` means using f-string formatting.
+logging-format-style=old
+
+# Minimum logging level for which messages should be emitted.
+logging-not-lazy=false
+
+[IMPORTS]
+# Allow relative imports for intra-package imports.
+# E0402: Allow relative imports
+extension-pkg-whitelist=
+
+# Deprecated modules which should not be used, separated by a comma.
+deprecated-modules=
+
+# Modules which can have an indirect import and should be reexported. Should be used in conjunction with --confidence=HIGH and --confidence=INFERENCE
+reexported-modules=
+
+# Allow import of an abstract base class in the same module as its implementation.
+import-definitions-alignment=no
+
+[DESIGN]
+# Maximum number of parents for a class (R0901).
+max-parents=7
+
+# Maximum number of attributes for a class (R0902).
+max-attributes=10
+
+# Minimum number of public methods for a class (R0903).
+min-public-methods=0
+
+# Maximum number of public methods for a class (R0904).
+max-public-methods=20
+
+[CLASSES]
+# List of method names used to declare (i.e. assign) instance attributes.
+defining-attr-methods=__init__,__new__,setUp
+
+# List of attributes names used to register a class with a metaclass.
+registered-attr-names=
+
+# List of attributes names used to register a class with a registry.
+registered-attr-names=
+
+[EXCEPTIONS]
+# List of exceptions that will emit a warning when being caught. Default to standard exceptions.
+overgeneral-exceptions=Exception
+
+[TYPECHECK]
+# List of decorators that produce context managers, such as `contextlib.contextmanager`.
+context-manager-decorators=contextlib.contextmanager
+
+# List of decorators that are used to declare a property (mimicking `property`).
+property-decorators=property
+
+[SIMILARITIES]
+# Minimum lines number of a similarity.
+min-similarity-lines=4
+
+[SIMPLIFICATIONS]
+# List of argument names to be used for the singleton type.
+singularize-args=
+

@@ -1,21 +1,21 @@
 # window.py
-
-import gi
+import configparser
+import logging
 import os
 import re
 import sys
-import configparser
-import logging
+
+from akstaging.aklib import AkamaiLib as akl
+from akstaging.defs import APP_NAME, COPYRIGHT, RESOURCE_PATH, VERSION
+from akstaging.dns_utils import DNSUtils as ns
+from akstaging.hosts import HostsFileEdit as hfe
+from akstaging.preferences import Preferences
+
+import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Gdk, Gio, Adw, GObject, GLib
-
-from akstaging.aklib import AkamaiLib as akl
-from akstaging.dns_utils import DNSUtils as ns
-from akstaging.hosts import HostsFileEdit as hfe
-from akstaging.defs import VERSION, COPYRIGHT, APP_NAME, RESOURCE_PATH
-from akstaging.preferences import Preferences
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 PREFERENCES_FILE = os.path.expanduser("~/.config/akamai_staging/preferences.conf")
 
@@ -202,7 +202,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.populate_store(self.store)
 
     def _create_and_append_column(self, title, setup_func, bind_func):
-        """Helper method to create and append a column."""
+        """Create and append a column helper method."""
         logger.debug(f"Creating and appending column: {title}")
         factory = Gtk.SignalListItemFactory()
         factory.connect("setup", setup_func)
