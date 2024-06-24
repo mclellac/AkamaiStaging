@@ -17,26 +17,34 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+"""Akamai Staging Application"""
+
 import os
 import platform
 import subprocess
 import sys
 
-from akstaging.window import AkamaiStagingWindow
-
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw
+from gi.repository import Adw  # noqa: E402
+
+from akstaging.window import AkamaiStagingWindow  # noqa: E402
 
 
 class AkamaiApp(Adw.Application):
+    """Akamai Application Class"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.window = None  # Store a reference to the main window
         self.connect("activate", self.on_activate)
 
     def on_activate(self, app):
+        """
+        Handle the 'activate' signal to create and show the main window.
+        """
         self.style_manager = Adw.StyleManager.get_default()
         # self.style_manager.set_color_scheme(Adw.ColorScheme.FORCE_DARK)
 
@@ -46,10 +54,16 @@ class AkamaiApp(Adw.Application):
 
 
 def is_root():
+    """
+    Check if the current user has root privileges.
+    """
     return os.geteuid() == 0
 
 
 def escalate_privileges_linux():
+    """
+    Request root privileges on Linux. Restart the script with 'sudo' if necessary.
+    """
     print("Requesting root privileges on Linux...")
     if not is_root():
         print("Not running as root, escalating privileges...")
@@ -62,6 +76,9 @@ def escalate_privileges_linux():
 
 
 def escalate_privileges_mac():
+    """
+    Request root privileges on macOS. Restart the script with elevated privileges if necessary.
+    """
     print("Requesting root privileges on macOS...")
     if not is_root():
         print("Not running as root, escalating privileges...")
@@ -82,3 +99,4 @@ if __name__ == "__main__":
         escalate_privileges_mac()
     else:
         raise OSError("Unsupported operating system for privilege escalation")
+

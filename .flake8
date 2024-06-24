@@ -1,9 +1,0 @@
-[flake8]
-max-line-length = 120
-extend-ignore = E203,F401,E402,Q000
-per-file-ignores =
-    akstaging/__init__.py:F401,E402,Q000
-exclude =
-  .flatpak-builder
-  build
-  _build
