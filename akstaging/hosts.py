@@ -46,7 +46,7 @@ class HostsFileEdit:
             with open(self.HOSTS_FILE, "w", encoding="utf-8") as hosts_file:
                 hosts_file.writelines(lines)
 
-            return f"Removed /etc/hosts entry for: {entry}"
+            return f"Removed /etc/hosts entry: {entry}"
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Error reading {self.HOSTS_FILE}: {e}") from e
         except IOError as e:
@@ -83,7 +83,7 @@ class HostsFileEdit:
                     else:
                         hosts_file.write(f"{staging_ip} {sanitized_domain}\n")
 
-                message = f"{'Deleted' if delete else 'Added'} {sanitized_domain} {staging_ip} to /etc/hosts"
+                message = f"{'Deleted' if delete else 'Added'} {staging_ip} {sanitized_domain} to /etc/hosts"
                 AkamaiLib.print_to_textview(status_label, message)
             except FileNotFoundError as e:
                 raise FileNotFoundError(
