@@ -1,4 +1,4 @@
-# Akamai Staging
+# Akamai Staging Network Spoof
 
 ![Akamai Staging](images/screenshot-light.png)
 
