@@ -1,4 +1,4 @@
-# AkamaiStaging
+# Akamai Staging
 
 ![Akamai Staging](images/screenshot-light.png)
 
