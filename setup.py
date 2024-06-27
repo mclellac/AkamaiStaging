@@ -140,7 +140,7 @@ def install_packages():
         update_cmd = [manager] + data["update"]
         install_cmd = [manager] + data["options"] + data["packages"]
 
-        if os_type == "Linux" and os.geteuid() != 0:
+        if os_type == "Linux" and os.geteuid():
             update_cmd.insert(0, "sudo")
             install_cmd.insert(0, "sudo")
 
@@ -181,11 +181,11 @@ def build_application(os_type):
         if site_packages_dir:
             old_path = Path("/usr/local" + site_packages_dir) / "akstaging"
             new_path = Path(site_packages_dir) / "akstaging"
-            
+
             if new_path.exists():
                 print(f"[macOS Fix] Removing old directory: {new_path}")
                 run_command(["sudo", "rm", "-rf", str(new_path)])
-            
+
             if old_path.exists():
                 print(
                     "[macOS Fix] Moving akstaging to correct site-packages location..."

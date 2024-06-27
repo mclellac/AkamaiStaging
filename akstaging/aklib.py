@@ -16,13 +16,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-import re
 from gi.repository import Gtk
+
 
 class AkamaiLib:
     """
-    A class that provides methods for interacting with DNS to obtain the Akamai Staging IP
-    for a given domain and to spoof the /etc/hosts file to direct the host computer to the Akamai Staging network.
+    A class that provides methods for interacting with DNS to obtain the Akamai Staging IP.
+    for a given domain and to spoof the /etc/hosts file to direct the host computer to the
+    Akamai Staging network.
     """
 
     def sanitize_domain(self, domain, status_label):
@@ -37,10 +38,14 @@ class AkamaiLib:
             str: The sanitized domain.
         """
         # Remove URL schemes and any paths
-        sanitized_domain = domain.replace("http://", "").replace("https://", "").split("/")[0]
+        sanitized_domain = (
+            domain.replace("http://", "").replace("https://", "").split("/")[0]
+        )
 
         # Print messages related to domain sanitization
-        self.print_to_textview(status_label, f"Original domain {domain} modified to {sanitized_domain}")
+        self.print_to_textview(
+            status_label, f"Original domain {domain} modified to {sanitized_domain}"
+        )
 
         return sanitized_domain
 
@@ -101,5 +106,3 @@ class AkamaiLib:
                         hosts_file.write(line)
         except IOError as e:
             raise IOError(f"Error modifying /etc/hosts file: {e}") from e
-
-

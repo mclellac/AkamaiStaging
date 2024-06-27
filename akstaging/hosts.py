@@ -52,11 +52,9 @@ class HostsFileEdit:
         except IOError as e:
             raise IOError(f"Error removing /etc/hosts entry: {e}") from e
 
-    def update_hosts_file_content(self,
-                                  staging_ip,
-                                  sanitized_domain,
-                                  delete,
-                                  status_label):
+    def update_hosts_file_content(
+        self, staging_ip, sanitized_domain, delete, status_label
+    ):
         """
         Updates the content of the /etc/hosts file.
 
@@ -115,4 +113,3 @@ class HostsFileEdit:
             print(f"Error reading {self.HOSTS_FILE}: {e}")
             sys.exit(1)
         return None
-

@@ -21,7 +21,6 @@ PREFERENCES_FILE = os.path.expanduser("~/.config/akamai_staging/preferences.conf
 
 # Load and register the resource bundle
 resource_path = RESOURCE_PATH
-print(resource_path)
 try:
     resource = Gio.Resource.load(resource_path)
     Gio.resources_register(resource)
@@ -38,6 +37,8 @@ logger = logging.getLogger(__name__)
 
 @Gtk.Template(resource_path="/com/github/mclellac/AkamaiStaging/gtk/window.ui")
 class AkamaiStagingWindow(Adw.ApplicationWindow):
+    """Main application window for the Akamai Staging tool."""
+
     __gtype_name__ = "AkamaiStagingWindow"
 
     button_add_ip: Gtk.Button = Gtk.Template.Child()
@@ -47,6 +48,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     entry_domain: Gtk.Entry = Gtk.Template.Child()
 
     def __init__(self, application=None):
+        """Initialize the Akamai Staging window with the given application."""
         super().__init__(application=application)
         logger.debug("Initializing AkamaiStagingWindow")
 
@@ -56,7 +58,6 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self._initialize_store()
         self.create_column_view_columns()
         self._connect_signals()
-        # Set minimum size
         self.set_size_request(700, 650)  # Minimum width of 600 and height of 400
         self.style_manager = Adw.StyleManager.get_for_display(Gdk.Display.get_default())
         self.load_preferences()
@@ -93,13 +94,11 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.entry_domain.connect("activate", self.on_entry_domain_activate)
         self.button_add_ip.connect(
             "clicked",
-            lambda btn: self.on_get_ip_button_clicked(
-                btn, self.entry_domain, self.textview_status
-            ),
+            lambda btn: self.on_get_ip_button_clicked(btn, self.entry_domain, self.textview_status)
         )
         self.button_delete.connect(
             "clicked",
-            lambda btn: self.on_delete_button_clicked(btn, self.column_view_entries),
+            lambda btn: self.on_delete_button_clicked(btn, self.column_view_entries)
         )
 
     # Action methods
@@ -161,9 +160,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         if os.path.exists(PREFERENCES_FILE):
             config = configparser.ConfigParser()
             config.read(PREFERENCES_FILE)
-            dark_theme_enabled = config.getboolean(
-                "Preferences", "dark_theme", fallback=True
-            )
+            dark_theme_enabled = config.getboolean("Preferences", "dark_theme", fallback=True)
             self.apply_theme(dark_theme_enabled)
             # Load and apply font size preference
             font_size = config.get("Preferences", "font_size", fallback=12)

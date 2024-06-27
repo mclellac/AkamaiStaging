@@ -26,11 +26,12 @@ import subprocess
 import sys
 
 import gi
+
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw  # noqa: E402
+from gi.repository import Adw
 
-from akstaging.window import AkamaiStagingWindow  # noqa: E402
+from akstaging.window import AkamaiStagingWindow
 
 
 class AkamaiApp(Adw.Application):
@@ -99,4 +100,3 @@ if __name__ == "__main__":
         escalate_privileges_mac()
     else:
         raise OSError("Unsupported operating system for privilege escalation")
-
