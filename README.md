@@ -13,7 +13,7 @@ A Python-based GTK4 application for managing Akamai staging environments through
 
 ## About
 
-`AkamaiStaging` simplifies the process of testing your Akamai configuration changes and web applications against the Akamai staging network. It provides a graphical interface to add, update, and delete DNS entries in your `/etc/hosts` file, allowing you to direct specific domains to their corresponding Akamai staging IP.
+`Akamai Staging` simplifies the process of testing your Akamai configuration changes and web applications against the Akamai staging network. It provides a graphical interface to add, update, and delete DNS entries in your `/etc/hosts` file, allowing you to direct specific domains to their corresponding Akamai staging IP.
 
 ## Features
 
