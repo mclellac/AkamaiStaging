@@ -12,6 +12,7 @@ distros = {
     "debian": "debian",
     "ubuntu": "debian",  # Use the same config as Debian
     "linuxmint": "debian",
+    "kali": "debian",
     "fedora": "fedora",
     "centos": "fedora",
     "rhel": "fedora",
