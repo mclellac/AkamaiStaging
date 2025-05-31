@@ -1,0 +1,9 @@
+akamaistaging.in
+akstaging/aklib.py
+akstaging/gtk/help-overlay.ui
+akstaging/gtk/window.ui
+akstaging/preferences.py
+akstaging/window.py
+data/com.github.mclellac.AkamaiStaging.desktop.in
+data/com.github.mclellac.AkamaiStaging.metainfo.xml.in
+# data/com.github.mclellac.AkamaiStaging.gschema.xml

@@ -1,0 +1,67 @@
+{
+  "app-id": "com.github.mclellac.AkamaiStaging",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "46",
+  "sdk": "org.gnome.Sdk",
+  "command": "akamaistaging",
+  "finish-args": [
+    "--share=network",
+    "--share=ipc",
+    "--socket=fallback-x11",
+    "--device=dri",
+    "--socket=wayland",
+    "--filesystem=home",
+    "--talk-name=org.freedesktop.Flatpak",
+    "--talk-name=org.freedesktop.portal.*",
+    "--talk-name=org.freedesktop.PolicyKit1",
+    "--system-talk-name=org.freedesktop.PolicyKit1"
+  ],
+  "cleanup": [
+    "*.pyc",
+    "*.pyo",
+    "*.so",
+    "__pycache__"
+  ],
+  "modules": [
+    {
+      "name": "akamaistaging",
+      "buildsystem": "meson",
+      "config-opts": [
+        "--prefix=/app"
+      ],
+      "sources": [
+        {
+          "type": "git",
+          "url": "https://github.com/mclellac/AkamaiStaging.git",
+          "branch": "main"
+        }
+      ],
+      "build-options": {
+        "env": {
+          "FLATPAK_BUILD": "1"
+        }
+      }
+    },
+    {
+      "name": "dnspython",
+      "buildsystem": "simple",
+      "build-commands": [
+        "pip3 install --prefix=/app git+https://github.com/rthalley/dnspython.git"
+      ],
+      "build-options": {
+        "env": {
+          "FLATPAK_BUILD": "1"
+        },
+        "build-args": [
+          "--share=network"
+        ]
+      }
+    }
+  ],
+  "cleanup": [
+    "*.pyc",
+    "*.pyo",
+    "*.so",
+    "__pycache__"
+  ]
+}

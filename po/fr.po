@@ -1,0 +1,474 @@
+# French translations for akamaistaging package.
+# Copyright (C) 2025 THE akamaistaging'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the akamaistaging package.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: akamaistaging\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-31 15:13-0400\n"
+"PO-Revision-Date: 2025-05-31 15:13-0400\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: akstaging/gtk/help-overlay.ui:11
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Général"
+
+#: akstaging/gtk/help-overlay.ui:14
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Afficher les raccourcis"
+
+#: akstaging/gtk/help-overlay.ui:20
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Quitter"
+
+#: akstaging/gtk/window.ui:15
+msgid "Akamai Staging Network Spoof"
+msgstr "Mystification du réseau de transit Akamai"
+
+#: akstaging/gtk/window.ui:25
+msgid "Menu"
+msgstr "Menu"
+
+#: akstaging/gtk/window.ui:49
+msgid "Enter domain or URL to add to Akamai Staging."
+msgstr "Entrez le domaine ou l'URL à ajouter à Akamai Staging."
+
+#: akstaging/gtk/window.ui:50
+msgid "Get Akamai Staging Network IP"
+msgstr "Obtenir l'IP du réseau de transit Akamai"
+
+#: akstaging/gtk/window.ui:55
+msgid "Domain/URL"
+msgstr "Domaine/URL"
+
+#: akstaging/gtk/window.ui:58
+msgid "Add"
+msgstr "Ajouter"
+
+#: akstaging/gtk/window.ui:84
+msgid "Search hosts..."
+msgstr "Rechercher des hôtes..."
+
+#: akstaging/gtk/window.ui:94
+msgid ""
+"These are the custom host entries currently managed by this tool. Select an "
+"entry to manage it."
+msgstr "Voici les entrées d'hôtes personnalisées actuellement gérées par cet outil. Sélectionnez une entrée pour la gérer."
+
+#. Margins can be adjusted if needed, AdwGroup might handle some spacing
+#: akstaging/gtk/window.ui:97
+msgid "Hosts File Entries"
+msgstr "Entrées du fichier hosts"
+
+#: akstaging/gtk/window.ui:131
+msgid "No Host Entries"
+msgstr "Aucune entrée d'hôte"
+
+#: akstaging/gtk/window.ui:132
+msgid ""
+"Add a domain using the input field above to get started, or try adjusting "
+"your search filter."
+msgstr "Ajoutez un domaine en utilisant le champ de saisie ci-dessus pour commencer, ou essayez d'ajuster votre filtre de recherche."
+
+#: akstaging/gtk/window.ui:151
+msgid "Status"
+msgstr "Statut"
+
+#: akstaging/gtk/window.ui:176
+msgid "Manage Selected Host"
+msgstr "Gérer l'hôte sélectionné"
+
+#: akstaging/gtk/window.ui:188
+msgctxt "button"
+msgid "Delete Selected Host"
+msgstr "Supprimer l'hôte sélectionné"
+
+#: akstaging/gtk/window.ui:189
+msgid ""
+"Select the line from /etc/hosts you want to remove and click this button to "
+"delete it."
+msgstr "Sélectionnez la ligne du fichier /etc/hosts que vous souhaitez supprimer et cliquez sur ce bouton pour la supprimer."
+
+#: akstaging/gtk/window.ui:198
+msgid "Edit Selected Host"
+msgstr "Modifier l'hôte sélectionné"
+
+#: akstaging/gtk/window.ui:199
+msgid "Select the line from /etc/hosts you want to edit and click this button."
+msgstr "Sélectionnez la ligne du fichier /etc/hosts que vous souhaitez modifier et cliquez sur ce bouton."
+
+#: akstaging/gtk/window.ui:226
+msgid "_Preferences"
+msgstr "_Préférences"
+
+#: akstaging/gtk/window.ui:230
+msgid "_Keyboard Shortcuts"
+msgstr "_Raccourcis clavier"
+
+#: akstaging/gtk/window.ui:234
+msgid "_About AkamaiStaging"
+msgstr "_À propos d'AkamaiStaging"
+
+#: akstaging/preferences.py:32
+msgid "Light"
+msgstr "Clair"
+
+#: akstaging/preferences.py:32
+msgid "Dark"
+msgstr "Sombre"
+
+#: akstaging/preferences.py:32
+msgid "System"
+msgstr "Système"
+
+#: akstaging/preferences.py:40
+msgid "System Default"
+msgstr "Défaut du système"
+
+#: akstaging/preferences.py:40
+msgid "110%"
+msgstr "110%"
+
+#: akstaging/preferences.py:40
+msgid "120%"
+msgstr "120%"
+
+#: akstaging/preferences.py:40
+msgid "130%"
+msgstr "130%"
+
+#: akstaging/preferences.py:40
+msgid "140%"
+msgstr "140%"
+
+#: akstaging/preferences.py:40
+msgid "150%"
+msgstr "150%"
+
+#: akstaging/preferences.py:66
+msgid "Appearance"
+msgstr "Apparence"
+
+#: akstaging/preferences.py:70
+msgid "Theme"
+msgstr "Thème"
+
+#: akstaging/preferences.py:71
+msgid "Choose the application color scheme"
+msgstr "Choisissez la palette de couleurs de l'application"
+
+#: akstaging/preferences.py:77
+msgid "Font Scale"
+msgstr "Échelle de la police"
+
+#: akstaging/preferences.py:78
+msgid "Adjust application font size"
+msgstr "Ajuster la taille de la police de l'application"
+
+#: akstaging/preferences.py:83
+msgid "Network"
+msgstr "Réseau"
+
+#: akstaging/preferences.py:87
+msgid "Use Custom DNS Servers"
+msgstr "Utiliser des serveurs DNS personnalisés"
+
+#: akstaging/preferences.py:88
+msgid "Override system DNS settings for lookups"
+msgstr "Remplacer les paramètres DNS du système pour les recherches"
+
+#: akstaging/preferences.py:93
+msgid "DNS Servers"
+msgstr "Serveurs DNS"
+
+#: akstaging/window.py:248 akstaging/window.py:616
+msgid "IP Address"
+msgstr "Adresse IP"
+
+#: akstaging/window.py:258 akstaging/window.py:619
+msgid "Hostname"
+msgstr "Nom d'hôte"
+
+#: akstaging/window.py:330
+#, python-brace-format
+msgid "Error loading hosts entries: {error_detail}"
+msgstr "Erreur lors du chargement des entrées d'hôtes : {error_detail}"
+
+#: akstaging/window.py:390
+#, python-brace-format
+msgid "Notice: Input '{domain_input}' sanitized to '{sanitized_domain}'.\n"
+msgstr "Avis : L'entrée '{domain_input}' a été normalisée en '{sanitized_domain}'.\n"
+
+#: akstaging/window.py:396
+msgid ""
+"Invalid domain format. Please enter a valid domain (e.g., www.example.com)."
+msgstr "Format de domaine invalide. Veuillez entrer un domaine valide (par exemple, www.example.com)."
+
+#: akstaging/window.py:411
+#, python-brace-format
+msgid "Could not determine Akamai staging IP for {domain}."
+msgstr "Impossible de déterminer l'IP de transit Akamai pour {domain}."
+
+#: akstaging/window.py:416
+#, python-brace-format
+msgid "DNS lookup failed for {domain}: {error}"
+msgstr "La recherche DNS a échoué pour {domain} : {error}"
+
+#: akstaging/window.py:425
+#, python-brace-format
+msgid "Host '{domain}' added."
+msgstr "Hôte '{domain}' ajouté."
+
+#: akstaging/window.py:427
+#, python-brace-format
+msgid "Host '{domain}' already configured."
+msgstr "L'hôte '{domain}' est déjà configuré."
+
+#: akstaging/window.py:429 akstaging/window.py:563
+msgid "Operation cancelled by user."
+msgstr "Opération annulée par l'utilisateur."
+
+#: akstaging/window.py:431
+msgid "Permission error occurred."
+msgstr "Une erreur de permission s'est produite."
+
+#: akstaging/window.py:433
+msgid "File I/O error occurred."
+msgstr "Une erreur d'E/S de fichier s'est produite."
+
+#: akstaging/window.py:435
+msgid "Hosts file not found."
+msgstr "Fichier hosts introuvable."
+
+#: akstaging/window.py:437 akstaging/window.py:569 akstaging/window.py:596
+msgid "Feature unavailable in Flatpak."
+msgstr "Fonctionnalité non disponible dans Flatpak."
+
+#. Covers ERROR_INTERNAL or any other unexpected status
+#: akstaging/window.py:439
+#, python-brace-format
+msgid "Failed to add host '{domain}'."
+msgstr "Échec de l'ajout de l'hôte '{domain}'."
+
+#: akstaging/window.py:467
+msgid "Invalid domain format entered."
+msgstr "Format de domaine invalide saisi."
+
+#: akstaging/window.py:477
+#, python-brace-format
+msgid ""
+"Found staging IP {ip} for Akamai Staging domain {staging_cname} (derived "
+"from {original_domain}). Attempting to add to hosts file..."
+msgstr "IP de transit {ip} trouvée pour le domaine Akamai Staging {staging_cname} (dérivé de {original_domain}). Tentative d'ajout au fichier hosts..."
+
+#: akstaging/window.py:481
+#, python-brace-format
+msgid ""
+"Found staging IP {ip} for {original_domain}. Attempting to add to hosts "
+"file..."
+msgstr "IP de transit {ip} trouvée pour {original_domain}. Tentative d'ajout au fichier hosts..."
+
+#: akstaging/window.py:489
+#, python-brace-format
+msgid "Failed to process staging request for {domain}: {error}"
+msgstr "Échec du traitement de la demande de transit pour {domain} : {error}"
+
+#: akstaging/window.py:492
+msgid "Failed to process staging request."
+msgstr "Échec du traitement de la demande de transit."
+
+#: akstaging/window.py:499 akstaging/window.py:500
+msgid "No entry selected for deletion."
+msgstr "Aucune entrée sélectionnée pour la suppression."
+
+#: akstaging/window.py:508
+msgid "Confirm Deletion"
+msgstr "Confirmer la suppression"
+
+#: akstaging/window.py:509
+#, python-brace-format
+msgid ""
+"Are you sure you want to delete the selected entry:\n"
+"'{entry}'?"
+msgstr "Êtes-vous sûr de vouloir supprimer l'entrée sélectionnée :\n'{entry}' ?"
+
+#: akstaging/window.py:511 akstaging/window.py:628
+msgid "Cancel"
+msgstr "Annuler"
+
+#: akstaging/window.py:512
+msgid "Delete"
+msgstr "Supprimer"
+
+#: akstaging/window.py:527
+msgid "Error: No item was identified for deletion."
+msgstr "Erreur : Aucun élément n'a été identifié pour la suppression."
+
+#: akstaging/window.py:529
+msgid "Error: No item identified for deletion."
+msgstr "Erreur : Aucun élément identifié pour la suppression."
+
+#: akstaging/window.py:548 akstaging/window.py:549
+msgid "Deletion cancelled."
+msgstr "Suppression annulée."
+
+#: akstaging/window.py:559
+#, python-brace-format
+msgid "Host '{entry}' removed."
+msgstr "Hôte '{entry}' supprimé."
+
+#. ALREADY_EXISTS here means "was already not there"
+#: akstaging/window.py:561
+#, python-brace-format
+msgid "Host '{entry}' not found."
+msgstr "Hôte '{entry}' introuvable."
+
+#: akstaging/window.py:565
+msgid "Permission error during removal."
+msgstr "Erreur de permission lors de la suppression."
+
+#: akstaging/window.py:567
+msgid "File I/O error during removal."
+msgstr "Erreur d'E/S de fichier lors de la suppression."
+
+#. Covers ERROR_INTERNAL or any other unexpected status
+#: akstaging/window.py:571
+#, python-brace-format
+msgid "Failed to remove '{entry}'."
+msgstr "Échec de la suppression de '{entry}'."
+
+#: akstaging/window.py:578
+#, python-brace-format
+msgid "Removal of old entry '{entry}' cancelled by user."
+msgstr "Suppression de l'ancienne entrée '{entry}' annulée par l'utilisateur."
+
+#: akstaging/window.py:579
+#, python-brace-format
+msgid "Permission error removing old entry '{entry}'."
+msgstr "Erreur de permission lors de la suppression de l'ancienne entrée '{entry}'."
+
+#: akstaging/window.py:580
+#, python-brace-format
+msgid "I/O error removing old entry '{entry}'."
+msgstr "Erreur d'E/S lors de la suppression de l'ancienne entrée '{entry}'."
+
+#: akstaging/window.py:581
+#, python-brace-format
+msgid "Feature unavailable in Flatpak. Cannot remove old entry '{entry}'."
+msgstr "Fonctionnalité non disponible dans Flatpak. Impossible de supprimer l'ancienne entrée '{entry}'."
+
+#: akstaging/window.py:582
+#, python-brace-format
+msgid "Failed to remove old entry '{entry}'. Edit aborted."
+msgstr "Échec de la suppression de l'ancienne entrée '{entry}'. Modification annulée."
+
+#: akstaging/window.py:590
+#, python-brace-format
+msgid "Host entry updated to '{ip} {hostname}'."
+msgstr "Entrée d'hôte mise à jour vers '{ip} {hostname}'."
+
+#: akstaging/window.py:592
+#, python-brace-format
+msgid "Host entry '{ip} {hostname}' already configured."
+msgstr "L'entrée d'hôte '{ip} {hostname}' est déjà configurée."
+
+#: akstaging/window.py:593
+msgid "Save operation cancelled by user."
+msgstr "Opération de sauvegarde annulée par l'utilisateur."
+
+#: akstaging/window.py:594
+msgid "Permission error saving changes."
+msgstr "Erreur de permission lors de la sauvegarde des modifications."
+
+#: akstaging/window.py:595
+msgid "I/O error saving changes."
+msgstr "Erreur d'E/S lors de la sauvegarde des modifications."
+
+#: akstaging/window.py:597
+#, python-brace-format
+msgid "Failed to save changes for '{hostname}'."
+msgstr "Échec de la sauvegarde des modifications pour '{hostname}'."
+
+#: akstaging/window.py:604 akstaging/window.py:605
+msgid "No entry selected to edit."
+msgstr "Aucune entrée sélectionnée pour modification."
+
+#: akstaging/window.py:612
+msgid "Edit Host Entry"
+msgstr "Modifier l'entrée d'hôte"
+
+#: akstaging/window.py:613
+msgid "Modify the IP address and/or hostname."
+msgstr "Modifiez l'adresse IP et/ou le nom d'hôte."
+
+#: akstaging/window.py:629
+msgid "Save Changes"
+msgstr "Enregistrer les modifications"
+
+#: akstaging/window.py:645
+#, python-brace-format
+msgid ""
+"Attempting to change '{old_ip} {old_hostname}' to '{new_ip} "
+"{new_hostname}'..."
+msgstr "Tentative de modification de '{old_ip} {old_hostname}' en '{new_ip} {new_hostname}'..."
+
+#: akstaging/window.py:652
+#, python-brace-format
+msgid "Removing old entry: {entry}..."
+msgstr "Suppression de l'ancienne entrée : {entry}..."
+
+#. ERROR_NOT_FOUND and ALREADY_EXISTS (meaning it wasn't there to be removed) are acceptable for the first step.
+#: akstaging/window.py:659
+#, python-brace-format
+msgid "Failed to remove old entry '{entry}'. Edit operation aborted."
+msgstr "Échec de la suppression de l'ancienne entrée '{entry}'. Opération de modification annulée."
+
+#: akstaging/window.py:664
+#, python-brace-format
+msgid "Adding new/updated entry: {ip} {hostname}..."
+msgstr "Ajout d'une nouvelle entrée/mise à jour : {ip} {hostname}..."
+
+#: akstaging/window.py:682
+msgid "Error: IP address and hostname cannot be empty."
+msgstr "Erreur : L'adresse IP et le nom d'hôte ne peuvent pas être vides."
+
+#: akstaging/window.py:684
+msgid "IP and hostname cannot be empty."
+msgstr "L'IP et le nom d'hôte ne peuvent pas être vides."
+
+#: akstaging/window.py:686
+msgid "No changes detected."
+msgstr "Aucune modification détectée."
+
+#: akstaging/window.py:694
+msgid "Edit operation cancelled by user."
+msgstr "Opération de modification annulée par l'utilisateur."
+
+#: akstaging/window.py:696
+msgid "Edit operation cancelled."
+msgstr "Opération de modification annulée."
+
+#: data/com.github.mclellac.AkamaiStaging.desktop.in:3
+msgid "Akamai Staging"
+msgstr "Akamai Staging"
+
+#: data/com.github.mclellac.AkamaiStaging.desktop.in:4
+msgid ""
+"Akamai Staging is an application designed to manage and apply Akamai Staging "
+"IPs for testing configurations on Akamaized domains."
+msgstr "Akamai Staging est une application conçue pour gérer et appliquer les IP de transit Akamai pour tester les configurations sur les domaines Akamaized."
+
+#: data/com.github.mclellac.AkamaiStaging.metainfo.xml.in:7
+msgid "No description"
+msgstr "Aucune description"

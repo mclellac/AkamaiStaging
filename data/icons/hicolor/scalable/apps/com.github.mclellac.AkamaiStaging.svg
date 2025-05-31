@@ -1,0 +1,25 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Define the drop shadow filter for the lines -->
+    <filter id="drop-shadow-lines" x="-20%" y="-20%" width="150%" height="150%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+      <feOffset in="blur" dx="2" dy="2" result="offsetBlur"/>
+      <feMerge>
+        <feMergeNode in="offsetBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer circle with stroke, centered and sized to fit the viewbox without being cut off -->
+  <circle cx="64" cy="64" r="56" stroke="#F28000" stroke-width="8" fill="#FFE0B2" />
+  
+  <!-- Lines representing text in /etc/hosts, adjusted to fit within the larger circle and made thicker, and drop shadow -->
+  <rect x="24" y="40" width="20" height="8" fill="#F28000" filter="url(#drop-shadow-lines)" />
+  <rect x="54" y="40" width="50" height="8" fill="#F28000" filter="url(#drop-shadow-lines)" />
+  <rect x="24" y="60" width="20" height="8" fill="#F28000" filter="url(#drop-shadow-lines)" />
+  <rect x="54" y="60" width="50" height="8" fill="#F28000" filter="url(#drop-shadow-lines)" />
+  <rect x="24" y="80" width="20" height="8" fill="#F28000" filter="url(#drop-shadow-lines)" />
+  <rect x="54" y="80" width="50" height="8" fill="#F28000" filter="url(#drop-shadow-lines)" />
+</svg>
+

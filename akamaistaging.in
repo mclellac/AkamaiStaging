@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+# akstaging/akamaistaging
+"""
+Akamai Staging Application.
+
+This script serves as the main entry point for the Akamai Staging GUI application.
+It handles OS detection for privilege escalation (required for modifying /etc/hosts)
+and then launches the Adwaita-based GTK application.
+"""
+
+import logging
+import sys
+from gi.repository import GLib
+
+
+python_site_packages_path = "@PYTHON_SITE_PACKAGES@"
+if python_site_packages_path not in sys.path:
+    sys.path.insert(0, python_site_packages_path)
+
+import gi
+
+gi.require_version("Gdk", "4.0")
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Adw
+
+from akstaging.window import AkamaiStagingWindow
+
+
+class AkamaiApp(Adw.Application):
+    """
+    The main Adwaita Application class for Akamai Staging.
+
+    This class handles the application lifecycle and the creation of the main window.
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Initializes the AkamaiApp instance.
+
+        Args:
+            **kwargs: Keyword arguments passed to the Adw.Application constructor.
+        """
+        super().__init__(**kwargs)
+        self.debug_enabled = False # Initialize debug state
+
+        debug_option = GLib.OptionEntry()
+        debug_option.long_name = 'debug'
+        debug_option.short_name = ord('d')
+        debug_option.flags = GLib.OptionFlags.NONE
+        debug_option.arg = GLib.OptionArg.NONE
+        debug_option.description = 'Enable debug logging output.'
+
+        self.add_main_option_entries([debug_option])
+
+        self.connect("handle-local-options", self._on_handle_local_options)
+        self.window = None
+        self.connect("activate", self.on_activate)
+
+    def _on_handle_local_options(self, app, options):
+        # options is a GLib.VariantDict
+        # GLib.VariantDict.lookup_value() returns a GLib.Variant or None
+        debug_variant = options.lookup_value("debug", GLib.VariantType.new("b"))
+        if debug_variant is not None:
+            self.debug_enabled = debug_variant.get_boolean()
+
+        log_format = '%(levelname)s:%(name)s:%(message)s'
+        if self.debug_enabled:
+            logging.basicConfig(level=logging.DEBUG, force=True, format=log_format)
+            logging.debug("Debug mode enabled by command line flag.")
+            logging.info("Starting Akamai Staging application (logging configured for DEBUG)...")
+        else:
+            # Default to WARN if not set by debug flag
+            logging.basicConfig(level=logging.WARN, force=True, format=log_format)
+
+        return -1
+
+    def on_activate(self, app):
+        """
+        Handles the 'activate' signal of the Adw.Application.
+
+        This typically occurs when the application is first launched or
+        re-activated (e.g., by clicking its icon). It ensures the main
+        window is created and presented.
+
+        Args:
+            app: The Adw.Application instance.
+        """
+        if not self.window:
+            self.window = AkamaiStagingWindow(application=app)
+        self.window.present()
+
+
+if __name__ == "__main__":
+    app = AkamaiApp(application_id="com.github.mclellac.AkamaiStaging")
+    exit_status = app.run(sys.argv)
+    sys.exit(exit_status)

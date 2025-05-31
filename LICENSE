@@ -1,6 +1,10 @@
 MIT License
 
+<<<<<<< HEAD
 Copyright (c) 2025 csm
+=======
+Copyright (c) 2025 Carey McLelland
+>>>>>>> e64babd (Cleaned up code, updated UI. Moved tests.)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

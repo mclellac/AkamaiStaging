@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=Akamai Staging
+Comment=Akamai Staging is an application designed to manage and apply Akamai Staging IPs for testing configurations on Akamaized domains.
+Exec=akamaistaging
+Icon=com.github.mclellac.AkamaiStaging
+Terminal=false
+Type=Application
+Categories=GTK;Utility;
+StartupNotify=true
+
+X-AppStream-Ignore=true
+X-AppStream-Metadata-Origin=com.github.mclellac.AkamaiStaging

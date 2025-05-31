@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="akamaistaging">
+	<schema id="com.github.mclellac.AkamaiStaging" path="/com/github/mclellac/AkamaiStaging/">
+		<key name='theme' type='s'>
+			<default>'system'</default>
+			<summary>Application theme</summary>
+			<description>The theme to use for the application: 'light', 'dark', or 'system'.</description>
+		</key>
+		<key name='font-scale' type='d'>
+			<default>1.0</default>
+			<summary>Font scaling factor</summary>
+			<description>The factor by which to scale fonts in the application.</description>
+		</key>
+		<key name='custom-dns-enabled' type='b'>
+			<default>false</default>
+			<summary>Enable custom DNS servers</summary>
+			<description>Whether to use custom DNS servers instead of system settings.</description>
+		</key>
+		<key name='custom-dns-servers' type='s'>
+			<default>''</default>
+			<summary>Custom DNS server addresses</summary>
+			<description>Comma-separated list of custom DNS server IP addresses.</description>
+		</key>
+	</schema>
+</schemalist>

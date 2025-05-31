@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN" "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+<policyconfig>
+  <action id="com.github.mclellac.AkamaiStaging">
+    <description>Perform privileged operations for AkamaiStaging (e.g., modify /etc/hosts)</description>
+    <message>Authentication is required to modify /etc/hosts for Akamai Staging</message>
+    <defaults>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">@AKSTAGING_HELPER_INSTALL_PATH@</annotate>
+  </action>
+</policyconfig>
+

@@ -1,0 +1,474 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the akamaistaging package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: akamaistaging\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-31 15:13-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: akstaging/gtk/help-overlay.ui:11
+msgctxt "shortcut window"
+msgid "General"
+msgstr ""
+
+#: akstaging/gtk/help-overlay.ui:14
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr ""
+
+#: akstaging/gtk/help-overlay.ui:20
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr ""
+
+#: akstaging/gtk/window.ui:15
+msgid "Akamai Staging Network Spoof"
+msgstr ""
+
+#: akstaging/gtk/window.ui:25
+msgid "Menu"
+msgstr ""
+
+#: akstaging/gtk/window.ui:49
+msgid "Enter domain or URL to add to Akamai Staging."
+msgstr ""
+
+#: akstaging/gtk/window.ui:50
+msgid "Get Akamai Staging Network IP"
+msgstr ""
+
+#: akstaging/gtk/window.ui:55
+msgid "Domain/URL"
+msgstr ""
+
+#: akstaging/gtk/window.ui:58
+msgid "Add"
+msgstr ""
+
+#: akstaging/gtk/window.ui:84
+msgid "Search hosts..."
+msgstr ""
+
+#: akstaging/gtk/window.ui:94
+msgid ""
+"These are the custom host entries currently managed by this tool. Select an "
+"entry to manage it."
+msgstr ""
+
+#. Margins can be adjusted if needed, AdwGroup might handle some spacing
+#: akstaging/gtk/window.ui:97
+msgid "Hosts File Entries"
+msgstr ""
+
+#: akstaging/gtk/window.ui:131
+msgid "No Host Entries"
+msgstr ""
+
+#: akstaging/gtk/window.ui:132
+msgid ""
+"Add a domain using the input field above to get started, or try adjusting "
+"your search filter."
+msgstr ""
+
+#: akstaging/gtk/window.ui:151
+msgid "Status"
+msgstr ""
+
+#: akstaging/gtk/window.ui:176
+msgid "Manage Selected Host"
+msgstr ""
+
+#: akstaging/gtk/window.ui:188
+msgctxt "button"
+msgid "Delete Selected Host"
+msgstr ""
+
+#: akstaging/gtk/window.ui:189
+msgid ""
+"Select the line from /etc/hosts you want to remove and click this button to "
+"delete it."
+msgstr ""
+
+#: akstaging/gtk/window.ui:198
+msgid "Edit Selected Host"
+msgstr ""
+
+#: akstaging/gtk/window.ui:199
+msgid "Select the line from /etc/hosts you want to edit and click this button."
+msgstr ""
+
+#: akstaging/gtk/window.ui:226
+msgid "_Preferences"
+msgstr ""
+
+#: akstaging/gtk/window.ui:230
+msgid "_Keyboard Shortcuts"
+msgstr ""
+
+#: akstaging/gtk/window.ui:234
+msgid "_About AkamaiStaging"
+msgstr ""
+
+#: akstaging/preferences.py:32
+msgid "Light"
+msgstr ""
+
+#: akstaging/preferences.py:32
+msgid "Dark"
+msgstr ""
+
+#: akstaging/preferences.py:32
+msgid "System"
+msgstr ""
+
+#: akstaging/preferences.py:40
+msgid "System Default"
+msgstr ""
+
+#: akstaging/preferences.py:40
+msgid "110%"
+msgstr ""
+
+#: akstaging/preferences.py:40
+msgid "120%"
+msgstr ""
+
+#: akstaging/preferences.py:40
+msgid "130%"
+msgstr ""
+
+#: akstaging/preferences.py:40
+msgid "140%"
+msgstr ""
+
+#: akstaging/preferences.py:40
+msgid "150%"
+msgstr ""
+
+#: akstaging/preferences.py:66
+msgid "Appearance"
+msgstr ""
+
+#: akstaging/preferences.py:70
+msgid "Theme"
+msgstr ""
+
+#: akstaging/preferences.py:71
+msgid "Choose the application color scheme"
+msgstr ""
+
+#: akstaging/preferences.py:77
+msgid "Font Scale"
+msgstr ""
+
+#: akstaging/preferences.py:78
+msgid "Adjust application font size"
+msgstr ""
+
+#: akstaging/preferences.py:83
+msgid "Network"
+msgstr ""
+
+#: akstaging/preferences.py:87
+msgid "Use Custom DNS Servers"
+msgstr ""
+
+#: akstaging/preferences.py:88
+msgid "Override system DNS settings for lookups"
+msgstr ""
+
+#: akstaging/preferences.py:93
+msgid "DNS Servers"
+msgstr ""
+
+#: akstaging/window.py:248 akstaging/window.py:616
+msgid "IP Address"
+msgstr ""
+
+#: akstaging/window.py:258 akstaging/window.py:619
+msgid "Hostname"
+msgstr ""
+
+#: akstaging/window.py:330
+#, python-brace-format
+msgid "Error loading hosts entries: {error_detail}"
+msgstr ""
+
+#: akstaging/window.py:390
+#, python-brace-format
+msgid "Notice: Input '{domain_input}' sanitized to '{sanitized_domain}'.\n"
+msgstr ""
+
+#: akstaging/window.py:396
+msgid ""
+"Invalid domain format. Please enter a valid domain (e.g., www.example.com)."
+msgstr ""
+
+#: akstaging/window.py:411
+#, python-brace-format
+msgid "Could not determine Akamai staging IP for {domain}."
+msgstr ""
+
+#: akstaging/window.py:416
+#, python-brace-format
+msgid "DNS lookup failed for {domain}: {error}"
+msgstr ""
+
+#: akstaging/window.py:425
+#, python-brace-format
+msgid "Host '{domain}' added."
+msgstr ""
+
+#: akstaging/window.py:427
+#, python-brace-format
+msgid "Host '{domain}' already configured."
+msgstr ""
+
+#: akstaging/window.py:429 akstaging/window.py:563
+msgid "Operation cancelled by user."
+msgstr ""
+
+#: akstaging/window.py:431
+msgid "Permission error occurred."
+msgstr ""
+
+#: akstaging/window.py:433
+msgid "File I/O error occurred."
+msgstr ""
+
+#: akstaging/window.py:435
+msgid "Hosts file not found."
+msgstr ""
+
+#: akstaging/window.py:437 akstaging/window.py:569 akstaging/window.py:596
+msgid "Feature unavailable in Flatpak."
+msgstr ""
+
+#. Covers ERROR_INTERNAL or any other unexpected status
+#: akstaging/window.py:439
+#, python-brace-format
+msgid "Failed to add host '{domain}'."
+msgstr ""
+
+#: akstaging/window.py:467
+msgid "Invalid domain format entered."
+msgstr ""
+
+#: akstaging/window.py:477
+#, python-brace-format
+msgid ""
+"Found staging IP {ip} for Akamai Staging domain {staging_cname} (derived "
+"from {original_domain}). Attempting to add to hosts file..."
+msgstr ""
+
+#: akstaging/window.py:481
+#, python-brace-format
+msgid ""
+"Found staging IP {ip} for {original_domain}. Attempting to add to hosts "
+"file..."
+msgstr ""
+
+#: akstaging/window.py:489
+#, python-brace-format
+msgid "Failed to process staging request for {domain}: {error}"
+msgstr ""
+
+#: akstaging/window.py:492
+msgid "Failed to process staging request."
+msgstr ""
+
+#: akstaging/window.py:499 akstaging/window.py:500
+msgid "No entry selected for deletion."
+msgstr ""
+
+#: akstaging/window.py:508
+msgid "Confirm Deletion"
+msgstr ""
+
+#: akstaging/window.py:509
+#, python-brace-format
+msgid ""
+"Are you sure you want to delete the selected entry:\n"
+"'{entry}'?"
+msgstr ""
+
+#: akstaging/window.py:511 akstaging/window.py:628
+msgid "Cancel"
+msgstr ""
+
+#: akstaging/window.py:512
+msgid "Delete"
+msgstr ""
+
+#: akstaging/window.py:527
+msgid "Error: No item was identified for deletion."
+msgstr ""
+
+#: akstaging/window.py:529
+msgid "Error: No item identified for deletion."
+msgstr ""
+
+#: akstaging/window.py:548 akstaging/window.py:549
+msgid "Deletion cancelled."
+msgstr ""
+
+#: akstaging/window.py:559
+#, python-brace-format
+msgid "Host '{entry}' removed."
+msgstr ""
+
+#. ALREADY_EXISTS here means "was already not there"
+#: akstaging/window.py:561
+#, python-brace-format
+msgid "Host '{entry}' not found."
+msgstr ""
+
+#: akstaging/window.py:565
+msgid "Permission error during removal."
+msgstr ""
+
+#: akstaging/window.py:567
+msgid "File I/O error during removal."
+msgstr ""
+
+#. Covers ERROR_INTERNAL or any other unexpected status
+#: akstaging/window.py:571
+#, python-brace-format
+msgid "Failed to remove '{entry}'."
+msgstr ""
+
+#: akstaging/window.py:578
+#, python-brace-format
+msgid "Removal of old entry '{entry}' cancelled by user."
+msgstr ""
+
+#: akstaging/window.py:579
+#, python-brace-format
+msgid "Permission error removing old entry '{entry}'."
+msgstr ""
+
+#: akstaging/window.py:580
+#, python-brace-format
+msgid "I/O error removing old entry '{entry}'."
+msgstr ""
+
+#: akstaging/window.py:581
+#, python-brace-format
+msgid "Feature unavailable in Flatpak. Cannot remove old entry '{entry}'."
+msgstr ""
+
+#: akstaging/window.py:582
+#, python-brace-format
+msgid "Failed to remove old entry '{entry}'. Edit aborted."
+msgstr ""
+
+#: akstaging/window.py:590
+#, python-brace-format
+msgid "Host entry updated to '{ip} {hostname}'."
+msgstr ""
+
+#: akstaging/window.py:592
+#, python-brace-format
+msgid "Host entry '{ip} {hostname}' already configured."
+msgstr ""
+
+#: akstaging/window.py:593
+msgid "Save operation cancelled by user."
+msgstr ""
+
+#: akstaging/window.py:594
+msgid "Permission error saving changes."
+msgstr ""
+
+#: akstaging/window.py:595
+msgid "I/O error saving changes."
+msgstr ""
+
+#: akstaging/window.py:597
+#, python-brace-format
+msgid "Failed to save changes for '{hostname}'."
+msgstr ""
+
+#: akstaging/window.py:604 akstaging/window.py:605
+msgid "No entry selected to edit."
+msgstr ""
+
+#: akstaging/window.py:612
+msgid "Edit Host Entry"
+msgstr ""
+
+#: akstaging/window.py:613
+msgid "Modify the IP address and/or hostname."
+msgstr ""
+
+#: akstaging/window.py:629
+msgid "Save Changes"
+msgstr ""
+
+#: akstaging/window.py:645
+#, python-brace-format
+msgid ""
+"Attempting to change '{old_ip} {old_hostname}' to '{new_ip} "
+"{new_hostname}'..."
+msgstr ""
+
+#: akstaging/window.py:652
+#, python-brace-format
+msgid "Removing old entry: {entry}..."
+msgstr ""
+
+#. ERROR_NOT_FOUND and ALREADY_EXISTS (meaning it wasn't there to be removed) are acceptable for the first step.
+#: akstaging/window.py:659
+#, python-brace-format
+msgid "Failed to remove old entry '{entry}'. Edit operation aborted."
+msgstr ""
+
+#: akstaging/window.py:664
+#, python-brace-format
+msgid "Adding new/updated entry: {ip} {hostname}..."
+msgstr ""
+
+#: akstaging/window.py:682
+msgid "Error: IP address and hostname cannot be empty."
+msgstr ""
+
+#: akstaging/window.py:684
+msgid "IP and hostname cannot be empty."
+msgstr ""
+
+#: akstaging/window.py:686
+msgid "No changes detected."
+msgstr ""
+
+#: akstaging/window.py:694
+msgid "Edit operation cancelled by user."
+msgstr ""
+
+#: akstaging/window.py:696
+msgid "Edit operation cancelled."
+msgstr ""
+
+#: data/com.github.mclellac.AkamaiStaging.desktop.in:3
+msgid "Akamai Staging"
+msgstr ""
+
+#: data/com.github.mclellac.AkamaiStaging.desktop.in:4
+msgid ""
+"Akamai Staging is an application designed to manage and apply Akamai Staging "
+"IPs for testing configurations on Akamaized domains."
+msgstr ""
+
+#: data/com.github.mclellac.AkamaiStaging.metainfo.xml.in:7
+msgid "No description"
+msgstr ""

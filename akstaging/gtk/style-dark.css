@@ -1,0 +1,35 @@
+/* Header Bar styling is handled by Adwaita */
+
+/* Generic label styling is handled by Adwaita */
+
+.frame {
+    border: 1px solid #555;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.4);
+    padding: 10px;
+    background-color: #444; /* Consider if this specific background is needed or if Adwaita's dark theme provides a suitable default for frames */
+}
+
+.column-header {
+    font-weight: bold;
+    /* color: #fff; Adwaita should handle text color in dark theme */
+}
+
+.column-view-row label {
+    font-size: 15px; /* Consider if this specific font size is necessary or if default Adwaita size is acceptable */
+    /* color: #ccc; Adwaita should handle text color */
+    padding-left: 3px;
+    padding-right: 5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.text-view-entry {
+    font-weight: bold;
+    color: #FFA500; /* This is a specific highlight color, so it's fine to keep */
+}
+
+.view {
+    font-size: 15px; /* Consider if this specific font size is necessary */
+    /* color: #ccc; Adwaita should handle text color */
+}

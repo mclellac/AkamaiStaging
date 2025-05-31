@@ -1,0 +1,4 @@
+build/
+.flatpak-builder/*
+*.pyc
+com.github.mclellac.AkamaiStaging.policy
