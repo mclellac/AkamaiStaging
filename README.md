@@ -157,19 +157,17 @@ These are required for all operating systems (macOS, Linux, \*BSD):
 
     The application uses OS-specific helper scripts for privilege escalation at runtime when modifying the hosts file, so the main application itself doesn't need to run as root.
 
-### Using `setup.py` (Convenience Wrapper - Deprecated)
+### Using `setup.py`
 
-A `setup.py` script is included for historical reasons and as a potential convenience wrapper. However, **direct Meson usage (as described above) is strongly recommended** for better control and reliability. The `setup.py` script might not correctly handle dependencies on all systems.
+A `setup.py` script is included and should be used
 
-If you choose to use it:
-
-- To attempt installing dependencies (may only work on some Linux distributions):
+- To attempt installing dependencies
 
   ```bash
   ./setup.py -i
   ```
 
-- To build the project (this essentially runs the Meson commands for you):
+- To build the project
 
   ```bash
   ./setup.py -b
@@ -190,13 +188,12 @@ akamaistaging
 ## Usage
 
 1. **Launch AkamaiStaging:** Open the application from your system's application menu or by running `akamaistaging` in the terminal.
-2. **Enter Domain:** In the "Domain to Add" field, type or paste the production domain name for which you want to access the Akamai staging environment (e.g., `www.example.com`). This domain should typically be CNAME'd to an Akamai edge hostname in its production DNS configuration.
-3. **Add to Hosts:** Click the "Get Staging IP & Add to Hosts" button.
+2. **Enter Domain:** In the "Domain / URL to Add" field, type or paste the production domain name for which you want to access the Akamai staging environment (e.g., `www.example.com`). This domain should typically be CNAME'd to an Akamai edge hostname in its production DNS configuration.
+3. **Add to Hosts:** Click the "Add" button.
     - The application will perform DNS lookups to find the specific Akamai staging IP address for your entered domain.
     - It will then attempt to add (or update) an entry in your system's `/etc/hosts` file, mapping the domain to this staging IP. This step will usually require administrator/root privileges, and the application will prompt you for credentials via a system dialog (e.g., PolicyKit or macOS security prompt).
 4. **Verify Entry:** The main list view will refresh, showing the newly added or updated entry along with other custom entries from your hosts file.
 5. **Test in Browser:** Open a web browser and navigate to the domain you added (e.g., `http://www.example.com` or `https://www.example.com`). Your local machine will now resolve this domain to the Akamai staging IP, allowing you to test your site's staging version.
-6. **Edit Entry (Optional):** Select an entry in the list and click the "Edit" button (pencil icon) to modify its IP address or hostname.
-7. **Delete Entry:** To remove an entry and restore normal DNS resolution for that domain on your machine, select it in the list view and click the "Delete" button (trash icon). This will also require administrator/root privileges.
-8. **Search/Filter:** Use the search bar at the top of the hosts list to quickly find entries by IP or hostname.
-9. **Status Messages:** Check the text area at the bottom of the window for status messages, errors, or confirmation of actions.
+6. **Delete Entry:** To remove an entry and restore normal DNS resolution for that domain on your machine, select it in the list view and click the "Delete" button (trash icon). This will also require administrator/root privileges.
+7. **Search/Filter:** Use the search bar at the top of the hosts list to quickly find entries by IP or hostname.
+8. **Status Messages:** Check the text area at the bottom of the window for status messages, errors, or confirmation of actions.
