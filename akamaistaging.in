@@ -2,16 +2,12 @@
 # akstaging/akamaistaging
 """
 Akamai Staging Application.
-
 This script serves as the main entry point for the Akamai Staging GUI application.
-It handles OS detection for privilege escalation (required for modifying /etc/hosts)
-and then launches the Adwaita-based GTK application.
 """
 
 import logging
 import sys
-from gi.repository import GLib
-
+from gi.repository import GLib, Gio
 
 python_site_packages_path = "@PYTHON_SITE_PACKAGES@"
 if python_site_packages_path not in sys.path:
@@ -22,76 +18,84 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw
+from gi.repository import Adw, Gdk, Gtk
 
 from akstaging.window import AkamaiStagingWindow
 
+# This import will now work correctly
+from akstaging.defs import SETTINGS_ID
+
 
 class AkamaiApp(Adw.Application):
-    """
-    The main Adwaita Application class for Akamai Staging.
-
-    This class handles the application lifecycle and the creation of the main window.
-    """
+    """The main Adwaita Application class for Akamai Staging."""
 
     def __init__(self, **kwargs):
-        """
-        Initializes the AkamaiApp instance.
-
-        Args:
-            **kwargs: Keyword arguments passed to the Adw.Application constructor.
-        """
         super().__init__(**kwargs)
-        self.debug_enabled = False # Initialize debug state
-
-        debug_option = GLib.OptionEntry()
-        debug_option.long_name = 'debug'
-        debug_option.short_name = ord('d')
-        debug_option.flags = GLib.OptionFlags.NONE
-        debug_option.arg = GLib.OptionArg.NONE
-        debug_option.description = 'Enable debug logging output.'
-
-        self.add_main_option_entries([debug_option])
-
-        self.connect("handle-local-options", self._on_handle_local_options)
         self.window = None
-        self.connect("activate", self.on_activate)
+        self.font_css_provider = None
 
-    def _on_handle_local_options(self, app, options):
-        # options is a GLib.VariantDict
-        # GLib.VariantDict.lookup_value() returns a GLib.Variant or None
-        debug_variant = options.lookup_value("debug", GLib.VariantType.new("b"))
-        if debug_variant is not None:
-            self.debug_enabled = debug_variant.get_boolean()
+        self.settings = Gio.Settings.new(SETTINGS_ID)
+        self.settings.connect("changed::theme", lambda s, k: self.apply_theme())
+        self.settings.connect(
+            "changed::font-scale", lambda s, k: self.apply_font_scaling()
+        )
 
-        log_format = '%(levelname)s:%(name)s:%(message)s'
-        if self.debug_enabled:
-            logging.basicConfig(level=logging.DEBUG, force=True, format=log_format)
-            logging.debug("Debug mode enabled by command line flag.")
-            logging.info("Starting Akamai Staging application (logging configured for DEBUG)...")
-        else:
-            # Default to WARN if not set by debug flag
-            logging.basicConfig(level=logging.WARN, force=True, format=log_format)
+    def do_startup(self):
+        """Called when the application starts, before activate."""
+        Adw.Application.do_startup(self)
+        self.apply_theme()
+        self.apply_font_scaling()
 
-        return -1
-
-    def on_activate(self, app):
-        """
-        Handles the 'activate' signal of the Adw.Application.
-
-        This typically occurs when the application is first launched or
-        re-activated (e.g., by clicking its icon). It ensures the main
-        window is created and presented.
-
-        Args:
-            app: The Adw.Application instance.
-        """
+    def do_activate(self):
+        """Handles the 'activate' signal of the Adw.Application."""
         if not self.window:
-            self.window = AkamaiStagingWindow(application=app)
+            self.window = AkamaiStagingWindow(application=self)
         self.window.present()
+
+    def apply_theme(self):
+        """Applies the color scheme based on the 'theme' GSettings key."""
+        style_manager = self.get_style_manager()
+        theme_str = self.settings.get_string("theme")
+
+        match theme_str:
+            case "dark":
+                style_manager.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
+            case "light":
+                style_manager.set_color_scheme(Adw.ColorScheme.PREFER_LIGHT)
+            case _:  # "system" or any other fallback
+                style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
+
+        logging.info("Applied theme: %s", theme_str)
+
+    def apply_font_scaling(self, scale_factor=None):
+        """Applies a font scaling factor to the entire application."""
+        if scale_factor is None:
+            scale_factor = self.settings.get_double("font-scale")
+
+        logging.info("Applying font scale factor: %s", scale_factor)
+        display = Gdk.Display.get_default()
+        if display is None:
+            logging.error("Cannot get GDK Display to apply font scaling.")
+            return
+
+        if self.font_css_provider is not None:
+            Gtk.StyleContext.remove_provider_for_display(
+                display, self.font_css_provider
+            )
+            self.font_css_provider = None
+
+        if abs(scale_factor - 1.0) > 0.01:
+            self.font_css_provider = Gtk.CssProvider()
+            css_data = f"* {{ font-size: {scale_factor}rem; }}".encode()
+            self.font_css_provider.load_from_data(css_data)
+            Gtk.StyleContext.add_provider_for_display(
+                display, self.font_css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER
+            )
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.WARN, format="%(levelname)s:%(name)s:%(message)s")
+
     app = AkamaiApp(application_id="com.github.mclellac.AkamaiStaging")
     exit_status = app.run(sys.argv)
     sys.exit(exit_status)

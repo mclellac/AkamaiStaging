@@ -7,4 +7,5 @@ VERSION = "@VERSION@"
 LIBEXECDIR = '@libexecdir@'
 RESOURCE_PATH = "@RESOURCE_PATH@"
 LOCALE_DIR = "@LOCALEDIR@"
-COPYRIGHT = "© 2024 Carey McLelland"
+SETTINGS_ID = "com.github.mclellac.AkamaiStaging"
+COPYRIGHT = "© 2025 Carey McLelland"

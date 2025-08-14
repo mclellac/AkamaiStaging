@@ -1,64 +1,142 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- Created with Cambalache 0.96.1 -->
+<!-- Created with Cambalache 0.97.7 -->
+<!--
+-->
 <interface>
-  <!-- interface-name window.ui -->
-  <!-- interface-description The main window UI file for Akamai Staging application. -->
-  <!-- interface-copyright Copyright &#169;- Carey McLelland - All Rights Reserved. -->
-  <!-- interface-authors Carey McLelland -->
-  <requires lib="Adw" version="1.0"/>
-  <requires lib="gio" version="2.44"/>
+  <!-- interface-name window.blp -->
   <requires lib="gtk" version="4.0"/>
-  <requires lib="libadwaita" version="1.5"/>
+  <requires lib="gio" version="2.0"/>
+  <requires lib="libadwaita" version="1.6"/>
   <template class="AkamaiStagingWindow" parent="AdwApplicationWindow">
-    <property name="default-height">700</property>
+    <property name="default-height">800</property>
     <property name="default-width">850</property>
     <property name="title" translatable="yes">Akamai Staging Network Spoof</property>
     <child>
       <object class="AdwToolbarView">
         <child type="top">
-          <object class="AdwHeaderBar" id="header_bar">
+          <object class="AdwHeaderBar">
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="icon-name">open-menu-symbolic</property>
                 <property name="menu-model">primary_menu</property>
-                <property name="primary">True</property>
-                <property name="tooltip-text" translatable="yes">Menu</property>
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
               </object>
             </child>
           </object>
         </child>
         <child>
-          <!-- Begin Akamai Staging Network DNS Spoof UI -->
           <object class="AdwToastOverlay" id="toast_overlay">
             <child>
-              <object class="GtkGrid" id="grid">
-                <property name="column-spacing">5</property>
-                <property name="margin-bottom">15</property>
-                <property name="margin-end">15</property>
-                <property name="margin-start">15</property>
-                <property name="margin-top">15</property>
-                <property name="row-spacing">5</property>
-                <property name="visible">True</property>
+              <object class="GtkScrolledWindow">
+                <property name="hscrollbar-policy">never</property>
+                <property name="min-content-width">400</property>
                 <child>
                   <object class="AdwClamp">
-                    <property name="maximum-size">700</property>
+                    <property name="maximum-size">800</property>
                     <child>
-                      <object class="AdwPreferencesPage">
+                      <object class="GtkBox">
+                        <property name="margin-bottom">24</property>
+                        <property name="margin-end">24</property>
+                        <property name="margin-start">24</property>
+                        <property name="margin-top">24</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">24</property>
                         <child>
                           <object class="AdwPreferencesGroup">
-                            <property name="description" translatable="yes">Enter domain or URL to add to Akamai Staging.</property>
-                            <property name="title" translatable="yes">Get Akamai Staging Network IP</property>
+                            <property name="description" translatable="yes">Enter a domain to resolve its Akamai staging IP and add it to your hosts file.</property>
+                            <property name="title" translatable="yes">Add Host</property>
                             <child>
                               <object class="AdwEntryRow" id="entry_domain">
-                                <property name="activates-default">True</property>
-                                <property name="hexpand">True</property>
+                                <property name="activates-default">true</property>
                                 <property name="title" translatable="yes">Domain/URL</property>
                                 <child type="suffix">
                                   <object class="GtkButton" id="button_add_ip">
+                                    <property name="css-classes">suggested-action</property>
                                     <property name="label" translatable="yes">Add</property>
-                                    <style>
-                                      <class name="suggested-action"/>
-                                    </style>
+                                    <property name="tooltip-text" translatable="yes">Add to Hosts</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title" translatable="yes">Managed Hosts</property>
+                            <child type="header-suffix">
+                              <object class="GtkSearchEntry" id="search_entry_hosts">
+                                <property name="placeholder-text" translatable="yes">Search hosts…</property>
+                                <property name="width-chars">20</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwViewSwitcher" id="hosts_view_switcher">
+                                <property name="margin-bottom">10</property>
+                                <property name="margin-top">20</property>
+                                <property name="vexpand">true</property>
+                                <child>
+                                  <object class="GtkScrolledWindow" id="scrolled_window_hosts_list">
+                                    <property name="min-content-height">200</property>
+                                    <child>
+                                      <object class="GtkColumnView" id="column_view_entries">
+                                        <property name="show-column-separators">true</property>
+                                        <property name="show-row-separators">true</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="AdwStatusPage" id="empty_hosts_status_page">
+                                    <property name="description" translatable="yes">Add a domain to get started, or adjust your search filter.</property>
+                                    <property name="icon-name">edit-find-symbolic</property>
+                                    <property name="title" translatable="yes">No Host Entries</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="margin-bottom">20</property>
+                                <property name="margin-top">20</property>
+                                <property name="title" translatable="yes">Select a host entry to edit/delete.</property>
+                                <child type="suffix">
+                                  <object class="GtkBox">
+                                    <property name="spacing">6</property>
+                                    <child>
+                                      <object class="GtkButton" id="button_edit_host">
+                                        <property name="label" translatable="yes">Edit…</property>
+                                        <property name="tooltip-text" translatable="yes">Edit Selected Entry</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_delete">
+                                        <property name="css-classes">destructive-action</property>
+                                        <property name="label" translatable="yes">Delete</property>
+                                        <property name="tooltip-text" translatable="yes">Delete Selected Entry</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwPreferencesGroup">
+                            <property name="title" translatable="yes">Status Log</property>
+                            <child>
+                              <object class="GtkScrolledWindow">
+                                <property name="hscrollbar-policy">never</property>
+                                <property name="min-content-height">100</property>
+                                <child>
+                                  <object class="GtkTextView" id="textview_status">
+                                    <property name="bottom-margin">6</property>
+                                    <property name="cursor-visible">false</property>
+                                    <property name="editable">false</property>
+                                    <property name="left-margin">12</property>
+                                    <property name="right-margin">12</property>
+                                    <property name="top-margin">6</property>
+                                    <property name="wrap-mode">word-char</property>
                                   </object>
                                 </child>
                               </object>
@@ -67,148 +145,6 @@
                         </child>
                       </object>
                     </child>
-                    <layout>
-                      <property name="column">0</property>
-                      <property name="column-span">3</property>
-                      <property name="row">0</property>
-                    </layout>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkSearchEntry" id="search_entry_hosts">
-                    <property name="hexpand">True</property>
-                    <property name="margin-bottom">10</property>
-                    <property name="margin-end">15</property>
-                    <property name="margin-start">15</property>
-                    <property name="margin-top">10</property>
-                    <property name="placeholder-text" translatable="yes">Search hosts...</property>
-                    <layout>
-                      <property name="column">0</property>
-                      <property name="column-span">3</property>
-                      <property name="row">1</property>
-                    </layout>
-                  </object>
-                </child>
-                <child>
-                  <object class="AdwPreferencesGroup">
-                    <property name="description" translatable="yes">These are the custom host entries currently managed by this tool. Select an entry to manage it.</property>
-                    <property name="hexpand">True</property>
-                    <!-- Margins can be adjusted if needed, AdwGroup might handle some spacing -->
-                    <property name="title" translatable="yes">Hosts File Entries</property>
-                    <property name="vexpand">True</property>
-                    <child>
-                      <object class="AdwViewSwitcher" id="hosts_view_switcher">
-                        <property name="vexpand">true</property>
-                        <property name="hexpand">true</property>
-                        <child>
-                          <object class="GtkScrolledWindow" id="scrolled_window_hosts_list">
-                            <property name="halign">fill</property>
-                            <property name="hexpand">True</property>
-                            <property name="valign">fill</property>
-                            <property name="vexpand">True</property>
-                            <child>
-                              <object class="GtkColumnView" id="column_view_entries">
-                                <property name="enable-rubberband">True</property>
-                                <property name="focusable">True</property>
-                                <property name="halign">fill</property>
-                                <property name="hexpand">True</property>
-                                <property name="margin-bottom">5</property>
-                                <property name="margin-end">5</property>
-                                <property name="margin-start">5</property>
-                                <property name="margin-top">5</property>
-                                <property name="receives-default">True</property>
-                                <property name="reorderable">False</property>
-                                <property name="show-column-separators">true</property>
-                                <property name="show-row-separators">True</property>
-                                <property name="valign">fill</property>
-                                <property name="vexpand">True</property>
-                              </object>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="AdwStatusPage" id="empty_hosts_status_page">
-                            <property name="title" translatable="yes">No Host Entries</property>
-                            <property name="description" translatable="yes">Add a domain using the input field above to get started, or try adjusting your search filter.</property>
-                            <property name="icon-name">edit-find-symbolic</property>
-                            <property name="vexpand">true</property>
-                            <property name="hexpand">true</property>
-                            <property name="valign">center</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <layout>
-                      <property name="column">0</property>
-                      <property name="column-span">3</property>
-                      <property name="row">2</property>
-                    </layout>
-                  </object>
-                </child>
-                <child>
-                  <object class="AdwPreferencesGroup">
-                    <property name="hexpand">True</property>
-                    <property name="title" translatable="yes">Status</property>
-                    <property name="vexpand">True</property>
-                    <child>
-                      <object class="GtkTextView" id="textview_status">
-                        <!-- <property name="css-classes">GtkTextView</property> --> <!-- Removed as likely redundant -->
-                        <property name="cursor-visible">False</property>
-                        <property name="editable">False</property>
-                        <property name="hexpand">True</property>
-                        <property name="margin-bottom">5</property>
-                        <property name="margin-end">5</property>
-                        <property name="margin-start">5</property>
-                        <property name="margin-top">5</property>
-                        <property name="vexpand">True</property>
-                        <property name="wrap-mode">word-char</property>
-                      </object>
-                    </child>
-                    <layout>
-                      <property name="column">0</property>
-                      <property name="column-span">3</property>
-                      <property name="row">3</property>
-                    </layout>
-                  </object>
-                </child>
-                <child>
-                  <object class="AdwPreferencesGroup">
-                    <property name="title" translatable="yes">Manage Selected Host</property>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="halign">fill</property>
-                        <property name="margin-bottom">6</property>
-                        <property name="margin-top">6</property>
-                        <property name="orientation">horizontal</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkButton" id="button_delete">
-                            <property name="hexpand">True</property>
-                            <property name="icon-name">edit-delete-symbolic</property>
-                            <property name="label" translatable="yes" context="button">Delete Selected Host</property>
-                            <property name="tooltip-text" translatable="yes">Select the line from /etc/hosts you want to remove and click this button to delete it.</property>
-                            <style>
-                              <class name="destructive-action"/>
-                            </style>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="button_edit_host">
-                            <property name="hexpand">True</property>
-                            <property name="label" translatable="yes">Edit Selected Host</property>
-                            <property name="tooltip-text" translatable="yes">Select the line from /etc/hosts you want to edit and click this button.</property>
-                            <style>
-                              <class name="suggested-action"/>
-                            </style>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <layout>
-                      <property name="column">0</property>
-                      <property name="column-span">3</property>
-                      <property name="row">4</property>
-                    </layout>
                   </object>
                 </child>
               </object>
@@ -219,7 +155,6 @@
     </child>
   </template>
   <menu id="primary_menu">
-    <section/>
     <section>
       <item>
         <attribute name="action">app.preferences</attribute>
@@ -231,7 +166,7 @@
       </item>
       <item>
         <attribute name="action">app.about</attribute>
-        <attribute name="label" translatable="yes">_About AkamaiStaging</attribute>
+        <attribute name="label" translatable="yes">_About…</attribute>
       </item>
     </section>
   </menu>
