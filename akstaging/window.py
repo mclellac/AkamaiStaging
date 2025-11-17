@@ -132,7 +132,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             application_icon="com.github.mclellac.AkamaiStaging",
             developer_name="Carey McLelland",
             version=VERSION,
-            website="https://github.com.github/mclellac/AkamaiStaging",
+            website="https://github.com/mclellac/AkamaiStaging",
             issue_url="https://github.com/mclellac/AkamaiStaging/issues",
             developers=["Carey McLelland <careymclelland@gmail.com>"],
             copyright=COPYRIGHT,
