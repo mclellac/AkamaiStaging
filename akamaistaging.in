@@ -96,8 +96,8 @@ class AkamaiApp(Adw.Application):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARN, format="%(levelname)s:%(name)s:%(message)s")
 
-    if not Gtk.init_check():
-        sys.stderr.write("Gtk couldn't be initialized. Ensure your display server is running and accessible.\n")
+    if Gdk.Display.get_default() is None:
+        sys.stderr.write("Cannot connect to display. Ensure your display server is running and accessible.\n")
         sys.exit(1)
 
     app = AkamaiApp(application_id="com.github.mclellac.AkamaiStaging")
