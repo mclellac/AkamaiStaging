@@ -42,7 +42,7 @@ def main():
     print("Attempting to instantiate AkamaiStagingWindow...")
     try:
         # The AkamaiStagingWindow constructor calls _verify_ui_elements internally.
-        window = AkamaiStagingWindow(application=app)
+        _window = AkamaiStagingWindow(application=app)
         print("AkamaiStagingWindow instantiated successfully.")
         print("Startup error checks (Gtk-CRITICAL, Assertions in _verify_ui_elements) passed.")
     except Exception as e:

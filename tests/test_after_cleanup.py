@@ -52,7 +52,7 @@ def main():
 
     print("main(): Attempting to instantiate AkamaiStagingWindow...")
     try:
-        window = AkamaiStagingWindow(application=app)
+        _window = AkamaiStagingWindow(application=app)
         print("main(): AkamaiStagingWindow instantiated successfully.")
         print("Test PASSED (Window Instantiated after comment cleanup and minor functional tweaks).")
     except Exception as e:

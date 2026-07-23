@@ -9,7 +9,7 @@ sys.path.insert(0, module_base_dir)
 
 
 # Configure basic logging for the test script
-logging.basicConfig(level=logging.INFO) 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("AkamaiStagingTest")
 
 # --- BEGIN Imports from AkamaiStaging ---
@@ -40,7 +40,7 @@ except GLib.Error as e:
     # For `python /app/run_app_tests.py` run from /app, ABS_RESOURCE_PATH should be correct.
     # If it was run from /app/build, then "akstaging/akamaistaging.gresource" would be correct.
     # The current setup assumes CWD=/app for the `run_in_bash_session` execution of the script.
-    sys.exit(1) 
+    sys.exit(1)
 except Exception as e_generic:
     logger.error(f"Test Script: Generic exception loading Gio resource: {e_generic}", exc_info=True)
     sys.exit(1)
@@ -87,12 +87,12 @@ def clear_hosts_file_for_test():
 
 def run_all_tests(app_instance):
     logger.info("Starting AkamaiStaging UI tests (simulated).")
-    
+
     window = AkamaiStagingWindow(application=app_instance)
 
     logger.info("--- Test Case 1: Initial State ---")
     clear_hosts_file_for_test()
-    window.populate_store(window.store) 
+    window.populate_store(window.store)
     initial_hosts_content = read_hosts_file_content()
     logger.info(f"Initial hosts content:\n{initial_hosts_content}")
     assert "example-staging.com" not in initial_hosts_content, "Initial state FAILED: example-staging.com found in hosts file."
@@ -101,12 +101,12 @@ def run_all_tests(app_instance):
     logger.info("--- Test Case 2: Add New Host (example-staging.com) ---")
     window.entry_domain.set_text("example-staging.com")
     window.on_get_ip_button_clicked(window.button_add_ip, window.entry_domain, window.textview_status)
-    
+
     status_messages_tc2 = get_textview_status_content(window)
     hosts_content_tc2 = read_hosts_file_content()
     logger.info(f"TC2 Status Messages:\n{status_messages_tc2}")
     logger.info(f"TC2 Hosts Content:\n{hosts_content_tc2}")
-    
+
     expected_msgs_tc2 = [
         "Found staging IP 1.2.3.4 for example-staging.com.",
         "Attempting to add to hosts file...",
@@ -123,11 +123,11 @@ def run_all_tests(app_instance):
     logger.info("--- Test Case 3: Add Existing Host (No Change) ---")
     window.entry_domain.set_text("example-staging.com")
     window.on_get_ip_button_clicked(window.button_add_ip, window.entry_domain, window.textview_status)
-    
+
     status_messages_tc3 = get_textview_status_content(window)
     hosts_content_tc3 = read_hosts_file_content()
     logger.info(f"TC3 Status Messages:\n{status_messages_tc3}")
-    
+
     expected_msgs_tc3 = [
         "Found staging IP 1.2.3.4 for example-staging.com.",
         "Attempting to add to hosts file...",
@@ -145,7 +145,7 @@ def run_all_tests(app_instance):
     with open(HostsFileEdit.HOSTS_FILE, "w", encoding="utf-8") as f:
         f.write("127.0.0.1 localhost\n::1 localhost\n0.0.0.0 example-staging.com # Old entry\n")
     logger.info(f"TC4 Hosts file before update:\n{read_hosts_file_content()}")
-    
+
     window.entry_domain.set_text("example-staging.com")
     window.on_get_ip_button_clicked(window.button_add_ip, window.entry_domain, window.textview_status)
 
@@ -169,11 +169,11 @@ def run_all_tests(app_instance):
     logger.info("Test Case 4 PASSED.")
 
     logger.info("--- Test Case 5: Delete Host (example-staging.com) ---")
-    clear_hosts_file_for_test() 
+    clear_hosts_file_for_test()
     with open(HostsFileEdit.HOSTS_FILE, "a", encoding="utf-8") as f:
         f.write("1.2.3.4 example-staging.com\n")
-    window.populate_store(window.store) 
-    
+    window.populate_store(window.store)
+
     selected_idx = -1
     for i in range(window.store.get_n_items()):
         item = window.store.get_item(i)
@@ -183,7 +183,7 @@ def run_all_tests(app_instance):
             break
     assert selected_idx != -1, "TC5 Setup FAILED: Could not find '1.2.3.4 example-staging.com' in store to select."
     window.selection_model.select_item(selected_idx, True)
-    
+
     window._item_to_delete = window.selection_model.get_selected_item()
     window._on_delete_confirmation_response(dialog=None, response_id="delete")
 
@@ -191,7 +191,7 @@ def run_all_tests(app_instance):
     hosts_content_tc5 = read_hosts_file_content()
     logger.info(f"TC5 Status Messages:\n{status_messages_tc5}")
     logger.info(f"TC5 Hosts Content:\n{hosts_content_tc5}")
-    
+
     expected_msg_tc5 = f"Successfully removed entries matching '1.2.3.4 example-staging.com' from {HostsFileEdit.HOSTS_FILE}."
     assert expected_msg_tc5 in status_messages_tc5, f"TC5 FAILED: Expected message '{expected_msg_tc5}' not found. Full log:\n{status_messages_tc5}"
     assert "1.2.3.4 example-staging.com" not in hosts_content_tc5, "TC5 FAILED: Host entry '1.2.3.4 example-staging.com' still present."
@@ -199,7 +199,7 @@ def run_all_tests(app_instance):
 
     logger.info("--- Test Case 6: Delete Non-Existent Host (example-staging.com) ---")
     assert "example-staging.com" not in read_hosts_file_content(), "TC6 Setup FAILED: example-staging.com found in hosts."
-    
+
     # _item_to_delete should still hold the DataObject from the last successful deletion.
     # This simulates trying to delete the same logical entry again.
     if window._item_to_delete and window._item_to_delete.ip == "1.2.3.4" and window._item_to_delete.hostname.split("#")[0].strip() == "example-staging.com":
@@ -218,7 +218,7 @@ def run_all_tests(app_instance):
     status_messages_tc6 = get_textview_status_content(window)
     hosts_content_tc6 = read_hosts_file_content()
     logger.info(f"TC6 Status Messages:\n{status_messages_tc6}")
-    
+
     expected_msg_tc6 = f"Entry '1.2.3.4 example-staging.com' not found in {HostsFileEdit.HOSTS_FILE}. No changes made."
     assert expected_msg_tc6 in status_messages_tc6, f"TC6 FAILED: Expected message '{expected_msg_tc6}' not found. Full log:\n{status_messages_tc6}"
     assert hosts_content_tc6 == hosts_content_tc5, f"TC6 FAILED: Hosts file changed.\nExpected:\n{hosts_content_tc5}\nGot:\n{hosts_content_tc6}"
@@ -229,12 +229,12 @@ def run_all_tests(app_instance):
 
 if __name__ == "__main__":
     logger.info("Test script __main__ started.")
-    
+
     app = Adw.Application(application_id="com.github.mclellac.akamai.staging.testrunner.main")
     app.connect("activate", run_all_tests) # Pass the app instance to run_all_tests
-    
+
     exit_status = app.run(sys.argv)
-    
+
     if exit_status == 0:
         logger.info("Test script finished successfully (exit code 0).")
         print("TEST_SCRIPT_SUCCESS")

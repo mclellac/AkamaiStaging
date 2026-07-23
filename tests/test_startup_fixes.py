@@ -4,8 +4,8 @@ print(f"Test script sys.path: {sys.path}")
 
 print("Attempting to import core AkamaiStagingWindow module (syntax/import check)...")
 try:
-    # This import chain will exercise i18n.py -> defs.py imports
-    from akstaging.window import AkamaiStagingWindow
+    import importlib
+    importlib.import_module("akstaging.window")
     print("Successfully imported AkamaiStagingWindow class (syntax and non-Gtk import checks passed).")
 except ImportError as e_import:
     if "_gi" in str(e_import): # Expected if Gtk components are hit

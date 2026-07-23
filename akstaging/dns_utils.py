@@ -52,7 +52,7 @@ class DNSUtils:
                     if cname_target.endswith(akamai_domain):
                         is_akamai_cname = True
                         break
-                
+
                 if not is_akamai_cname:
                     logger.warning(
                         "Domain %s CNAME %s does not appear to be a recognized Akamai managed domain.",
@@ -61,7 +61,7 @@ class DNSUtils:
                     raise dns.exception.DNSException(
                         f"CNAME {cname_target} for domain {domain} is not a recognized Akamai domain."
                     )
-                
+
                 logger.info("Found Akamai CNAME for %s: %s", domain, cname_target)
                 return cname_target
             return None  # Should ideally not be reached if answers exist but are empty; NoAnswer would be raised.
@@ -84,7 +84,7 @@ class DNSUtils:
             logger.error("DNS lookup for %s failed with error: %s", domain, e)
             raise
 
-    def get_akamai_staging_ip(self, domain: str) -> str | None:
+    def get_akamai_staging_ip(self, domain: str) -> tuple[str | None, str | None]:
         """
         Gets the Akamai staging IP address for a given domain.
         It first resolves the CNAME and then resolves the 'A' record of the CNAME.
@@ -116,6 +116,7 @@ class DNSUtils:
         else:
             logger.info("Using system DNS servers.")
 
+        staging_cname_to_resolve: str | None = None
         try:
             base_cname = self.get_akamai_cname(domain, resolver_instance)
             if not base_cname:
@@ -162,7 +163,7 @@ class DNSUtils:
                 return None, base_cname # Or None, None if base_cname is not useful here
 
             logger.info("Constructed staging CNAME for %s: %s", domain, staging_cname_to_resolve)
-            
+
             answers = resolver_instance.resolve(staging_cname_to_resolve, "A")
             if answers:
                 staging_ip = answers[0].address
@@ -171,7 +172,7 @@ class DNSUtils:
                     domain, staging_cname_to_resolve, staging_ip
                 )
                 return staging_ip, staging_cname_to_resolve
-            
+
             logger.warning("No A records found for staging CNAME %s (derived from %s).", staging_cname_to_resolve, domain)
             return None, staging_cname_to_resolve
         except NXDOMAIN as e: # Keep staging_cname_to_resolve context if available

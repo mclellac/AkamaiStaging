@@ -64,7 +64,7 @@ def main():
         # Instantiation will trigger _initialize_helpers (incl. hfe()),
         # then _initialize_store(), then populate_store(), which calls
         # self.hosts_editor.read_hosts_file_content_privileged()
-        window = AkamaiStagingWindow(application=app)
+        _window = AkamaiStagingWindow(application=app)
         print("main(): AkamaiStagingWindow instantiated successfully.")
         print("main(): Startup error checks (Gtk-CRITICAL, Assertions in _verify_ui_elements) passed.")
         print("main(): The call to read_hosts_file_content_privileged within populate_store also completed without crashing.")

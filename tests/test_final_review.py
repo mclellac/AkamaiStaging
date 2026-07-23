@@ -15,7 +15,8 @@ print(f"Test script sys.path: {sys.path}")
 # This part will just try to import a core module to catch syntax errors.
 print("Attempting to import core AkamaiStagingWindow module...")
 try:
-    from akstaging.window import AkamaiStagingWindow
+    import importlib
+    importlib.import_module("akstaging.window")
     print("Successfully imported AkamaiStagingWindow class (syntax check).")
     # Further instantiation will likely fail due to _gi error.
 except ImportError as e_import:

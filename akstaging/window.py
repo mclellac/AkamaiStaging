@@ -380,16 +380,22 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     def _get_toast_message_for_add_status(self, status: Status, domain: str) -> str:
         """Generates a toast message for an add operation."""
         match status:
-            case Status.SUCCESS: return _("Host '{domain}' added.").format(domain=domain)
-            case Status.ALREADY_EXISTS: return _("Host '{domain}' already configured.").format(domain=domain)
-            case _: return _("Failed to add host '{domain}'.").format(domain=domain)
+            case Status.SUCCESS:
+                return _("Host '{domain}' added.").format(domain=domain)
+            case Status.ALREADY_EXISTS:
+                return _("Host '{domain}' already configured.").format(domain=domain)
+            case _:
+                return _("Failed to add host '{domain}'.").format(domain=domain)
 
     def _get_toast_message_for_delete_status(self, status: Status, entry: str) -> str:
         """Generates a toast message for a delete operation."""
         match status:
-            case Status.SUCCESS: return _("Host '{entry}' removed.").format(entry=entry)
-            case Status.ERROR_NOT_FOUND: return _("Host '{entry}' not found.").format(entry=entry)
-            case _: return _("Failed to remove '{entry}'.").format(entry=entry)
+            case Status.SUCCESS:
+                return _("Host '{entry}' removed.").format(entry=entry)
+            case Status.ERROR_NOT_FOUND:
+                return _("Host '{entry}' not found.").format(entry=entry)
+            case _:
+                return _("Failed to remove '{entry}'.").format(entry=entry)
 
     def _get_toast_message_for_edit_remove_status(self, status: Status, entry: str) -> str:
         """Generates a toast message for the removal part of an edit operation."""
@@ -399,8 +405,10 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Generates a toast message for the addition part of an edit operation."""
         entry = f"{new_ip} {new_hostname}"
         match status:
-            case Status.SUCCESS: return _("Host entry updated to '{entry}'.").format(entry=entry)
-            case _: return _("Failed to save changes for '{entry}'.").format(entry=entry)
+            case Status.SUCCESS:
+                return _("Host entry updated to '{entry}'.").format(entry=entry)
+            case _:
+                return _("Failed to save changes for '{entry}'.").format(entry=entry)
 
     def show_toast(self, message: str, timeout: int = 3):
         """Displays a toast notification."""

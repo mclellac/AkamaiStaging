@@ -54,7 +54,8 @@ def adjust_python_path(logger_func):
                 logger_func("adjust_python_path: Site-packages path already in sys.path.")
 
             try:
-                import akstaging
+                import importlib
+                importlib.import_module("akstaging")
                 logger_func("adjust_python_path: Test import of 'akstaging' successful after path adjustment.")
             except ModuleNotFoundError:
                 logger_func("adjust_python_path: FAILED to import 'akstaging' even after adding site-packages path.")
@@ -109,10 +110,10 @@ def _print_status_and_exit(status_code: Status, message: any):
         if not (status_code == Status.ERROR_INTERNAL and "Invalid status type" not in final_message_str):
             final_message_str = "Internal helper error: Invalid status type processed."
         status_code = Status.ERROR_INTERNAL
-    
+
     status_name_to_log = status_code.name if isinstance(status_code, Status) else "UNKNOWN_STATUS_TYPE"
-    write_log(f"To stdout: {status_name_to_log}:{final_message_str}") 
-    
+    write_log(f"To stdout: {status_name_to_log}:{final_message_str}")
+
     print(f"{status_code.name}:{final_message_str}")
     sys.exit(0)
 

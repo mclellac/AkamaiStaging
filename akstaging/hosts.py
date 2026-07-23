@@ -1177,7 +1177,7 @@ class HostsFileEdit:
         except FileNotFoundError:
             error_message_str = (
                 f"Failed to perform '{operation_type}': pkexec or "
-                f"helper script ({helper_path}) not found."
+                f"helper script ({HELPER_EXECUTABLE_PATH}) not found."
             )
             self._log_debug(f"Returning ERROR_NOT_FOUND, message: '{error_message_str}'")
             return Status.ERROR_NOT_FOUND, error_message_str

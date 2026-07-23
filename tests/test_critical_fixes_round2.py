@@ -7,16 +7,17 @@ try:
     # This import chain will exercise i18n.py -> defs.py imports,
     # and will make dns_utils.py and hosts.py available for basic syntax checks.
     # It does not execute their main logic paths extensively without Gtk.
+    import importlib
     print("Importing akstaging.dns_utils...")
-    import akstaging.dns_utils
+    importlib.import_module("akstaging.dns_utils")
     print("Successfully imported akstaging.dns_utils.")
 
     print("Importing akstaging.hosts...")
-    import akstaging.hosts # This might fail if akstaging.config is not found
+    importlib.import_module("akstaging.hosts")
     print("Successfully imported akstaging.hosts.")
 
     print("Importing akstaging.window (will likely fail at Gtk/Adw imports)...")
-    from akstaging.window import AkamaiStagingWindow
+    importlib.import_module("akstaging.window")
     print("Successfully imported AkamaiStagingWindow class (syntax and non-Gtk import checks passed).")
 
 except ModuleNotFoundError as mnfe:

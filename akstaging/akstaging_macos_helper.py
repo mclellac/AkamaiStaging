@@ -41,7 +41,8 @@ def adjust_python_path(logger_func):
 
             # Test import
             try:
-                import akstaging.hosts # Try importing a specific submodule
+                import importlib
+                importlib.import_module("akstaging.hosts")
                 logger_func("adjust_python_path: Test import of 'akstaging.hosts' successful.")
             except ModuleNotFoundError:
                 logger_func("adjust_python_path: FAILED to import 'akstaging.hosts' after path adjustment.")

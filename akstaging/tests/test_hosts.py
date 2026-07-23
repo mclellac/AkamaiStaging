@@ -48,7 +48,7 @@ class TestHostsFileEdit(unittest.TestCase):
         mock_file.return_value.read.return_value = self.initial_hosts_content
         mock_file.return_value.__enter__.return_value.readlines.return_value = self.initial_hosts_content.splitlines(True)
         mock_file.return_value.__iter__.return_value = self.initial_hosts_content.splitlines(True)
-        
+
         ip = self.hfe.get_existing_ip_for_domain("nonexistent.com")
         self.assertIsNone(ip)
         mock_file.assert_called_once_with(self.mock_hosts_file_path, "r", encoding="utf-8")
@@ -182,22 +182,20 @@ class TestHostsFileEdit(unittest.TestCase):
                 return True
             return False
         mock_isfile.side_effect = isfile_side_effect
-        
+
         # Expected order: newest to oldest
         expected_backups = [
             "hosts_backup_20230101_120000.txt",
             "hosts_backup_20230101_100000.txt",
             "hosts_backup_20221231_230000.txt",
         ]
-        
+
         # Patch datetime.strptime to handle the valid ones, and raise ValueError for the invalid one
-        original_strptime = datetime.strptime
         def strptime_side_effect(date_string, format_string):
             if date_string == "invalid_format":
                 raise ValueError("Invalid date format for test")
-            return original_strptime(date_string, format_string)
-
-        with patch('akstaging.hosts.datetime.strptime', side_effect=strptime_side_effect) as mock_strptime:
+            return datetime.strptime(date_string, format_string)
+        with patch('akstaging.hosts.datetime.strptime', side_effect=strptime_side_effect):
             backups = self.hfe.list_backups()
 
         self.assertEqual(backups, expected_backups)
@@ -319,19 +317,19 @@ class TestHostsFileEdit(unittest.TestCase):
         initial_content = "1.1.1.1 example.com\n2.2.2.2 another.com\n"
         # Configure the mock_open to handle read and write
         mock_file.return_value.__enter__.return_value.readlines.return_value = initial_content.splitlines(True)
-        
+
         entry_to_remove = "1.1.1.1 example.com"
         expected_message = f"Removed /etc/hosts entry: {entry_to_remove}"
-        
+
         message = self.hfe.remove_hosts_entry(entry_to_remove)
-        
+
         self.assertEqual(message, expected_message)
         mock_hfe_create_backup.assert_called_once() # Backup should be called
-        
+
         # Check that open was called for reading then for writing
         mock_file.assert_any_call(self.mock_hosts_file_path, "r", encoding="utf-8")
         mock_file.assert_any_call(self.mock_hosts_file_path, "w", encoding="utf-8")
-        
+
         # Verify the content written to the file
         # The handle for the write call is the second one in mock_file.mock_calls
         # (index 2 because 0 is read, 1 is __enter__ for read, 2 could be write or readlines, need to be careful)
@@ -346,12 +344,12 @@ class TestHostsFileEdit(unittest.TestCase):
     def test_remove_hosts_entry_non_existing(self, mock_hfe_create_backup, mock_file):
         initial_content = "1.1.1.1 example.com\n"
         mock_file.return_value.__enter__.return_value.readlines.return_value = initial_content.splitlines(True)
-        
+
         entry_to_remove = "3.3.3.3 nonexistent.com"
         expected_message = f"Entry '{entry_to_remove}' not found in {self.mock_hosts_file_path}. No changes made."
-        
+
         message = self.hfe.remove_hosts_entry(entry_to_remove)
-        
+
         self.assertEqual(message, expected_message)
         mock_hfe_create_backup.assert_not_called() # Backup should NOT be called
         mock_file.assert_called_once_with(self.mock_hosts_file_path, "r", encoding="utf-8")
@@ -383,7 +381,7 @@ class TestHostsFileEdit(unittest.TestCase):
             mock_open(read_data=initial_content).return_value, # For the read
             PermissionError("Permission denied writing") # For the write
         ]
-        
+
         entry_to_remove = "1.1.1.1 example.com"
         # We need to mock create_backup here as well, otherwise it might fail first if not mocked.
         with patch.object(HostsFileEdit, 'create_backup') as mock_hfe_create_backup:
@@ -413,14 +411,14 @@ class TestHostsFileEdit(unittest.TestCase):
         hfe_instance = HostsFileEdit(logger_func=None)
         initial_content = ["1.1.1.1 WWW.EXAMPLE.COM\n"]
         mock_open_file.return_value.__enter__.return_value.readlines.return_value = initial_content
-        
+
         status, _ = hfe_instance._update_hosts_file_content_direct(
             staging_ip="1.1.1.1", sanitized_domain="www.example.com", delete=False
         )
         # If the only difference is case, and the file has "WWW.EXAMPLE.COM"
         # the current logic will normalize the case, resulting in a write and SUCCESS.
         self.assertEqual(status, Status.SUCCESS)
-        
+
         handle = mock_open_file()
         written_content_lines = handle.writelines.call_args[0][0]
         self.assertEqual(written_content_lines, ["1.1.1.1 www.example.com\n"])
@@ -431,12 +429,12 @@ class TestHostsFileEdit(unittest.TestCase):
         hfe_instance = HostsFileEdit(logger_func=None)
         initial_content = ["1.1.1.1 www.example.com\n"] # Already lowercase, no comment
         mock_open_file.return_value.__enter__.return_value.readlines.return_value = initial_content
-        
+
         status, _ = hfe_instance._update_hosts_file_content_direct(
             staging_ip="1.1.1.1", sanitized_domain="www.example.com", delete=False
         )
         # Entry is exactly as it should be (lowercase, no comment), so ALREADY_EXISTS
-        self.assertEqual(status, Status.ALREADY_EXISTS) 
+        self.assertEqual(status, Status.ALREADY_EXISTS)
         mock_open_file.return_value.__enter__.return_value.writelines.assert_not_called()
 
 
@@ -446,17 +444,17 @@ class TestHostsFileEdit(unittest.TestCase):
         hfe_instance = HostsFileEdit(logger_func=None)
         initial_content = ["2.2.2.2 WWW.EXAMPLE.COM\n"]
         mock_open_file.return_value.__enter__.return_value.readlines.return_value = initial_content
-        
+
         status, _ = hfe_instance._update_hosts_file_content_direct(
             staging_ip="1.1.1.1", sanitized_domain="www.example.com", delete=False
         )
         self.assertEqual(status, Status.SUCCESS)
-        
+
         handle = mock_open_file()
         written_content_lines = handle.writelines.call_args[0][0]
         # Ensure the new entry is present and the old one is gone
         self.assertIn("1.1.1.1 www.example.com\n", written_content_lines)
-        self.assertNotIn("2.2.2.2 WWW.EXAMPLE.COM\n", written_content_lines) 
+        self.assertNotIn("2.2.2.2 WWW.EXAMPLE.COM\n", written_content_lines)
         self.assertEqual(len(written_content_lines), 1)
 
 
@@ -466,12 +464,12 @@ class TestHostsFileEdit(unittest.TestCase):
         hfe_instance = HostsFileEdit(logger_func=None)
         initial_content = ["1.2.3.4 other.com\n"]
         mock_open_file.return_value.__enter__.return_value.readlines.return_value = initial_content
-        
+
         status, _ = hfe_instance._update_hosts_file_content_direct(
             staging_ip="1.1.1.1", sanitized_domain="Mixed.Case.Com", delete=False
         )
         self.assertEqual(status, Status.SUCCESS)
-        
+
         handle = mock_open_file()
         written_content_lines = handle.writelines.call_args[0][0]
         # Check that both original and new (lowercased) entries are present
@@ -485,15 +483,15 @@ class TestHostsFileEdit(unittest.TestCase):
         hfe_instance = HostsFileEdit(logger_func=None)
         initial_content = ["1.1.1.1 WWW.EXAMPLE.COM OtherHost.com SOMEHOST.COM\n"]
         mock_open_file.return_value.__enter__.return_value.readlines.return_value = initial_content
-        
+
         status, _ = hfe_instance._update_hosts_file_content_direct(
             staging_ip="2.2.2.2", sanitized_domain="www.example.com", delete=False
         )
         self.assertEqual(status, Status.SUCCESS)
-        
+
         handle = mock_open_file()
         written_content_lines = handle.writelines.call_args[0][0]
-        
+
         # Check that other domains' casing is preserved and new entry is added
         self.assertIn("1.1.1.1 OtherHost.com SOMEHOST.COM\n", written_content_lines)
         self.assertIn("2.2.2.2 www.example.com\n", written_content_lines)
@@ -504,23 +502,23 @@ class TestHostsFileEdit(unittest.TestCase):
     @patch.object(HostsFileEdit, 'HOSTS_FILE', '/mocked_hosts_file_for_test')
     def test_add_same_domain_and_ip_twice_no_duplicates(self, mock_open_file):
         hfe_instance = HostsFileEdit(logger_func=None)
-        
+
         # Call 1: Add for the first time
         initial_content1 = ["1.1.1.1 existing.com\n"]
         mock_open_file.return_value.__enter__.return_value.readlines.return_value = initial_content1
-        
+
         status1, _ = hfe_instance._update_hosts_file_content_direct(
             staging_ip="2.2.2.2", sanitized_domain="test.com", delete=False
         )
         self.assertEqual(status1, Status.SUCCESS)
-        
+
         handle1 = mock_open_file()
         written_content_lines1 = handle1.writelines.call_args[0][0]
-        
+
         # Call 2: Attempt to add the same entry again
         mock_open_file.return_value.__enter__.return_value.readlines.return_value = written_content_lines1
-        handle1.writelines.reset_mock() 
-        
+        handle1.writelines.reset_mock()
+
         status2, _ = hfe_instance._update_hosts_file_content_direct(
             staging_ip="2.2.2.2", sanitized_domain="test.com", delete=False
         )

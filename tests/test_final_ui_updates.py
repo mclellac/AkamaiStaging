@@ -52,7 +52,7 @@ def main():
 
     print("main(): Attempting to instantiate AkamaiStagingWindow...")
     try:
-        window = AkamaiStagingWindow(application=app)
+        _window = AkamaiStagingWindow(application=app)
         print("main(): AkamaiStagingWindow instantiated successfully.")
         # Verify the 'Add' button (button_add_ip) label if possible (requires widget access)
         # For now, successful instantiation is the main test given environment.

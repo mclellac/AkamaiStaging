@@ -198,14 +198,14 @@ class Preferences(Adw.PreferencesWindow):
         """
         if hasattr(self, 'theme_combo_row') and self.theme_combo_row:
             self.theme_combo_row.disconnect_by_func(self._on_theme_preference_changed)
-        
+
         if hasattr(self, 'font_scale_combo_row') and self.font_scale_combo_row:
             self.font_scale_combo_row.disconnect_by_func(self._on_font_scale_changed)
-        
+
         if hasattr(self, 'custom_dns_switch') and self.custom_dns_switch:
             self.custom_dns_switch.disconnect_by_func(self._on_custom_dns_enabled_changed)
 
         if hasattr(self, 'custom_dns_servers_entry') and self.custom_dns_servers_entry:
             self.custom_dns_servers_entry.disconnect_by_func(self._on_custom_dns_servers_changed)
-            
+
         super().do_destroy()
