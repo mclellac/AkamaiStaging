@@ -1,5 +1,6 @@
 # akstaging/aklib.py
 import gi
+
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk
@@ -15,9 +16,7 @@ def sanitize_domain(domain: str) -> str:
     Returns:
         str: The sanitized domain.
     """
-    sanitized_domain = (
-        domain.replace("http://", "").replace("https://", "").split("/")[0]
-    )
+    sanitized_domain = domain.replace("http://", "").replace("https://", "").split("/")[0]
     return sanitized_domain
 
 

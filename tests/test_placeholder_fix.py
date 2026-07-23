@@ -1,14 +1,16 @@
 import gi
+
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib
-import sys
-import os
 import logging
+import os
+import sys
+
+from gi.repository import Adw, Gio, GLib
 
 logging.basicConfig(level=logging.DEBUG)
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 print(f"Python sys.path: {sys.path}")
 
 gresource_file = "akstaging/akamaistaging.gresource"
@@ -32,6 +34,7 @@ except Exception as e_res:
 print("Attempting to import AkamaiStagingWindow...")
 try:
     from akstaging.window import AkamaiStagingWindow
+
     print("Successfully imported AkamaiStagingWindow.")
 except ImportError as e_import:
     print(f"Failed to import AkamaiStagingWindow: {e_import}")
@@ -41,10 +44,12 @@ except Exception as e_gen_import:
     print(f"Unexpected error during import of AkamaiStagingWindow: {e_gen_import}")
     sys.exit(1)
 
+
 class DummyApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         print("DummyApp initialized.")
+
 
 def main():
     print("main(): Creating DummyApp...")
@@ -58,9 +63,11 @@ def main():
     except Exception as e:
         print(f"main(): Error during AkamaiStagingWindow instantiation: {e}")
         import traceback
+
         traceback.print_exc()
         print("Test FAILED.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

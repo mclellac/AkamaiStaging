@@ -1,6 +1,7 @@
 import sys
+
 # Ensure current dir is in path for local module resolution if script is in root
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 print(f"Test script sys.path: {sys.path}")
 
 # Attempt to import and run the main function of akamaistaging.in
@@ -16,6 +17,7 @@ print(f"Test script sys.path: {sys.path}")
 print("Attempting to import core AkamaiStagingWindow module...")
 try:
     import importlib
+
     importlib.import_module("akstaging.window")
     print("Successfully imported AkamaiStagingWindow class (syntax check).")
     # Further instantiation will likely fail due to _gi error.
@@ -25,11 +27,12 @@ except ImportError as e_import:
         print("This part of test considered 'conditionally passed' as no new pre-gi-import errors were found.")
     else:
         print(f"Unexpected ImportError: {e_import}")
-        sys.exit(1) # Unexpected import error
+        sys.exit(1)  # Unexpected import error
 except Exception as e:
     print(f"A non-ImportError exception occurred during import attempt: {e}")
     import traceback
+
     traceback.print_exc()
-    sys.exit(1) # Other critical error
+    sys.exit(1)  # Other critical error
 
 print("Basic syntax and import checks passed for core modules.")

@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-import sys
-import os
 import datetime
+import os
+import sys
 import traceback
-
 
 LOG_FILE_PATH = "/tmp/akstaging_helper_debug.log"
 
@@ -25,6 +24,7 @@ write_log(f"CWD: {os.getcwd()}")
 write_log(f"sys.executable: {sys.executable}")
 write_log(f"sys.version: {sys.version.replace(chr(10), ' ')}")
 write_log(f"Initial sys.path: {sys.path}")
+
 
 def adjust_python_path(logger_func):
     """
@@ -55,6 +55,7 @@ def adjust_python_path(logger_func):
 
             try:
                 import importlib
+
                 importlib.import_module("akstaging")
                 logger_func("adjust_python_path: Test import of 'akstaging' successful after path adjustment.")
             except ModuleNotFoundError:
@@ -68,12 +69,14 @@ def adjust_python_path(logger_func):
 
     logger_func(f"adjust_python_path: Finished. Final sys.path: {sys.path}")
 
+
 adjust_python_path(write_log)
 
 write_log("Attempting to import akstaging modules...")
 try:
     from akstaging.hosts import HostsFileEdit
     from akstaging.status_codes import Status
+
     write_log("Import of akstaging.hosts.HostsFileEdit and akstaging.status_codes.Status successful.")
 except ModuleNotFoundError as e:
     write_log(f"CRITICAL: Failed to import akstaging modules. Error: {e}")
@@ -94,19 +97,23 @@ except Exception as e_import_generic:
     sys.exit(0)
 
 try:
-    from akstaging.helper_cli import parse_common_arguments, handle_read_command
+    from akstaging.helper_cli import handle_read_command, parse_common_arguments
+
     write_log("Successfully imported shared CLI functions from akstaging.helper_cli.")
 except ImportError as e_cli_import:
     write_log(f"CRITICAL: Failed to import from akstaging.helper_cli: {e_cli_import}")
     print("ERROR_INTERNAL:Failed to import helper_cli. Check logs.")
     sys.exit(0)
 
+
 def _print_status_and_exit(status_code: Status, message: any):
     """Ensures status_code is Status, message is string, then logs, prints, and exits."""
     final_message_str = str(message)
 
     if not isinstance(status_code, Status):
-        write_log(f"CRITICAL: Invalid status_code type ({type(status_code)}) in _print_status_and_exit. Value: {status_code}")
+        write_log(
+            f"CRITICAL: Invalid status_code type ({type(status_code)}) in _print_status_and_exit. Value: {status_code}"
+        )
         if not (status_code == Status.ERROR_INTERNAL and "Invalid status type" not in final_message_str):
             final_message_str = "Internal helper error: Invalid status type processed."
         status_code = Status.ERROR_INTERNAL
@@ -131,14 +138,12 @@ def main():
         editor = HostsFileEdit(logger_func=write_log)
 
         if args.command == "update":
-            delete_bool = args.delete.lower() == 'true'
+            delete_bool = args.delete.lower() == "true"
             write_log(
                 f"main(): Preparing to call editor._update_hosts_file_content_direct with "
                 f"ip='{args.ip}', domain='{args.domain}', delete={delete_bool}"
             )
-            status_code, message = editor._update_hosts_file_content_direct(
-                args.ip, args.domain, delete=delete_bool
-            )
+            status_code, message = editor._update_hosts_file_content_direct(args.ip, args.domain, delete=delete_bool)
             write_log(
                 f"main(): editor._update_hosts_file_content_direct returned: "
                 f"status_code='{status_code.name if hasattr(status_code, 'name') else status_code}', message='{message}'"
@@ -146,9 +151,7 @@ def main():
             _print_status_and_exit(status_code, message)
         elif args.command == "remove":
             entry_to_remove = f"{args.ip} {args.domain}"
-            write_log(
-                f"main(): Preparing to call editor._remove_hosts_entry_direct with entry='{entry_to_remove}'"
-            )
+            write_log(f"main(): Preparing to call editor._remove_hosts_entry_direct with entry='{entry_to_remove}'")
             status_code, message = editor._remove_hosts_entry_direct(entry_to_remove)
             write_log(
                 f"main(): editor._remove_hosts_entry_direct returned: "

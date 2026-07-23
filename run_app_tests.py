@@ -1,10 +1,10 @@
+import logging
 import os
 import sys
-import logging
 
 # Setup PYTHONPATH to find akstaging modules from the build directory
 # This script is in /app
-module_base_dir = os.path.abspath(os.path.dirname(__file__)) # /app
+module_base_dir = os.path.abspath(os.path.dirname(__file__))  # /app
 sys.path.insert(0, module_base_dir)
 build_dir = os.path.join(module_base_dir, "build")
 if os.path.exists(build_dir):
@@ -17,6 +17,7 @@ logger = logging.getLogger("AkamaiStagingTest")
 
 # --- BEGIN Imports from AkamaiStaging ---
 import gi
+
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
@@ -25,6 +26,7 @@ from gi.repository import Adw, Gio
 RESOURCE_PATH_FROM_DEFS = None
 try:
     from akstaging.defs import RESOURCE_PATH as RESOURCE_PATH_FROM_DEFS
+
     logger.info(f"Test Script: Imported RESOURCE_PATH from akstaging.defs: {RESOURCE_PATH_FROM_DEFS}")
 except ImportError:
     logger.warning("Test Script: Could not import RESOURCE_PATH from akstaging.defs.")
@@ -48,17 +50,19 @@ if not resource_loaded:
     sys.exit(1)
 
 
+from akstaging.hosts import HostsFileEdit  # To access HOSTS_FILE path for reading
 from akstaging.window import AkamaiStagingWindow, DataObject
-from akstaging.hosts import HostsFileEdit # To access HOSTS_FILE path for reading
+
 # --- END Imports from AkamaiStaging ---
 
 test_hosts_dir = os.path.join(module_base_dir, "tests", "test_env")
 os.makedirs(test_hosts_dir, exist_ok=True)
 HostsFileEdit.HOSTS_FILE = os.path.join(test_hosts_dir, "hosts")
 
+
 def read_hosts_file_content():
     try:
-        with open(HostsFileEdit.HOSTS_FILE, "r", encoding="utf-8") as f:
+        with open(HostsFileEdit.HOSTS_FILE, encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
         logger.error(f"Hosts file not found at {HostsFileEdit.HOSTS_FILE}")
@@ -67,17 +71,15 @@ def read_hosts_file_content():
         logger.error(f"Error reading hosts file {HostsFileEdit.HOSTS_FILE}: {e}")
         return f"ERROR_READING_HOSTS_FILE: {e}"
 
+
 def get_textview_status_content(window_instance):
     buffer = window_instance.textview_status.get_buffer()
     return buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False).strip()
 
+
 def clear_hosts_file_for_test():
     logger.info(f"Clearing dummy hosts file for test: {HostsFileEdit.HOSTS_FILE}")
-    content = (
-        "127.0.0.1 localhost\n"
-        "::1 localhost\n"
-        "# Test comment\n"
-    )
+    content = "127.0.0.1 localhost\n::1 localhost\n# Test comment\n"
     try:
         with open(HostsFileEdit.HOSTS_FILE, "w", encoding="utf-8") as f:
             f.write(content)
@@ -97,7 +99,9 @@ def run_all_tests(app_instance):
     window.populate_store(window.store)
     initial_hosts_content = read_hosts_file_content()
     logger.info(f"Initial hosts content:\n{initial_hosts_content}")
-    assert "example-staging.com" not in initial_hosts_content, "Initial state FAILED: example-staging.com found in hosts file."
+    assert "example-staging.com" not in initial_hosts_content, (
+        "Initial state FAILED: example-staging.com found in hosts file."
+    )
     logger.info("Test Case 1 PASSED.")
 
     logger.info("--- Test Case 2: Add New Host (example-staging.com) ---")
@@ -112,14 +116,18 @@ def run_all_tests(app_instance):
     expected_msgs_tc2 = [
         "Found staging IP 1.2.3.4 for example-staging.com.",
         "Attempting to add to hosts file...",
-        f"Updated {HostsFileEdit.HOSTS_FILE}: Set example-staging.com to 1.2.3.4."
+        f"Updated {HostsFileEdit.HOSTS_FILE}: Set example-staging.com to 1.2.3.4.",
     ]
     current_pos = 0
     for msg in expected_msgs_tc2:
         found_pos = status_messages_tc2.find(msg, current_pos)
-        assert found_pos != -1, f"TC2 FAILED: Expected message '{msg}' not found in sequence. Full log:\n{status_messages_tc2}"
+        assert found_pos != -1, (
+            f"TC2 FAILED: Expected message '{msg}' not found in sequence. Full log:\n{status_messages_tc2}"
+        )
         current_pos = found_pos + len(msg)
-    assert "1.2.3.4 example-staging.com" in hosts_content_tc2, "TC2 FAILED: Host entry '1.2.3.4 example-staging.com' not found."
+    assert "1.2.3.4 example-staging.com" in hosts_content_tc2, (
+        "TC2 FAILED: Host entry '1.2.3.4 example-staging.com' not found."
+    )
     logger.info("Test Case 2 PASSED.")
 
     logger.info("--- Test Case 3: Add Existing Host (No Change) ---")
@@ -133,14 +141,18 @@ def run_all_tests(app_instance):
     expected_msgs_tc3 = [
         "Found staging IP 1.2.3.4 for example-staging.com.",
         "Attempting to add to hosts file...",
-        f"Entry 1.2.3.4 example-staging.com already correctly configured in {HostsFileEdit.HOSTS_FILE}."
+        f"Entry 1.2.3.4 example-staging.com already correctly configured in {HostsFileEdit.HOSTS_FILE}.",
     ]
     current_pos = 0
     for msg in expected_msgs_tc3:
         found_pos = status_messages_tc3.find(msg, current_pos)
-        assert found_pos != -1, f"TC3 FAILED: Expected message '{msg}' not found in sequence. Full log:\n{status_messages_tc3}"
+        assert found_pos != -1, (
+            f"TC3 FAILED: Expected message '{msg}' not found in sequence. Full log:\n{status_messages_tc3}"
+        )
         current_pos = found_pos + len(msg)
-    assert hosts_content_tc3 == hosts_content_tc2, f"TC3 FAILED: Hosts file changed.\nExpected:\n{hosts_content_tc2}\nGot:\n{hosts_content_tc3}"
+    assert hosts_content_tc3 == hosts_content_tc2, (
+        f"TC3 FAILED: Hosts file changed.\nExpected:\n{hosts_content_tc2}\nGot:\n{hosts_content_tc3}"
+    )
     logger.info("Test Case 3 PASSED.")
 
     logger.info("--- Test Case 4: Update Existing Host (example-staging.com from 0.0.0.0 to 1.2.3.4) ---")
@@ -159,12 +171,14 @@ def run_all_tests(app_instance):
     expected_msgs_tc4 = [
         "Found staging IP 1.2.3.4 for example-staging.com.",
         "Attempting to add to hosts file...",
-        f"Updated {HostsFileEdit.HOSTS_FILE}: Set example-staging.com to 1.2.3.4."
+        f"Updated {HostsFileEdit.HOSTS_FILE}: Set example-staging.com to 1.2.3.4.",
     ]
     current_pos = 0
     for msg in expected_msgs_tc4:
         found_pos = status_messages_tc4.find(msg, current_pos)
-        assert found_pos != -1, f"TC4 FAILED: Expected message '{msg}' not found in sequence. Full log:\n{status_messages_tc4}"
+        assert found_pos != -1, (
+            f"TC4 FAILED: Expected message '{msg}' not found in sequence. Full log:\n{status_messages_tc4}"
+        )
         current_pos = found_pos + len(msg)
     assert "1.2.3.4 example-staging.com" in hosts_content_tc4, "TC4 FAILED: Host entry not updated to 1.2.3.4."
     assert "0.0.0.0 example-staging.com" not in hosts_content_tc4, "TC4 FAILED: Old host entry 0.0.0.0 still present."
@@ -194,46 +208,64 @@ def run_all_tests(app_instance):
     logger.info(f"TC5 Status Messages:\n{status_messages_tc5}")
     logger.info(f"TC5 Hosts Content:\n{hosts_content_tc5}")
 
-    expected_msg_tc5 = f"Successfully removed entries matching '1.2.3.4 example-staging.com' from {HostsFileEdit.HOSTS_FILE}."
-    assert expected_msg_tc5 in status_messages_tc5, f"TC5 FAILED: Expected message '{expected_msg_tc5}' not found. Full log:\n{status_messages_tc5}"
-    assert "1.2.3.4 example-staging.com" not in hosts_content_tc5, "TC5 FAILED: Host entry '1.2.3.4 example-staging.com' still present."
+    expected_msg_tc5 = (
+        f"Successfully removed entries matching '1.2.3.4 example-staging.com' from {HostsFileEdit.HOSTS_FILE}."
+    )
+    assert expected_msg_tc5 in status_messages_tc5, (
+        f"TC5 FAILED: Expected message '{expected_msg_tc5}' not found. Full log:\n{status_messages_tc5}"
+    )
+    assert "1.2.3.4 example-staging.com" not in hosts_content_tc5, (
+        "TC5 FAILED: Host entry '1.2.3.4 example-staging.com' still present."
+    )
     logger.info("Test Case 5 PASSED.")
 
     logger.info("--- Test Case 6: Delete Non-Existent Host (example-staging.com) ---")
-    assert "example-staging.com" not in read_hosts_file_content(), "TC6 Setup FAILED: example-staging.com found in hosts."
+    assert "example-staging.com" not in read_hosts_file_content(), (
+        "TC6 Setup FAILED: example-staging.com found in hosts."
+    )
 
     # _item_to_delete should still hold the DataObject from the last successful deletion.
     # This simulates trying to delete the same logical entry again.
-    if window._item_to_delete and window._item_to_delete.ip == "1.2.3.4" and window._item_to_delete.hostname.split("#")[0].strip() == "example-staging.com":
-         logger.info(f"TC6: Simulating delete for already deleted item: {window._item_to_delete.ip} {window._item_to_delete.hostname.split('#')[0].strip()}")
-         window._on_delete_confirmation_response(dialog=None, response_id="delete")
+    if (
+        window._item_to_delete
+        and window._item_to_delete.ip == "1.2.3.4"
+        and window._item_to_delete.hostname.split("#")[0].strip() == "example-staging.com"
+    ):
+        logger.info(
+            f"TC6: Simulating delete for already deleted item: {window._item_to_delete.ip} {window._item_to_delete.hostname.split('#')[0].strip()}"
+        )
+        window._on_delete_confirmation_response(dialog=None, response_id="delete")
     else:
-         # If _item_to_delete is not what we expect, this path of the test is flawed.
-         # For this test, we want to ensure that calling delete on an entry that's
-         # not in the hosts file (but might have been represented by a DataObject)
-         # results in the correct "not found" message.
-         logger.warning("TC6: _item_to_delete not as expected. Manually creating DataObject for test.")
-         window._item_to_delete = DataObject("1.2.3.4", "example-staging.com") # Simulate it was selected
-         window._on_delete_confirmation_response(dialog=None, response_id="delete")
-
+        # If _item_to_delete is not what we expect, this path of the test is flawed.
+        # For this test, we want to ensure that calling delete on an entry that's
+        # not in the hosts file (but might have been represented by a DataObject)
+        # results in the correct "not found" message.
+        logger.warning("TC6: _item_to_delete not as expected. Manually creating DataObject for test.")
+        window._item_to_delete = DataObject("1.2.3.4", "example-staging.com")  # Simulate it was selected
+        window._on_delete_confirmation_response(dialog=None, response_id="delete")
 
     status_messages_tc6 = get_textview_status_content(window)
     hosts_content_tc6 = read_hosts_file_content()
     logger.info(f"TC6 Status Messages:\n{status_messages_tc6}")
 
     expected_msg_tc6 = f"Entry '1.2.3.4 example-staging.com' not found in {HostsFileEdit.HOSTS_FILE}. No changes made."
-    assert expected_msg_tc6 in status_messages_tc6, f"TC6 FAILED: Expected message '{expected_msg_tc6}' not found. Full log:\n{status_messages_tc6}"
-    assert hosts_content_tc6 == hosts_content_tc5, f"TC6 FAILED: Hosts file changed.\nExpected:\n{hosts_content_tc5}\nGot:\n{hosts_content_tc6}"
+    assert expected_msg_tc6 in status_messages_tc6, (
+        f"TC6 FAILED: Expected message '{expected_msg_tc6}' not found. Full log:\n{status_messages_tc6}"
+    )
+    assert hosts_content_tc6 == hosts_content_tc5, (
+        f"TC6 FAILED: Hosts file changed.\nExpected:\n{hosts_content_tc5}\nGot:\n{hosts_content_tc6}"
+    )
     logger.info("Test Case 6 PASSED.")
 
     logger.info("All simulated UI tests completed successfully.")
     app_instance.quit()
 
+
 if __name__ == "__main__":
     logger.info("Test script __main__ started.")
 
     app = Adw.Application(application_id="com.github.mclellac.akamai.staging.testrunner.main")
-    app.connect("activate", run_all_tests) # Pass the app instance to run_all_tests
+    app.connect("activate", run_all_tests)  # Pass the app instance to run_all_tests
 
     exit_status = app.run(sys.argv)
 

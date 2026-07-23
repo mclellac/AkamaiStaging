@@ -1,10 +1,11 @@
 import logging
 import re
-from socket import gaierror
 import sys
+from socket import gaierror
 
-from dns.exception import DNSException, Timeout as DNSTimeout
 import gi
+from dns.exception import DNSException
+from dns.exception import Timeout as DNSTimeout
 
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
@@ -13,13 +14,13 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 Adw.init()
 
-from akstaging.aklib import sanitize_domain, print_to_textview
+from akstaging.aklib import print_to_textview, sanitize_domain
 from akstaging.defs import APP_NAME, COPYRIGHT, RESOURCE_PATH, VERSION
 from akstaging.dns_utils import DNSUtils as ns
 from akstaging.hosts import HostsFileEdit as hfe
+from akstaging.i18n import get_translator
 from akstaging.preferences import Preferences
 from akstaging.status_codes import Status
-from akstaging.i18n import get_translator
 
 _ = get_translator()
 
@@ -34,6 +35,7 @@ except GLib.Error as e:
         Gio.resources_lookup_data("/com/github/mclellac/AkamaiStaging/gtk/window.ui", Gio.ResourceLookupFlags.NONE)
     except GLib.Error:
         import os
+
         _project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         _in_tree_resource = os.path.join(_project_root, "build", "akstaging", "akamaistaging.gresource")
         if os.path.exists(_in_tree_resource):
@@ -50,6 +52,7 @@ except GLib.Error as e:
 
 class DataObject(GObject.Object):
     """A GObject class to represent a host entry."""
+
     ip = GObject.Property(type=str)
     hostname = GObject.Property(type=str)
 
@@ -309,9 +312,12 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Sanitizes and validates a domain name input string."""
         sanitized_domain = sanitize_domain(domain_input)
         if domain_input != sanitized_domain:
-            print_to_textview(self.textview_status, _("Notice: Input '{domain_input}' sanitized to '{sanitized_domain}'.\n").format(
-                domain_input=domain_input, sanitized_domain=sanitized_domain
-            ))
+            print_to_textview(
+                self.textview_status,
+                _("Notice: Input '{domain_input}' sanitized to '{sanitized_domain}'.\n").format(
+                    domain_input=domain_input, sanitized_domain=sanitized_domain
+                ),
+            )
         if not re.match(r"^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", sanitized_domain):
             return False, sanitized_domain, _("Invalid domain format.")
         return True, sanitized_domain, ""
@@ -355,9 +361,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                 self.show_toast(err_msg)
                 return
 
-            status_msg = _("Found IP {ip} for {name}. Adding to hosts file...").format(
-                ip=ip, name=cname or domain
-            )
+            status_msg = _("Found IP {ip} for {name}. Adding to hosts file...").format(ip=ip, name=cname or domain)
             print_to_textview(self.textview_status, status_msg)
             self._update_hosts_and_ui(ip, domain)
         finally:
@@ -373,15 +377,19 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self._item_to_delete = item
         entry_display = f"{item.ip} {item.hostname}"
         if hasattr(Adw, "AlertDialog"):
-            dialog = Adw.AlertDialog.new(_("Remove Host Mapping?"), _("Are you sure you want to remove the staging entry for '{entry}'?").format(entry=entry_display))
+            dialog = Adw.AlertDialog.new(
+                _("Remove Host Mapping?"),
+                _("Are you sure you want to remove the staging entry for '{entry}'?").format(entry=entry_display),
+            )
             dialog.add_response("cancel", _("Cancel"))
             dialog.add_response("delete", _("Remove"))
             dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
             dialog.connect("response", self._on_delete_confirmation_response)
             dialog.present(self)
         else:
-            dialog = Adw.MessageDialog.new(self.get_root(), _("Confirm Deletion"),
-                                           _("Delete the entry:\n'{entry}'?").format(entry=entry_display))
+            dialog = Adw.MessageDialog.new(
+                self.get_root(), _("Confirm Deletion"), _("Delete the entry:\n'{entry}'?").format(entry=entry_display)
+            )
             dialog.add_response("cancel", _("Cancel"))
             dialog.add_response("delete", _("Remove"))
             dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
@@ -401,7 +409,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                 self.show_toast(
                     toast_msg,
                     button_label=_("Undo"),
-                    on_button_clicked=lambda ip=item.ip, host=item.hostname: self._update_hosts_and_ui(ip, host)
+                    on_button_clicked=lambda ip=item.ip, host=item.hostname: self._update_hosts_and_ui(ip, host),
                 )
             else:
                 self.show_toast(toast_msg)
@@ -539,10 +547,8 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         print_to_textview(self.textview_status, status_msg)
         try:
             import urllib.request
-            req = urllib.request.Request(
-                f"http://{ip}/",
-                headers={"Host": hostname, "User-Agent": "AkamaiStaging/1.0"}
-            )
+
+            req = urllib.request.Request(f"http://{ip}/", headers={"Host": hostname, "User-Agent": "AkamaiStaging/1.0"})
             with urllib.request.urlopen(req, timeout=3) as resp:
                 code = resp.getcode()
                 msg = _("Health Check: {host} -> {ip} returned HTTP {code}.").format(host=hostname, ip=ip, code=code)
@@ -572,6 +578,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     def on_export_action(self, _action, _param):
         """Handles export mappings action."""
         import json
+
         mappings = []
         for i in range(self.store.get_n_items()):
             item = self.store.get_item(i)
@@ -582,7 +589,9 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.show_toast(_("Exported {count} staging mappings to clipboard.").format(count=len(mappings)))
         print_to_textview(self.textview_status, _("Exported {count} mappings (JSON).").format(count=len(mappings)))
 
-    def show_toast(self, message: str, timeout: int = 3, button_label: str | None = None, on_button_clicked: callable | None = None):
+    def show_toast(
+        self, message: str, timeout: int = 3, button_label: str | None = None, on_button_clicked: callable | None = None
+    ):
         """Displays a toast notification."""
         if self.toast_overlay:
             toast = Adw.Toast(title=message, timeout=timeout)

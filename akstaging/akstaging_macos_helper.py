@@ -9,6 +9,7 @@ def write_log_stderr(message: str):
     """Writes a message to sys.stderr, prefixed for this helper."""
     sys.stderr.write(f"[macOS Helper Log] {message}\n")
 
+
 def adjust_python_path(logger_func):
     """
     Adjusts sys.path to include the site-packages directory relative to the script's prefix.
@@ -42,12 +43,15 @@ def adjust_python_path(logger_func):
             # Test import
             try:
                 import importlib
+
                 importlib.import_module("akstaging.hosts")
                 logger_func("adjust_python_path: Test import of 'akstaging.hosts' successful.")
             except ModuleNotFoundError:
                 logger_func("adjust_python_path: FAILED to import 'akstaging.hosts' after path adjustment.")
         else:
-            logger_func("adjust_python_path: Constructed site-packages path is not a directory. Path not added. Check Python/install layout.")
+            logger_func(
+                "adjust_python_path: Constructed site-packages path is not a directory. Path not added. Check Python/install layout."
+            )
 
     except Exception as e:
         logger_func(f"adjust_python_path: Error during path adjustment: {e}")
@@ -57,16 +61,17 @@ def adjust_python_path(logger_func):
     final_path_str = ":".join(sys.path)
     logger_func(f"adjust_python_path: Finished. Final sys.path: {final_path_str}")
 
+
 adjust_python_path(write_log_stderr)
 
 try:
     from akstaging.hosts import HostsFileEdit
     from akstaging.status_codes import Status
+
     write_log_stderr("Import of akstaging.hosts.HostsFileEdit and akstaging.status_codes.Status successful.")
 except ImportError as e:
     error_message = (
-        f"ERROR_INTERNAL:Failed to import necessary modules. "
-        f"Ensure 'akstaging' package is in PYTHONPATH. Error: {e}\n"
+        f"ERROR_INTERNAL:Failed to import necessary modules. Ensure 'akstaging' package is in PYTHONPATH. Error: {e}\n"
     )
     write_log_stderr(error_message)
     sys.stderr.write(f"Python sys.path: {sys.path}\n")
@@ -80,12 +85,14 @@ except Exception as e_import_generic:
     sys.exit(0)
 
 try:
-    from akstaging.helper_cli import parse_common_arguments, handle_read_command
+    from akstaging.helper_cli import handle_read_command, parse_common_arguments
+
     write_log_stderr("Successfully imported shared CLI functions from akstaging.helper_cli.")
 except ImportError as e_cli_import:
     write_log_stderr(f"CRITICAL: Failed to import from akstaging.helper_cli: {e_cli_import}")
     print("ERROR_INTERNAL:Failed to import helper_cli. Check stderr for details.")
     sys.exit(0)
+
 
 def main():
     """Parses arguments and executes the requested hosts file operation for macOS."""
@@ -98,7 +105,7 @@ def main():
         editor = HostsFileEdit()
 
         if args.command == "update":
-            delete_bool = args.delete.lower() == 'true'
+            delete_bool = args.delete.lower() == "true"
             status, message = editor._update_hosts_file_content_direct(args.ip, args.domain, delete=delete_bool)
             print(f"{status.name}:{message}")
             sys.exit(0)

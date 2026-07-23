@@ -1,11 +1,13 @@
 # akstaging/hosts.py
 import os
-import tempfile
 import platform
 import subprocess
+import tempfile
 import traceback
+
 import akstaging
 from akstaging.config import HELPER_EXECUTABLE_PATH, MACOS_HELPER_EXECUTABLE_PATH
+
 from .status_codes import Status
 
 
@@ -101,9 +103,7 @@ class HostsFileEdit:
                 )
 
             os.replace(temp_file_path, self.HOSTS_FILE)
-            self._log_debug(
-                f"Successfully replaced '{self.HOSTS_FILE}' with temporary file '{temp_file_path}'."
-            )
+            self._log_debug(f"Successfully replaced '{self.HOSTS_FILE}' with temporary file '{temp_file_path}'.")
             temp_file_path = None  # Mark as successfully moved.
             return Status.SUCCESS, f"Successfully updated '{self.HOSTS_FILE}'."
 
@@ -113,7 +113,7 @@ class HostsFileEdit:
                 Status.ERROR_PERMISSION,
                 f"Permission denied during update of '{self.HOSTS_FILE}'.",
             )
-        except IOError as e_io:
+        except OSError as e_io:
             self._log_debug(f"IOError during atomic write to '{self.HOSTS_FILE}': {e_io}")
             return Status.ERROR_IO, f"I/O error updating '{self.HOSTS_FILE}': {e_io}"
         except Exception as e_generic:
@@ -147,9 +147,7 @@ class HostsFileEdit:
         if hasattr(self, "logger_func") and self.logger_func is not None:
             self.logger_func(f"[HostsFileEdit] {message_text}")
 
-    def _parse_hosts_line(
-        self, line_content: str
-    ) -> tuple[str | None, list[str], list[str], str | None]:
+    def _parse_hosts_line(self, line_content: str) -> tuple[str | None, list[str], list[str], str | None]:
         """
         Parses a single line from a hosts file into its components.
 
@@ -220,14 +218,12 @@ class HostsFileEdit:
             - entry_removed (bool): True if the specified IP/domain entry was found
               and removed from this line, False otherwise.
         """
-        parsed_ip, parsed_original_hostnames, parsed_normalized_hostnames, parsed_comment_text = (
-            self._parse_hosts_line(line_content)
+        parsed_ip, parsed_original_hostnames, parsed_normalized_hostnames, parsed_comment_text = self._parse_hosts_line(
+            line_content
         )
 
         if parsed_ip is None:  # Comment, empty, or unparsable line
-            return (
-                parsed_comment_text + "\n"
-            ) if parsed_comment_text and not parsed_comment_text.startswith(
+            return (parsed_comment_text + "\n") if parsed_comment_text and not parsed_comment_text.startswith(
                 "#"
             ) and parsed_comment_text.strip() else line_content, False
 
@@ -289,13 +285,13 @@ class HostsFileEdit:
         original_lines: list[str] = []
 
         try:
-            with open(self.HOSTS_FILE, "r", encoding="utf-8") as hosts_file:
+            with open(self.HOSTS_FILE, encoding="utf-8") as hosts_file:
                 original_lines = hosts_file.readlines()
         except FileNotFoundError:
             return Status.ERROR_NOT_FOUND, f"Error reading '{self.HOSTS_FILE}': File not found."
         except PermissionError:
             return Status.ERROR_PERMISSION, f"Permission denied reading '{self.HOSTS_FILE}'."
-        except IOError as e:
+        except OSError as e:
             return Status.ERROR_IO, f"I/O error reading '{self.HOSTS_FILE}': {e}"
         except Exception as e:  # pylint: disable=broad-except
             return Status.ERROR_INTERNAL, f"Unexpected error reading '{self.HOSTS_FILE}': {e}"
@@ -328,17 +324,11 @@ class HostsFileEdit:
 
         if not entry_found_and_removed:
             status = Status.ALREADY_EXISTS  # Or NOT_FOUND
-            message = (
-                f"Entry '{entry_to_remove}' not found in '{self.HOSTS_FILE}'. No changes made."
-            )
-            self._log_debug(
-                f"Entry '{entry_to_remove}' not found. No changes needed. Returning {status.name}."
-            )
+            message = f"Entry '{entry_to_remove}' not found in '{self.HOSTS_FILE}'. No changes made."
+            self._log_debug(f"Entry '{entry_to_remove}' not found. No changes needed. Returning {status.name}.")
             return status, message
 
-        self._log_debug(
-            f"Attempting to write changes for removal of '{entry_to_remove}' using atomic write."
-        )
+        self._log_debug(f"Attempting to write changes for removal of '{entry_to_remove}' using atomic write.")
         status, message = self._write_lines_to_hosts_file(lines_to_keep)
 
         if status == Status.SUCCESS:
@@ -386,8 +376,8 @@ class HostsFileEdit:
               was found on this line with the correct `staging_ip`. Always False
               for delete operations or if the domain wasn't found with the correct IP.
         """
-        parsed_ip, parsed_original_hostnames, parsed_normalized_hostnames, parsed_comment_text = (
-            self._parse_hosts_line(line_content)
+        parsed_ip, parsed_original_hostnames, parsed_normalized_hostnames, parsed_comment_text = self._parse_hosts_line(
+            line_content
         )
 
         if parsed_ip is None:  # Comment, empty, or unparsable line
@@ -437,9 +427,7 @@ class HostsFileEdit:
         else:  # Add/Update operation
             if parsed_ip == staging_ip:
                 domain_is_correct_ip_for_update = True
-                self._log_debug(
-                    f"    UPDATE: Domain '{sanitized_domain_lower}' found with CORRECT IP '{staging_ip}'."
-                )
+                self._log_debug(f"    UPDATE: Domain '{sanitized_domain_lower}' found with CORRECT IP '{staging_ip}'.")
 
                 current_hostnames_on_line = []
                 target_domain_present_original_case = False
@@ -464,9 +452,7 @@ class HostsFileEdit:
 
                 line_changed = new_line.strip() != line_content.strip()
                 if line_changed:
-                    self._log_debug(
-                        f"    UPDATE: Line with correct IP, content updated: '{new_line.strip()}'"
-                    )
+                    self._log_debug(f"    UPDATE: Line with correct IP, content updated: '{new_line.strip()}'")
                 return line_changed, new_line.strip() + "\n", domain_is_correct_ip_for_update
             else:
                 self._log_debug(
@@ -530,13 +516,13 @@ class HostsFileEdit:
 
         original_lines: list[str] = []
         try:
-            with open(self.HOSTS_FILE, "r", encoding="utf-8") as hosts_file:
+            with open(self.HOSTS_FILE, encoding="utf-8") as hosts_file:
                 original_lines = hosts_file.readlines()
         except FileNotFoundError:
             return Status.ERROR_NOT_FOUND, f"Error reading '{self.HOSTS_FILE}': File not found."
         except PermissionError:
             return Status.ERROR_PERMISSION, f"Permission denied reading '{self.HOSTS_FILE}'."
-        except IOError as e:
+        except OSError as e:
             return Status.ERROR_IO, f"I/O error reading '{self.HOSTS_FILE}': {e}"
         except Exception as e:  # pylint: disable=broad-except
             return Status.ERROR_INTERNAL, f"Unexpected error reading '{self.HOSTS_FILE}': {e}"
@@ -569,9 +555,7 @@ class HostsFileEdit:
         if delete:
             if made_change_to_file_content:
                 current_status = Status.SUCCESS
-                message = (
-                    f"Successfully removed entries for {sanitized_domain} from '{self.HOSTS_FILE}'."
-                )
+                message = f"Successfully removed entries for {sanitized_domain} from '{self.HOSTS_FILE}'."
             else:
                 current_status = Status.ALREADY_EXISTS
                 message = f"No entry found for {sanitized_domain} in '{self.HOSTS_FILE}'. No changes made."
@@ -602,9 +586,7 @@ class HostsFileEdit:
 
         return current_status, message
 
-    def _execute_operation(
-        self, operation_func: callable, operation_type: str, op_kwargs: dict
-    ) -> tuple[Status, str]:
+    def _execute_operation(self, operation_func: callable, operation_type: str, op_kwargs: dict) -> tuple[Status, str]:
         """
         Executes a host file write operation (update, remove), handling direct execution
         and attempting privilege escalation if a PermissionError occurs.
@@ -627,9 +609,7 @@ class HostsFileEdit:
             )
             current_os = platform.system()
             if self.is_flatpak and current_os == "Linux":
-                self._log_debug(
-                    "Flatpak environment on Linux detected. Using flatpak-spawn for escalation."
-                )
+                self._log_debug("Flatpak environment on Linux detected. Using flatpak-spawn for escalation.")
                 return self._run_flatpak_spawn_pkexec(operation_type, **op_kwargs)
             if current_os == "Darwin":
                 self._log_debug("macOS detected. Using osascript for escalation.")
@@ -665,9 +645,7 @@ class HostsFileEdit:
         op_kwargs = {"entry_to_remove": entry_to_remove}
         return self._execute_operation(self._remove_hosts_entry_direct, "remove", op_kwargs)
 
-    def update_hosts_file_content(
-        self, staging_ip: str, sanitized_domain: str, delete: bool
-    ) -> tuple[Status, str]:
+    def update_hosts_file_content(self, staging_ip: str, sanitized_domain: str, delete: bool) -> tuple[Status, str]:
         """
         Updates or deletes an entry in the system hosts file for a given domain.
 
@@ -708,21 +686,17 @@ class HostsFileEdit:
         """
         self._log_debug(f"Attempting to read '{self.HOSTS_FILE}' directly.")
         try:
-            with open(self.HOSTS_FILE, "r", encoding="utf-8") as f:
+            with open(self.HOSTS_FILE, encoding="utf-8") as f:
                 content_lines = f.read().splitlines(keepends=False)
-            self._log_debug(
-                f"Successfully read '{self.HOSTS_FILE}' directly ({len(content_lines)} lines)."
-            )
+            self._log_debug(f"Successfully read '{self.HOSTS_FILE}' directly ({len(content_lines)} lines).")
             return Status.SUCCESS, content_lines
         except PermissionError:
-            self._log_debug(
-                f"Permission denied reading '{self.HOSTS_FILE}' directly. Falling back to privileged read."
-            )
+            self._log_debug(f"Permission denied reading '{self.HOSTS_FILE}' directly. Falling back to privileged read.")
             return self.read_hosts_file_content_privileged()
         except FileNotFoundError:
             self._log_debug(f"'{self.HOSTS_FILE}' not found during direct read attempt.")
             return Status.ERROR_NOT_FOUND, f"Error reading '{self.HOSTS_FILE}': File not found."
-        except IOError as e:
+        except OSError as e:
             self._log_debug(f"IOError during direct read of '{self.HOSTS_FILE}': {e}")
             return Status.ERROR_IO, f"I/O error reading '{self.HOSTS_FILE}' directly: {e}"
         except Exception as e:  # pylint: disable=broad-except
@@ -748,38 +722,30 @@ class HostsFileEdit:
                 - If successful: A list of strings (lines from the hosts file).
                 - If failed: An error message string.
         """
-        self._log_debug(
-            f"_read_hosts_file_direct: Attempting to read '{self.HOSTS_FILE}' directly."
-        )
+        self._log_debug(f"_read_hosts_file_direct: Attempting to read '{self.HOSTS_FILE}' directly.")
         try:
             euid = os.geteuid() if hasattr(os, "geteuid") else "N/A"
             self._log_debug(f"_read_hosts_file_direct: Effective UID: {euid}")
             if not os.path.exists(self.HOSTS_FILE):
-                self._log_debug(
-                    f"_read_hosts_file_direct: File '{self.HOSTS_FILE}' does not exist."
-                )
+                self._log_debug(f"_read_hosts_file_direct: File '{self.HOSTS_FILE}' does not exist.")
                 return Status.ERROR_NOT_FOUND, f"Error reading '{self.HOSTS_FILE}': File not found."
             if not os.access(self.HOSTS_FILE, os.R_OK):
                 self._log_debug(
                     f"_read_hosts_file_direct: File '{self.HOSTS_FILE}' exists but is not readable (os.R_OK check failed)."
                 )
-            with open(self.HOSTS_FILE, "r", encoding="utf-8") as f:
+            with open(self.HOSTS_FILE, encoding="utf-8") as f:
                 content_lines = f.read().splitlines(keepends=False)
             self._log_debug(
                 f"_read_hosts_file_direct: Successfully read '{self.HOSTS_FILE}' directly ({len(content_lines)} lines)."
             )
             return Status.SUCCESS, content_lines
         except PermissionError as e_perm:
-            self._log_debug(
-                f"_read_hosts_file_direct: Permission denied reading '{self.HOSTS_FILE}'. Error: {e_perm}"
-            )
+            self._log_debug(f"_read_hosts_file_direct: Permission denied reading '{self.HOSTS_FILE}'. Error: {e_perm}")
             return Status.ERROR_PERMISSION, f"Permission denied reading '{self.HOSTS_FILE}'."
         except FileNotFoundError as e_fnf:
-            self._log_debug(
-                f"_read_hosts_file_direct: File '{self.HOSTS_FILE}' not found during open. Error: {e_fnf}"
-            )
+            self._log_debug(f"_read_hosts_file_direct: File '{self.HOSTS_FILE}' not found during open. Error: {e_fnf}")
             return Status.ERROR_NOT_FOUND, f"Error reading '{self.HOSTS_FILE}': File not found."
-        except IOError as e_io:
+        except OSError as e_io:
             self._log_debug(
                 f"_read_hosts_file_direct: IOError during direct read of '{self.HOSTS_FILE}': {e_io} (Traceback: {traceback.format_exc()})"
             )
@@ -819,9 +785,7 @@ class HostsFileEdit:
             self._log_debug("Direct read successful. Skipping privileged escalation.")
             return direct_status, direct_content_or_error
         if direct_status == Status.ERROR_PERMISSION:
-            self._log_debug(
-                "Direct read failed due to permission error. Proceeding with privileged escalation."
-            )
+            self._log_debug("Direct read failed due to permission error. Proceeding with privileged escalation.")
         else:
             self._log_debug(
                 f"read_hosts_file_content_privileged: Direct read failed with {direct_status.name if hasattr(direct_status, 'name') else direct_status} ('{direct_content_or_error}'). Not attempting privileged escalation."
@@ -851,18 +815,14 @@ class HostsFileEdit:
             )
 
         if status == Status.SUCCESS:
-            self._log_debug(
-                f"Privileged read successful. Received {len(raw_output_from_helper)} bytes from helper."
-            )
+            self._log_debug(f"Privileged read successful. Received {len(raw_output_from_helper)} bytes from helper.")
             return Status.SUCCESS, raw_output_from_helper.splitlines()
         self._log_debug(
             f"Privileged read failed. Status: {status.name if hasattr(status, 'name') else status}. Message: {raw_output_from_helper}"
         )
         return status, raw_output_from_helper
 
-    def _build_macos_command_args(
-        self, operation_type: str, **kwargs
-    ) -> list[str] | tuple[Status, str]:
+    def _build_macos_command_args(self, operation_type: str, **kwargs) -> list[str] | tuple[Status, str]:
         """
         Builds the command arguments for the macOS helper script used with osascript.
 
@@ -887,9 +847,7 @@ class HostsFileEdit:
             staging_ip = kwargs.get("staging_ip")
             sanitized_domain = kwargs.get("sanitized_domain")
             delete_str = str(kwargs.get("delete", False)).lower()
-            cmd_args.extend(
-                ["--ip", staging_ip, "--domain", sanitized_domain, "--delete", delete_str]
-            )
+            cmd_args.extend(["--ip", staging_ip, "--domain", sanitized_domain, "--delete", delete_str])
         elif operation_type == "remove":
             entry_to_remove = kwargs.get("entry_to_remove")
             parts = entry_to_remove.split(maxsplit=1)
@@ -956,14 +914,8 @@ class HostsFileEdit:
                     if stderr_cleaned
                     else f"osascript failed with exit code {process.returncode} and no stderr."
                 )
-                if (
-                    "User cancelled" in error_details_str
-                    or "(-128)" in error_details_str
-                    or process.returncode == 1
-                ):
-                    op_details = kwargs.get(
-                        "entry_to_remove", kwargs.get("sanitized_domain", "operation")
-                    )
+                if "User cancelled" in error_details_str or "(-128)" in error_details_str or process.returncode == 1:
+                    op_details = kwargs.get("entry_to_remove", kwargs.get("sanitized_domain", "operation"))
                     return Status.USER_CANCELLED, f"Operation cancelled by user for '{op_details}'."
 
                 if ":" in stdout_cleaned:
@@ -971,8 +923,7 @@ class HostsFileEdit:
                     try:
                         status_code_val = Status[status_name]
                         full_message = (
-                            f"osascript error ({error_details_str}) "
-                            f"but helper provided status: {message_str}"
+                            f"osascript error ({error_details_str}) but helper provided status: {message_str}"
                         )
                         return status_code_val, full_message
                     except KeyError:
@@ -984,13 +935,9 @@ class HostsFileEdit:
                 )
 
             if operation_type == "read":
-                first_line_has_colon = (
-                    ":" in stdout_cleaned.splitlines()[0] if stdout_cleaned else False
-                )
+                first_line_has_colon = ":" in stdout_cleaned.splitlines()[0] if stdout_cleaned else False
                 if not first_line_has_colon:
-                    self._log_debug(
-                        f"Helper 'read' successful, returning raw content ({len(stdout_cleaned)} bytes)."
-                    )
+                    self._log_debug(f"Helper 'read' successful, returning raw content ({len(stdout_cleaned)} bytes).")
                     return Status.SUCCESS, stdout_cleaned
 
             if ":" in stdout_cleaned:
@@ -1069,9 +1016,7 @@ class HostsFileEdit:
         elif operation_type == "read":
             cmd.append("read")
         else:
-            self._log_debug(
-                f"Error: Invalid operation type for _build_linux_command: {operation_type}"
-            )
+            self._log_debug(f"Error: Invalid operation type for _build_linux_command: {operation_type}")
             return None
         return cmd
 
@@ -1107,12 +1052,8 @@ class HostsFileEdit:
             output_str = result.stdout.strip()
 
             if result.returncode:
-                error_details_str = (
-                    result.stderr.strip() if result.stderr else "Unknown error from pkexec/helper."
-                )
-                op_details = kwargs.get(
-                    "entry_to_remove", kwargs.get("sanitized_domain", "operation")
-                )
+                error_details_str = result.stderr.strip() if result.stderr else "Unknown error from pkexec/helper."
+                op_details = kwargs.get("entry_to_remove", kwargs.get("sanitized_domain", "operation"))
                 if (
                     "cancel" in error_details_str.lower()
                     or "authenticate" in error_details_str.lower()
@@ -1123,36 +1064,27 @@ class HostsFileEdit:
                         f"Operation for '{op_details}' cancelled or "
                         f"authentication failed via pkexec: {error_details_str}"
                     )
-                    self._log_debug(
-                        f"Returning status: {status_to_return.name}, message: '{message_to_return}'"
-                    )
+                    self._log_debug(f"Returning status: {status_to_return.name}, message: '{message_to_return}'")
                     return status_to_return, message_to_return
 
                 status_to_return = Status.ERROR_INTERNAL
                 message_to_return = (
-                    f"Failed to perform '{operation_type}' for '{op_details}' "
-                    f"with pkexec: {error_details_str}"
+                    f"Failed to perform '{operation_type}' for '{op_details}' with pkexec: {error_details_str}"
                 )
-                self._log_debug(
-                    f"Returning status: {status_to_return.name}, message: '{message_to_return}'"
-                )
+                self._log_debug(f"Returning status: {status_to_return.name}, message: '{message_to_return}'")
                 return status_to_return, message_to_return
 
             if operation_type == "read":
                 first_line_has_colon = ":" in output_str.splitlines()[0] if output_str else False
                 if not first_line_has_colon:
-                    self._log_debug(
-                        f"Helper 'read' successful, returning raw content ({len(output_str)} bytes)."
-                    )
+                    self._log_debug(f"Helper 'read' successful, returning raw content ({len(output_str)} bytes).")
                     return Status.SUCCESS, output_str
 
             if ":" in output_str:
                 status_name, message_str = output_str.split(":", 1)
                 try:
                     status_code_val = Status[status_name]
-                    self._log_debug(
-                        f"Returning status: {status_code_val.name}, message: '{message_str}'"
-                    )
+                    self._log_debug(f"Returning status: {status_code_val.name}, message: '{message_str}'")
                     return status_code_val, message_str
                 except KeyError:
                     error_message_str = f"Linux helper script returned unknown status: {output_str}"
@@ -1176,13 +1108,14 @@ class HostsFileEdit:
             return Status.ERROR_INTERNAL, error_message_str
         except FileNotFoundError:
             error_message_str = (
-                f"Failed to perform '{operation_type}': pkexec or "
-                f"helper script ({HELPER_EXECUTABLE_PATH}) not found."
+                f"Failed to perform '{operation_type}': pkexec or helper script ({HELPER_EXECUTABLE_PATH}) not found."
             )
             self._log_debug(f"Returning ERROR_NOT_FOUND, message: '{error_message_str}'")
             return Status.ERROR_NOT_FOUND, error_message_str
         except Exception as e_pkexec:  # pylint: disable=broad-except
-            error_message_str = f"Error executing pkexec for {operation_type}: {e_pkexec} (Traceback: {traceback.format_exc()})"
+            error_message_str = (
+                f"Error executing pkexec for {operation_type}: {e_pkexec} (Traceback: {traceback.format_exc()})"
+            )
             self._log_debug(f"Returning ERROR_INTERNAL, message: '{error_message_str}'")
             return Status.ERROR_INTERNAL, error_message_str
 
@@ -1223,9 +1156,7 @@ class HostsFileEdit:
         elif operation_type == "read":
             cmd.append("read")
         else:
-            self._log_debug(
-                f"Error: Invalid operation type for _build_flatpak_command: {operation_type}"
-            )
+            self._log_debug(f"Error: Invalid operation type for _build_flatpak_command: {operation_type}")
             return None
         return cmd
 
@@ -1261,13 +1192,9 @@ class HostsFileEdit:
 
             if result.returncode:
                 error_details_str = (
-                    result.stderr.strip()
-                    if result.stderr
-                    else "Unknown error from flatpak-spawn/pkexec/helper."
+                    result.stderr.strip() if result.stderr else "Unknown error from flatpak-spawn/pkexec/helper."
                 )
-                op_details = kwargs.get(
-                    "entry_to_remove", kwargs.get("sanitized_domain", "operation")
-                )
+                op_details = kwargs.get("entry_to_remove", kwargs.get("sanitized_domain", "operation"))
                 if (
                     "cancel" in error_details_str.lower()
                     or "authenticate" in error_details_str.lower()
@@ -1285,9 +1212,7 @@ class HostsFileEdit:
                         f"Failed to perform '{operation_type}' for '{op_details}' "
                         f"with flatpak-spawn/pkexec: {error_details_str}"
                     )
-                self._log_debug(
-                    f"Returning status: {status_to_return.name}, message: '{message_to_return}'"
-                )
+                self._log_debug(f"Returning status: {status_to_return.name}, message: '{message_to_return}'")
                 return status_to_return, message_to_return
 
             if operation_type == "read":
@@ -1307,19 +1232,17 @@ class HostsFileEdit:
                     )
                     return status_code_val, message_str
                 except KeyError:
-                    error_message_str = (
-                        f"Helper (via flatpak-spawn) returned unknown status: {output_str}"
-                    )
+                    error_message_str = f"Helper (via flatpak-spawn) returned unknown status: {output_str}"
                     self._log_debug(error_message_str)
                     return Status.ERROR_INTERNAL, error_message_str
             if operation_type != "read":
-                error_message_str = f"Helper (via flatpak-spawn) returned malformed output for {operation_type}: {output_str}"
+                error_message_str = (
+                    f"Helper (via flatpak-spawn) returned malformed output for {operation_type}: {output_str}"
+                )
                 self._log_debug(error_message_str)
                 return Status.ERROR_INTERNAL, error_message_str
             if not output_str:
-                self._log_debug(
-                    "Helper 'read' (via flatpak-spawn) successful, returning empty content."
-                )
+                self._log_debug("Helper 'read' (via flatpak-spawn) successful, returning empty content.")
                 return Status.SUCCESS, ""
             return (
                 Status.ERROR_INTERNAL,
@@ -1327,13 +1250,13 @@ class HostsFileEdit:
             )
 
         except subprocess.TimeoutExpired:
-            error_message_str = (
-                f"Privileged operation (via flatpak-spawn) timed out for '{operation_type}'."
-            )
+            error_message_str = f"Privileged operation (via flatpak-spawn) timed out for '{operation_type}'."
             self._log_debug(error_message_str)
             return Status.ERROR_INTERNAL, error_message_str
         except FileNotFoundError:
-            error_message_str = "flatpak-spawn command not found. This method should only be called in a Flatpak environment."
+            error_message_str = (
+                "flatpak-spawn command not found. This method should only be called in a Flatpak environment."
+            )
             self._log_debug(error_message_str)
             return Status.ERROR_INTERNAL, error_message_str
         except Exception as e_fp_spawn:  # pylint: disable=broad-except
@@ -1363,7 +1286,7 @@ class HostsFileEdit:
             RuntimeError: For any other unexpected errors during the file read.
         """
         try:
-            with open(self.HOSTS_FILE, "r", encoding="utf-8") as hosts_file:
+            with open(self.HOSTS_FILE, encoding="utf-8") as hosts_file:
                 for line in hosts_file:
                     stripped_line = line.strip()
                     if not stripped_line or stripped_line.startswith("#"):
@@ -1382,11 +1305,9 @@ class HostsFileEdit:
             # Re-raise with more context for clarity if needed, or let it propagate.
             raise FileNotFoundError(f"Error reading '{self.HOSTS_FILE}': {e_fnf}") from e_fnf
         except PermissionError as e_perm:
-            raise PermissionError(
-                f"Permission denied reading '{self.HOSTS_FILE}': {e_perm}"
-            ) from e_perm
-        except IOError as e_io:
-            raise IOError(f"I/O error reading '{self.HOSTS_FILE}': {e_io}") from e_io
+            raise PermissionError(f"Permission denied reading '{self.HOSTS_FILE}': {e_perm}") from e_perm
+        except OSError as e_io:
+            raise OSError(f"I/O error reading '{self.HOSTS_FILE}': {e_io}") from e_io
         except Exception as e_generic:  # pylint: disable=broad-except
             # Catching broad Exception is generally discouraged, but here it might
             # be for logging or converting to a custom app exception.

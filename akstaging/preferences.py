@@ -1,10 +1,11 @@
 import logging
+
 import gi
 
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Adw, Gio, Gtk
 
 from akstaging.i18n import get_translator
 
@@ -24,6 +25,7 @@ class Preferences(Adw.PreferencesWindow):
     (`~/.config/akamai_staging/preferences.conf`).
     Automatic backup behavior configuration has been removed.
     """
+
     __gtype_name__ = "AkamaiStagingPreferences"
 
     @property
@@ -67,14 +69,12 @@ class Preferences(Adw.PreferencesWindow):
         general_page.add(general_group)
 
         self.auto_refresh_switch = Adw.SwitchRow(
-            title=_("Automatic Hosts Refresh"),
-            subtitle=_("Automatically re-read hosts file on external changes")
+            title=_("Automatic Hosts Refresh"), subtitle=_("Automatically re-read hosts file on external changes")
         )
         general_group.add(self.auto_refresh_switch)
 
         self.desktop_notif_switch = Adw.SwitchRow(
-            title=_("Desktop Notifications"),
-            subtitle=_("Show system notifications for IP updates and deletions")
+            title=_("Desktop Notifications"), subtitle=_("Show system notifications for IP updates and deletions")
         )
         general_group.add(self.desktop_notif_switch)
 
@@ -86,19 +86,15 @@ class Preferences(Adw.PreferencesWindow):
         network_page.add(network_group)
 
         self.custom_dns_switch = Adw.SwitchRow(
-            title=_("Use Custom DNS Servers"),
-            subtitle=_("Override system DNS settings for lookups")
+            title=_("Use Custom DNS Servers"), subtitle=_("Override system DNS settings for lookups")
         )
         network_group.add(self.custom_dns_switch)
 
-        self.custom_dns_servers_entry = Adw.EntryRow(
-            title=_("DNS Servers")
-        )
+        self.custom_dns_servers_entry = Adw.EntryRow(title=_("DNS Servers"))
         network_group.add(self.custom_dns_servers_entry)
 
         self.dns_timeout_row = Adw.ActionRow(
-            title=_("DNS Timeout (seconds)"),
-            subtitle=_("Query timeout threshold for DNS lookups")
+            title=_("DNS Timeout (seconds)"), subtitle=_("Query timeout threshold for DNS lookups")
         )
         dns_spin = Gtk.SpinButton.new_with_range(1, 30, 1)
         self.dns_spin = dns_spin
@@ -112,17 +108,11 @@ class Preferences(Adw.PreferencesWindow):
         appearance_group = Adw.PreferencesGroup(title=_("Appearance &amp; Theme"))
         appearance_page.add(appearance_group)
 
-        self.theme_combo_row = Adw.ComboRow(
-            title=_("Theme"),
-            subtitle=_("Choose the application color scheme")
-        )
+        self.theme_combo_row = Adw.ComboRow(title=_("Theme"), subtitle=_("Choose the application color scheme"))
         self.theme_combo_row.set_model(Gtk.StringList.new(self.THEME_OPTIONS))
         appearance_group.add(self.theme_combo_row)
 
-        self.font_scale_combo_row = Adw.ComboRow(
-            title=_("Font Scale"),
-            subtitle=_("Adjust application font size")
-        )
+        self.font_scale_combo_row = Adw.ComboRow(title=_("Font Scale"), subtitle=_("Adjust application font size"))
         self.font_scale_combo_row.set_model(Gtk.StringList.new(self.FONT_SCALE_OPTIONS))
         appearance_group.add(self.font_scale_combo_row)
 
@@ -134,14 +124,12 @@ class Preferences(Adw.PreferencesWindow):
         security_page.add(security_group)
 
         self.helper_status_row = Adw.ActionRow(
-            title=_("Helper Execution Mode"),
-            subtitle=_("PolicyKit (Linux) / osascript (macOS)")
+            title=_("Helper Execution Mode"), subtitle=_("PolicyKit (Linux) / osascript (macOS)")
         )
         security_group.add(self.helper_status_row)
 
         self.elevation_timeout_row = Adw.ActionRow(
-            title=_("Elevated Session Timeout (s)"),
-            subtitle=_("Cached helper elevation timeout duration")
+            title=_("Elevated Session Timeout (s)"), subtitle=_("Cached helper elevation timeout duration")
         )
         elev_spin = Gtk.SpinButton.new_with_range(5, 60, 5)
         self.elev_spin = elev_spin
@@ -164,7 +152,7 @@ class Preferences(Adw.PreferencesWindow):
     def load_initial_settings(self):
         """Loads settings from GSettings and applies them to the UI widgets and application state."""
         # Load and apply theme.
-        theme_str = self.settings.get_string('theme')
+        theme_str = self.settings.get_string("theme")
         try:
             theme_idx = self.THEME_STRING_MAP.index(theme_str)
         except ValueError:
@@ -173,14 +161,14 @@ class Preferences(Adw.PreferencesWindow):
             # Optionally, save the default back to GSettings if it was invalid
             # self.settings.set_string('theme', self.THEME_STRING_MAP[self.DEFAULT_THEME_IDX])
 
-        if not 0 <= theme_idx < len(self.THEME_OPTIONS): # Should not happen if THEME_STRING_MAP is correct
+        if not 0 <= theme_idx < len(self.THEME_OPTIONS):  # Should not happen if THEME_STRING_MAP is correct
             theme_idx = self.DEFAULT_THEME_IDX
 
         self.theme_combo_row.set_selected(theme_idx)
         self.style_manager.set_color_scheme(self.THEME_SCHEMES[theme_idx])
 
         # Load and apply font scale.
-        font_scale_value = self.settings.get_double('font-scale')
+        font_scale_value = self.settings.get_double("font-scale")
         try:
             selected_font_scale_idx = self.FONT_SCALE_VALUES.index(font_scale_value)
         except ValueError:
@@ -190,21 +178,21 @@ class Preferences(Adw.PreferencesWindow):
             # self.settings.set_double('font-scale', self.FONT_SCALE_VALUES[self.DEFAULT_FONT_SCALE_IDX])
 
         self.font_scale_combo_row.set_selected(selected_font_scale_idx)
-        if hasattr(self.parent_window, 'apply_font_scaling'):
+        if hasattr(self.parent_window, "apply_font_scaling"):
             self.parent_window.apply_font_scaling(self.FONT_SCALE_VALUES[selected_font_scale_idx])
 
         # Load custom DNS settings
-        custom_dns_enabled = self.settings.get_boolean('custom-dns-enabled')
+        custom_dns_enabled = self.settings.get_boolean("custom-dns-enabled")
         self.custom_dns_switch.set_active(custom_dns_enabled)
 
-        custom_dns_servers = self.settings.get_string('custom-dns-servers')
+        custom_dns_servers = self.settings.get_string("custom-dns-servers")
         self.custom_dns_servers_entry.set_text(custom_dns_servers)
         self.custom_dns_servers_entry.set_sensitive(custom_dns_enabled)
 
-        self.auto_refresh_switch.set_active(self.settings.get_boolean('auto-refresh'))
-        self.desktop_notif_switch.set_active(self.settings.get_boolean('desktop-notifications'))
-        self.dns_spin.set_value(float(self.settings.get_int('dns-timeout')))
-        self.elev_spin.set_value(float(self.settings.get_int('elevation-timeout')))
+        self.auto_refresh_switch.set_active(self.settings.get_boolean("auto-refresh"))
+        self.desktop_notif_switch.set_active(self.settings.get_boolean("desktop-notifications"))
+        self.dns_spin.set_value(float(self.settings.get_int("dns-timeout")))
+        self.elev_spin.set_value(float(self.settings.get_int("elevation-timeout")))
 
     def get_font_scale(self) -> float:
         """
@@ -213,31 +201,31 @@ class Preferences(Adw.PreferencesWindow):
         Returns:
             float: The saved font scale factor.
         """
-        return self.settings.get_double('font-scale')
+        return self.settings.get_double("font-scale")
 
     def _on_auto_refresh_changed(self, switch, _gparam):
-        self.settings.set_boolean('auto-refresh', switch.get_active())
+        self.settings.set_boolean("auto-refresh", switch.get_active())
 
     def _on_desktop_notif_changed(self, switch, _gparam):
-        self.settings.set_boolean('desktop-notifications', switch.get_active())
+        self.settings.set_boolean("desktop-notifications", switch.get_active())
 
     def _on_dns_timeout_changed(self, spin):
-        self.settings.set_int('dns-timeout', int(spin.get_value()))
+        self.settings.set_int("dns-timeout", int(spin.get_value()))
 
     def _on_elev_timeout_changed(self, spin):
-        self.settings.set_int('elevation-timeout', int(spin.get_value()))
+        self.settings.set_int("elevation-timeout", int(spin.get_value()))
 
     def _on_theme_preference_changed(self, combo_row, _gparam):
         """Handles changes in the theme preference Adw.ComboRow and saves the new setting to GSettings."""
         selected_idx = combo_row.get_selected()
         if 0 <= selected_idx < len(self.THEME_SCHEMES) and selected_idx < len(self.THEME_STRING_MAP):
             self.style_manager.set_color_scheme(self.THEME_SCHEMES[selected_idx])
-            self.settings.set_string('theme', self.THEME_STRING_MAP[selected_idx])
+            self.settings.set_string("theme", self.THEME_STRING_MAP[selected_idx])
         else:
             logger.warning("Unexpected theme index: %s. Reverting to default system theme.", selected_idx)
             default_scheme = self.THEME_SCHEMES[self.DEFAULT_THEME_IDX]
             self.style_manager.set_color_scheme(default_scheme)
-            self.settings.set_string('theme', self.THEME_STRING_MAP[self.DEFAULT_THEME_IDX])
+            self.settings.set_string("theme", self.THEME_STRING_MAP[self.DEFAULT_THEME_IDX])
             self.theme_combo_row.set_selected(self.DEFAULT_THEME_IDX)
 
     def _on_font_scale_changed(self, combo_row, _gparam):
@@ -245,24 +233,24 @@ class Preferences(Adw.PreferencesWindow):
         selected_idx = combo_row.get_selected()
         if 0 <= selected_idx < len(self.FONT_SCALE_VALUES):
             scale_factor = self.FONT_SCALE_VALUES[selected_idx]
-            self.settings.set_double('font-scale', scale_factor)
-            if hasattr(self.parent_window, 'apply_font_scaling'):
+            self.settings.set_double("font-scale", scale_factor)
+            if hasattr(self.parent_window, "apply_font_scaling"):
                 self.parent_window.apply_font_scaling(scale_factor)
         else:
             logger.warning("Unexpected font scale index: %s. Reverting to default.", selected_idx)
             default_scale_factor = self.FONT_SCALE_VALUES[self.DEFAULT_FONT_SCALE_IDX]
-            self.settings.set_double('font-scale', default_scale_factor)
-            if hasattr(self.parent_window, 'apply_font_scaling'):
+            self.settings.set_double("font-scale", default_scale_factor)
+            if hasattr(self.parent_window, "apply_font_scaling"):
                 self.parent_window.apply_font_scaling(default_scale_factor)
             self.font_scale_combo_row.set_selected(self.DEFAULT_FONT_SCALE_IDX)
 
     def _on_custom_dns_enabled_changed(self, switch, _gparam):
         is_active = switch.get_active()
-        self.settings.set_boolean('custom-dns-enabled', is_active)
+        self.settings.set_boolean("custom-dns-enabled", is_active)
         self.custom_dns_servers_entry.set_sensitive(is_active)
 
     def _on_custom_dns_servers_changed(self, entry):
-        self.settings.set_string('custom-dns-servers', entry.get_text())
+        self.settings.set_string("custom-dns-servers", entry.get_text())
 
     def do_destroy(self):
         """
@@ -272,16 +260,16 @@ class Preferences(Adw.PreferencesWindow):
         Using `disconnect_by_func` is safe even if the handler isn't connected or was connected multiple times
         (it will only remove one instance per call if multiply connected, which is usually a bug anyway).
         """
-        if hasattr(self, 'theme_combo_row') and self.theme_combo_row:
+        if hasattr(self, "theme_combo_row") and self.theme_combo_row:
             self.theme_combo_row.disconnect_by_func(self._on_theme_preference_changed)
 
-        if hasattr(self, 'font_scale_combo_row') and self.font_scale_combo_row:
+        if hasattr(self, "font_scale_combo_row") and self.font_scale_combo_row:
             self.font_scale_combo_row.disconnect_by_func(self._on_font_scale_changed)
 
-        if hasattr(self, 'custom_dns_switch') and self.custom_dns_switch:
+        if hasattr(self, "custom_dns_switch") and self.custom_dns_switch:
             self.custom_dns_switch.disconnect_by_func(self._on_custom_dns_enabled_changed)
 
-        if hasattr(self, 'custom_dns_servers_entry') and self.custom_dns_servers_entry:
+        if hasattr(self, "custom_dns_servers_entry") and self.custom_dns_servers_entry:
             self.custom_dns_servers_entry.disconnect_by_func(self._on_custom_dns_servers_changed)
 
         super().do_destroy()

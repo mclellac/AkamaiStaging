@@ -14,21 +14,21 @@ target-version = "py310"
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "C"]
-ignore = ["E402", "E501", "C901"]
+select = ["E", "F", "W", "I", "UP", "B", "C4"]
+ignore = ["E402", "E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401", "F403"]
 
 [tool.pytest.ini_options]
-testpaths = ["akstaging/tests"]
+testpaths = ["tests"]
 
 [tool.pyright]
 pythonVersion = "3.10"
-extraPaths = [".", "build", "akstaging"]
+extraPaths = [".", "build", "akstaging", "tests"]
 reportAttributeAccessIssue = false
 reportMissingImports = false
 reportGeneralTypeIssues = false
 reportOptionalMemberAccess = false
 reportCallIssue = false
-
+reportUnusedImport = false

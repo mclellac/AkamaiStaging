@@ -1,9 +1,12 @@
 # akstaging/dns_utils.py
 import logging
-import dns.resolver
-from dns.resolver import Resolver, NoNameservers, NXDOMAIN, Timeout as DNSTimeout
+
 import dns.exception
+import dns.resolver
 import gi
+from dns.resolver import NXDOMAIN, NoNameservers, Resolver
+from dns.resolver import Timeout as DNSTimeout
+
 gi.require_version("Gio", "2.0")
 from gi.repository import Gio
 
@@ -16,11 +19,11 @@ class DNSUtils:
     """
     Utility class for performing DNS lookups, specifically for Akamai staging environments.
     """
+
     # Common Akamai CNAME suffixes used for constructing staging CNAMEs
     CNAME_SUFFIXES = [".edgesuite.net", ".edgekey.net", ".akamaiedge.net"]
     # Domains that identify a CNAME as being part of Akamai infrastructure
     AKAMAI_DOMAINS = ["edgesuite.net", "edgekey.net", "akamaiedge.net", "akamaihd.net"]
-
 
     def __init__(self):
         """
@@ -56,7 +59,8 @@ class DNSUtils:
                 if not is_akamai_cname:
                     logger.warning(
                         "Domain %s CNAME %s does not appear to be a recognized Akamai managed domain.",
-                        domain, cname_target
+                        domain,
+                        cname_target,
                     )
                     raise dns.exception.DNSException(
                         f"CNAME {cname_target} for domain {domain} is not a recognized Akamai domain."
@@ -80,7 +84,7 @@ class DNSUtils:
         except dns.resolver.NoResolverConfiguration:
             logger.error("DNS resolver is not configured. Cannot resolve any domains.")
             raise
-        except dns.exception.DNSException as e: # Catch-all for other dnspython errors
+        except dns.exception.DNSException as e:  # Catch-all for other dnspython errors
             logger.error("DNS lookup for %s failed with error: %s", domain, e)
             raise
 
@@ -99,16 +103,16 @@ class DNSUtils:
             Raises dns.exception.DNSException for various DNS errors.
         """
         settings = Gio.Settings.new(SETTINGS_ID)
-        custom_dns_enabled = settings.get_boolean('custom-dns-enabled')
-        custom_dns_servers_str = settings.get_string('custom-dns-servers')
+        custom_dns_enabled = settings.get_boolean("custom-dns-enabled")
+        custom_dns_servers_str = settings.get_string("custom-dns-servers")
 
         resolver_instance = dns.resolver.get_default_resolver()
 
         if custom_dns_enabled and custom_dns_servers_str.strip():
-            custom_servers = [s.strip() for s in custom_dns_servers_str.split(',') if s.strip()]
+            custom_servers = [s.strip() for s in custom_dns_servers_str.split(",") if s.strip()]
             if custom_servers:
                 logger.info("Using custom DNS servers: %s", custom_servers)
-                custom_resolver = Resolver(configure=False) # Do not configure from /etc/resolv.conf
+                custom_resolver = Resolver(configure=False)  # Do not configure from /etc/resolv.conf
                 custom_resolver.nameservers = custom_servers
                 resolver_instance = custom_resolver
             else:
@@ -133,53 +137,63 @@ class DNSUtils:
             staging_cname_to_resolve = None
             for ak_domain in self.AKAMAI_DOMAINS:
                 if base_cname.endswith(ak_domain):
-                    parts = ak_domain.split('.', 1)
+                    parts = ak_domain.split(".", 1)
                     if len(parts) == 2:
                         service_name, tld = parts
                         transformed_ak_domain = f"{service_name}-staging.{tld}"
 
-                        customer_part = base_cname[:-len(ak_domain)]
+                        customer_part = base_cname[: -len(ak_domain)]
 
                         # Defensively ensure customer_part ends with a dot if it's not empty
                         # and doesn't already end with one.
-                        if customer_part and not customer_part.endswith('.'):
-                            customer_part += '.'
+                        if customer_part and not customer_part.endswith("."):
+                            customer_part += "."
                         # Handle a very unlikely edge case of customer_part becoming just ".."
                         # if base_cname was something like ".akamaiedge.net" and we stripped ".akamaiedge.net"
                         # This is more of a theoretical safeguard.
                         if customer_part == "..":
-                             customer_part = "."
+                            customer_part = "."
 
                         staging_cname_to_resolve = f"{customer_part}{transformed_ak_domain}"
-                        logger.debug(f"Derived customer_part: '{customer_part}', transformed_ak_domain: '{transformed_ak_domain}', for base_cname: '{base_cname}' and ak_domain: '{ak_domain}'") # Added debug log
+                        logger.debug(
+                            f"Derived customer_part: '{customer_part}', transformed_ak_domain: '{transformed_ak_domain}', for base_cname: '{base_cname}' and ak_domain: '{ak_domain}'"
+                        )  # Added debug log
                         break
 
             if not staging_cname_to_resolve:
                 logger.error(
                     "Base CNAME %s for domain %s does not end with a recognized Akamai domain pattern "
                     "from AKAMAI_DOMAINS or pattern is malformed. Cannot construct staging CNAME.",
-                    base_cname, domain
+                    base_cname,
+                    domain,
                 )
-                return None, base_cname # Or None, None if base_cname is not useful here
+                return None, base_cname  # Or None, None if base_cname is not useful here
 
             logger.info("Constructed staging CNAME for %s: %s", domain, staging_cname_to_resolve)
 
             answers = resolver_instance.resolve(staging_cname_to_resolve, "A")
             if answers:
                 staging_ip = answers[0].address
-                logger.info(
-                    "Found Akamai staging IP for %s (via %s): %s",
-                    domain, staging_cname_to_resolve, staging_ip
-                )
+                logger.info("Found Akamai staging IP for %s (via %s): %s", domain, staging_cname_to_resolve, staging_ip)
                 return staging_ip, staging_cname_to_resolve
 
-            logger.warning("No A records found for staging CNAME %s (derived from %s).", staging_cname_to_resolve, domain)
+            logger.warning(
+                "No A records found for staging CNAME %s (derived from %s).", staging_cname_to_resolve, domain
+            )
             return None, staging_cname_to_resolve
-        except NXDOMAIN as e: # Keep staging_cname_to_resolve context if available
-            logger.error("DNS record not found (NXDOMAIN) for %s or its CNAMEs. Staging CNAME was: %s", domain, staging_cname_to_resolve if 'staging_cname_to_resolve' in locals() else "not determined")
+        except NXDOMAIN as e:  # Keep staging_cname_to_resolve context if available
+            logger.error(
+                "DNS record not found (NXDOMAIN) for %s or its CNAMEs. Staging CNAME was: %s",
+                domain,
+                staging_cname_to_resolve if "staging_cname_to_resolve" in locals() else "not determined",
+            )
             raise e
-        except dns.resolver.NoAnswer as e: # Keep staging_cname_to_resolve context if available
-            logger.warning("No A record found (NoAnswer) for %s or its CNAMEs. Staging CNAME was: %s", domain, staging_cname_to_resolve if 'staging_cname_to_resolve' in locals() else "not determined")
+        except dns.resolver.NoAnswer as e:  # Keep staging_cname_to_resolve context if available
+            logger.warning(
+                "No A record found (NoAnswer) for %s or its CNAMEs. Staging CNAME was: %s",
+                domain,
+                staging_cname_to_resolve if "staging_cname_to_resolve" in locals() else "not determined",
+            )
             raise e
         except NoNameservers:
             logger.error("No nameservers available to resolve %s.", domain)
@@ -190,6 +204,11 @@ class DNSUtils:
         except dns.resolver.NoResolverConfiguration as e:
             logger.error("DNS resolver is not configured. Cannot resolve any domains.")
             raise e
-        except dns.exception.DNSException as e: # General DNS exception
-            logger.error("Staging IP lookup for %s failed: %s. Staging CNAME was: %s", domain, e, staging_cname_to_resolve if 'staging_cname_to_resolve' in locals() else "not determined")
+        except dns.exception.DNSException as e:  # General DNS exception
+            logger.error(
+                "Staging IP lookup for %s failed: %s. Staging CNAME was: %s",
+                domain,
+                e,
+                staging_cname_to_resolve if "staging_cname_to_resolve" in locals() else "not determined",
+            )
             raise e

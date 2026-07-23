@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
+import platform
+import shutil
 import subprocess
 import sys
-import shutil
-import platform
-import os
 from pathlib import Path
 
 distros = {
@@ -104,9 +104,7 @@ def run_command(cmd):
         result = subprocess.run(cmd, check=True, text=True, capture_output=True)
         print(result.stdout)
     except subprocess.CalledProcessError as e:
-        print(
-            f"Error: Command {' '.join(map(str, cmd))} failed."
-        )  # Convert PosixPath to str
+        print(f"Error: Command {' '.join(map(str, cmd))} failed.")  # Convert PosixPath to str
         print(e.stderr)
         sys.exit(1)
 
@@ -122,7 +120,7 @@ def detect_os_and_distro():
                     line = line.strip()
                     if line and not line.startswith("#") and "=" in line:
                         key, value = line.split("=", 1)
-                        distro_info[key.strip()] = value.strip().strip('"\'')
+                        distro_info[key.strip()] = value.strip().strip("\"'")
                 distro = distro_info.get("ID", "unknown")
                 if distro not in distros and "ID_LIKE" in distro_info:
                     for like_id in distro_info["ID_LIKE"].split():
@@ -130,7 +128,7 @@ def detect_os_and_distro():
                             distro = like_id
                             break
         except Exception as e:
-            raise RuntimeError(f"Could not determine Linux distribution: {str(e)}")
+            raise RuntimeError(f"Could not determine Linux distribution: {str(e)}") from e
     elif os_type == "Darwin":
         distro = "darwin"
     else:
@@ -187,8 +185,12 @@ def build_application(os_type):
         py_version_major = sys.version_info.major
         py_version_minor = sys.version_info.minor
 
-        incorrectly_installed_path = Path(f"/usr/local/usr/local/lib/python{py_version_major}.{py_version_minor}/site-packages/akstaging")
-        correct_install_path = Path(f"/usr/local/lib/python{py_version_major}.{py_version_minor}/site-packages/akstaging")
+        incorrectly_installed_path = Path(
+            f"/usr/local/usr/local/lib/python{py_version_major}.{py_version_minor}/site-packages/akstaging"
+        )
+        correct_install_path = Path(
+            f"/usr/local/lib/python{py_version_major}.{py_version_minor}/site-packages/akstaging"
+        )
 
         if correct_install_path.exists():
             print(f"[macOS Fix] Removing existing directory at correct location (if any): {correct_install_path}")
@@ -205,22 +207,14 @@ def build_application(os_type):
 def check_homebrew():
     """Check if Homebrew is installed on macOS."""
     if shutil.which("brew") is None:
-        print(
-            ">> Homebrew not found. Please install it or install the dependencies manually."
-        )
+        print(">> Homebrew not found. Please install it or install the dependencies manually.")
         sys.exit(1)
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Dependency installer and application builder"
-    )
-    parser.add_argument(
-        "-i", "--install-deps", action="store_true", help="Install dependencies"
-    )
-    parser.add_argument(
-        "-b", "--build", action="store_true", help="Build and install the application"
-    )
+    parser = argparse.ArgumentParser(description="Dependency installer and application builder")
+    parser.add_argument("-i", "--install-deps", action="store_true", help="Install dependencies")
+    parser.add_argument("-b", "--build", action="store_true", help="Build and install the application")
     args = parser.parse_args()
 
     if not any(vars(args).values()):
