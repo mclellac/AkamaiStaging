@@ -1,5 +1,4 @@
 import sys
-import os
 sys.path.insert(0, '.')
 print(f"Test script sys.path: {sys.path}")
 

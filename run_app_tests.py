@@ -17,7 +17,7 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, Gtk, GLib
+from gi.repository import Adw, Gio, GLib
 
 RESOURCE_PATH_FROM_DEFS = None
 try:
@@ -49,6 +49,10 @@ except Exception as e_generic:
 from akstaging.window import AkamaiStagingWindow, DataObject
 from akstaging.hosts import HostsFileEdit # To access HOSTS_FILE path for reading
 # --- END Imports from AkamaiStaging ---
+
+test_hosts_dir = os.path.join(module_base_dir, "tests", "test_env")
+os.makedirs(test_hosts_dir, exist_ok=True)
+HostsFileEdit.HOSTS_FILE = os.path.join(test_hosts_dir, "hosts")
 
 def read_hosts_file_content():
     try:

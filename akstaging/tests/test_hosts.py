@@ -1,22 +1,16 @@
 import unittest
-from unittest.mock import patch, mock_open, MagicMock, call
+from unittest.mock import patch, mock_open, MagicMock
 import os
-import shutil # For tests that might involve shutil, though we'll mock it mostly
 from datetime import datetime
 
 # Attempt to import HostsFileEdit from the correct location
 # This assumes your project structure allows this import from the test directory
 try:
     from akstaging.hosts import HostsFileEdit
-    from akstaging.aklib import AkamaiLib # For mocking print_to_textview if it's a class method
 except ImportError:
-    # This is a fallback if the direct import fails,
-    # you might need to adjust sys.path if running tests directly and not via a test runner
-    # For example, by adding the parent directory of 'akstaging' to sys.path
     import sys
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
     from akstaging.hosts import HostsFileEdit
-    from akstaging.aklib import AkamaiLib
 
 
 class TestHostsFileEdit(unittest.TestCase):

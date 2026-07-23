@@ -1,6 +1,5 @@
 # akstaging/dns_utils.py
 import logging
-import os
 import dns.resolver
 from dns.resolver import Resolver, NoNameservers, NXDOMAIN, Timeout as DNSTimeout
 import dns.exception
@@ -181,7 +180,7 @@ class DNSUtils:
         except dns.resolver.NoAnswer as e: # Keep staging_cname_to_resolve context if available
             logger.warning("No A record found (NoAnswer) for %s or its CNAMEs. Staging CNAME was: %s", domain, staging_cname_to_resolve if 'staging_cname_to_resolve' in locals() else "not determined")
             raise e
-        except NoNameservers as e:
+        except NoNameservers:
             logger.error("No nameservers available to resolve %s.", domain)
             raise
         except DNSTimeout as e_timeout:

@@ -1,6 +1,6 @@
 project('akamaistaging',
          version: '1.0.0',
-         meson_version: '>= 0.62.0',
+         meson_version: '>= 1.0.0',
          default_options: [ 'warning_level=2', 'werror=false', ],
 )
 
@@ -23,10 +23,10 @@ endif
 # or be Meson's default for that platform.
 prefix_opt = get_option('prefix')
 
-dependency('glib-2.0', version: '>= 2.78.0')
-dependency('gtk4', version: '>= 4.14.0')
-dependency('libadwaita-1', version: '>= 1.7.0')
-dependency('pygobject-3.0', version: '>= 3.46.0')
+dependency('glib-2.0', version: '>= 2.88.2')
+dependency('gtk4', version: '>= 4.22.4')
+dependency('libadwaita-1', version: '>= 1.9.2')
+dependency('pygobject-3.0', version: '>= 3.56.3')
 
 bindir = join_paths(prefix_opt, get_option('bindir'))
 datadir = join_paths(prefix_opt, get_option('datadir'))
@@ -58,19 +58,9 @@ install_data(
 akstaging_helper_script_name = 'akstaging_root_helper.py'
 akstaging_helper_install_path = join_paths(prefix_opt, get_option('libexecdir'), meson.project_name(), akstaging_helper_script_name)
 
-conf_data_akstaging_config = configuration_data()
-conf_data_akstaging_config.set('AKSTAGING_HELPER_INSTALL_PATH', akstaging_helper_install_path)
-
-# Define macOS helper path and add to config data *before* configuring config.py.in
+# Define macOS helper path
 akstaging_macos_helper_script_name = 'akstaging_macos_helper.py'
 akstaging_macos_helper_install_path = join_paths(prefix_opt, get_option('libexecdir'), meson.project_name(), akstaging_macos_helper_script_name)
-conf_data_akstaging_config.set('MACOS_HELPER_EXECUTABLE_PATH', akstaging_macos_helper_install_path)
-
-generated_akstaging_config_py_file_object = configure_file(
-  input : 'akstaging/config.py.in',
-  output : 'config.py',
-  configuration : conf_data_akstaging_config
-)
 
 subdir('akstaging')
 subdir('data')

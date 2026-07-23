@@ -1,5 +1,4 @@
 import sys
-import os
 # Ensure current dir is in path for local module resolution if script is in root
 sys.path.insert(0, '.')
 print(f"Test script sys.path: {sys.path}")

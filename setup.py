@@ -17,6 +17,7 @@ distros = {
     "centos": "fedora",
     "rhel": "fedora",
     "arch": "arch",
+    "archarm": "arch",
     "darwin": "darwin",
 }
 
@@ -118,9 +119,16 @@ def detect_os_and_distro():
                 lines = f.readlines()
                 distro_info = {}
                 for line in lines:
-                    key, value = line.strip().split("=")
-                    distro_info[key] = value.strip('"')
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        key, value = line.split("=", 1)
+                        distro_info[key.strip()] = value.strip().strip('"\'')
                 distro = distro_info.get("ID", "unknown")
+                if distro not in distros and "ID_LIKE" in distro_info:
+                    for like_id in distro_info["ID_LIKE"].split():
+                        if like_id in distros:
+                            distro = like_id
+                            break
         except Exception as e:
             raise RuntimeError(f"Could not determine Linux distribution: {str(e)}")
     elif os_type == "Darwin":

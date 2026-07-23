@@ -2,7 +2,7 @@ import gi
 # Attempt to set Gtk and Adw versions early, though the import error might precede this.
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gtk, Gio, GLib
+from gi.repository import Adw, Gio, GLib
 import sys
 import os
 import logging

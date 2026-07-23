@@ -9,7 +9,7 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
+from gi.repository import Adw, Gio, GLib, GObject, Gtk
 
 from akstaging.aklib import sanitize_domain, print_to_textview
 from akstaging.defs import APP_NAME, COPYRIGHT, RESOURCE_PATH, VERSION
@@ -27,8 +27,23 @@ try:
     resource = Gio.Resource.load(resource_path)
     Gio.resources_register(resource)
 except GLib.Error as e:
-    logging.error("Failed to load resource: %s", e)
-    sys.exit(1)
+    # If resource is already registered or available in build tree, use it
+    try:
+        Gio.resources_lookup_data("/com/github/mclellac/AkamaiStaging/gtk/window.ui", Gio.ResourceLookupFlags.NONE)
+    except GLib.Error:
+        import os
+        _project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        _in_tree_resource = os.path.join(_project_root, "build", "akstaging", "akamaistaging.gresource")
+        if os.path.exists(_in_tree_resource):
+            try:
+                resource = Gio.Resource.load(_in_tree_resource)
+                Gio.resources_register(resource)
+            except GLib.Error:
+                logging.error("Failed to load resource: %s", e)
+                sys.exit(1)
+        else:
+            logging.error("Failed to load resource: %s", e)
+            sys.exit(1)
 
 
 class DataObject(GObject.Object):
@@ -258,7 +273,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             self.entry_domain.set_text("")
         self.show_toast(toast)
 
-    def on_get_ip_button_clicked(self):
+    def on_get_ip_button_clicked(self, *args):
         """Handles the 'Get Staging IP & Add to Hosts' button click."""
         self.textview_status.get_buffer().set_text("")
         is_valid, domain, err_msg = self._validate_domain_input(self.entry_domain.get_text())

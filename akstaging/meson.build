@@ -97,13 +97,18 @@ python3.install_sources(
 #   subdir: 'akstaging' 
 # )
 
-# Reference the config.py file generated in the root build directory
-# (output name from root meson.build's configure_file for akstaging/config.py.in is now 'config.py')
-generated_config_py_from_build_root = meson.global_build_root() / 'config.py'
+conf_data_akstaging_config = configuration_data()
+conf_data_akstaging_config.set('AKSTAGING_HELPER_INSTALL_PATH', akstaging_helper_install_path)
+conf_data_akstaging_config.set('MACOS_HELPER_EXECUTABLE_PATH', akstaging_macos_helper_install_path)
 
-# Install the generated file. Since its basename is already 'config.py',
-# no rename is needed.
+generated_akstaging_config_py_file_object = configure_file(
+  input: 'config.py.in',
+  output: 'config.py',
+  configuration: conf_data_akstaging_config
+)
+
+# Install the generated config.py file object
 python3.install_sources(
-  [generated_config_py_from_build_root], # This is builddir/config.py
-  subdir: 'akstaging'                   # Installs as .../akstaging/config.py
+  [generated_akstaging_config_py_file_object],
+  subdir: 'akstaging'
 )

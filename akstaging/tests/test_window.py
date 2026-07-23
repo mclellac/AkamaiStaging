@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 import tempfile
 import os
 import sys
@@ -102,8 +102,7 @@ mock_hosts_module.HostsFileEdit = mock_HostsFileEdit_class_global
 sys.modules['akstaging.hosts'] = mock_hosts_module
 # --- End of Other Application Mocks ---
 
-from akstaging.window import AkamaiStagingWindow, DataObject 
-from akstaging.aklib import AkamaiLib
+from akstaging.window import AkamaiStagingWindow 
 
 class TestDataObject: 
     def __init__(self, ip, hostname): self.ip = ip; self.hostname = hostname

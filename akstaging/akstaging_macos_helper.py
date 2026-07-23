@@ -70,12 +70,12 @@ except ImportError as e:
     write_log_stderr(error_message)
     sys.stderr.write(f"Python sys.path: {sys.path}\n")
     sys.stderr.write(f"Current working directory: {os.getcwd()}\n")
-    print(f"ERROR_INTERNAL:Failed to import modules in helper. Check stderr for details.")
+    print("ERROR_INTERNAL:Failed to import modules in helper. Check stderr for details.")
     sys.exit(0)
 except Exception as e_import_generic:
     write_log_stderr(f"CRITICAL: Unexpected error during initial module import: {e_import_generic}")
     # Main exception handler below will catch and log traceback if this occurs.
-    print(f"ERROR_INTERNAL:Unexpected import error in helper. Check stderr.")
+    print("ERROR_INTERNAL:Unexpected import error in helper. Check stderr.")
     sys.exit(0)
 
 try:
@@ -83,7 +83,7 @@ try:
     write_log_stderr("Successfully imported shared CLI functions from akstaging.helper_cli.")
 except ImportError as e_cli_import:
     write_log_stderr(f"CRITICAL: Failed to import from akstaging.helper_cli: {e_cli_import}")
-    print(f"ERROR_INTERNAL:Failed to import helper_cli. Check stderr for details.")
+    print("ERROR_INTERNAL:Failed to import helper_cli. Check stderr for details.")
     sys.exit(0)
 
 def main():

@@ -3,7 +3,6 @@
 import sysconfig
 from compileall import compile_dir
 from os import environ, path
-import subprocess
 
 prefix = environ.get("MESON_INSTALL_PREFIX", "/usr/local")
 destdir = environ.get("DESTDIR", "")

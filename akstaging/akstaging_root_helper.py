@@ -80,7 +80,7 @@ except ModuleNotFoundError as e:
     write_log(f"Current sys.path: {sys.path}")
     write_log(f"Traceback: {traceback.format_exc()}")
     # Directly use string literals for safety, as Status import has failed.
-    print(f"ERROR_INTERNAL:CRITICAL: Failed to import akstaging modules in helper. Check logs.")
+    print("ERROR_INTERNAL:CRITICAL: Failed to import akstaging modules in helper. Check logs.")
     sys.exit(0)
 except Exception as e_import_generic:
     _error_message = f"CRITICAL: Unexpected error importing modules: {e_import_generic}. Check logs."
@@ -97,7 +97,7 @@ try:
     write_log("Successfully imported shared CLI functions from akstaging.helper_cli.")
 except ImportError as e_cli_import:
     write_log(f"CRITICAL: Failed to import from akstaging.helper_cli: {e_cli_import}")
-    print(f"ERROR_INTERNAL:Failed to import helper_cli. Check logs.")
+    print("ERROR_INTERNAL:Failed to import helper_cli. Check logs.")
     sys.exit(0)
 
 def _print_status_and_exit(status_code: Status, message: any):
