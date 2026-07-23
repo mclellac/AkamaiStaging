@@ -59,11 +59,58 @@ class Preferences(Adw.PreferencesWindow):
 
         self.settings = Gio.Settings.new(SETTINGS_ID)
 
-        page = Adw.PreferencesPage()
-        self.add(page)
+        # Page 1: General & Behavior
+        general_page = Adw.PreferencesPage(title=_("General"), icon_name="preferences-system-symbolic")
+        self.add(general_page)
 
-        appearance_group = Adw.PreferencesGroup(title=_("Appearance"))
-        page.add(appearance_group)
+        general_group = Adw.PreferencesGroup(title=_("General &amp; Behavior"))
+        general_page.add(general_group)
+
+        self.auto_refresh_switch = Adw.SwitchRow(
+            title=_("Automatic Hosts Refresh"),
+            subtitle=_("Automatically re-read hosts file on external changes")
+        )
+        general_group.add(self.auto_refresh_switch)
+
+        self.desktop_notif_switch = Adw.SwitchRow(
+            title=_("Desktop Notifications"),
+            subtitle=_("Show system notifications for IP updates and deletions")
+        )
+        general_group.add(self.desktop_notif_switch)
+
+        # Page 2: DNS Resolver Settings
+        network_page = Adw.PreferencesPage(title=_("Network"), icon_name="network-workgroup-symbolic")
+        self.add(network_page)
+
+        network_group = Adw.PreferencesGroup(title=_("DNS Resolver Settings"))
+        network_page.add(network_group)
+
+        self.custom_dns_switch = Adw.SwitchRow(
+            title=_("Use Custom DNS Servers"),
+            subtitle=_("Override system DNS settings for lookups")
+        )
+        network_group.add(self.custom_dns_switch)
+
+        self.custom_dns_servers_entry = Adw.EntryRow(
+            title=_("DNS Servers")
+        )
+        network_group.add(self.custom_dns_servers_entry)
+
+        self.dns_timeout_row = Adw.ActionRow(
+            title=_("DNS Timeout (seconds)"),
+            subtitle=_("Query timeout threshold for DNS lookups")
+        )
+        dns_spin = Gtk.SpinButton.new_with_range(1, 30, 1)
+        self.dns_spin = dns_spin
+        self.dns_timeout_row.add_suffix(dns_spin)
+        network_group.add(self.dns_timeout_row)
+
+        # Page 3: Appearance & Theme
+        appearance_page = Adw.PreferencesPage(title=_("Appearance"), icon_name="preferences-desktop-theme-symbolic")
+        self.add(appearance_page)
+
+        appearance_group = Adw.PreferencesGroup(title=_("Appearance &amp; Theme"))
+        appearance_page.add(appearance_group)
 
         self.theme_combo_row = Adw.ComboRow(
             title=_("Theme"),
@@ -79,19 +126,27 @@ class Preferences(Adw.PreferencesWindow):
         self.font_scale_combo_row.set_model(Gtk.StringList.new(self.FONT_SCALE_OPTIONS))
         appearance_group.add(self.font_scale_combo_row)
 
-        network_group = Adw.PreferencesGroup(title=_("Network"))
-        page.add(network_group)
+        # Page 4: Security & Privilege Escalation
+        security_page = Adw.PreferencesPage(title=_("Security"), icon_name="dialog-password-symbolic")
+        self.add(security_page)
 
-        self.custom_dns_switch = Adw.SwitchRow(
-            title=_("Use Custom DNS Servers"),
-            subtitle=_("Override system DNS settings for lookups")
-        )
-        network_group.add(self.custom_dns_switch)
+        security_group = Adw.PreferencesGroup(title=_("Security &amp; Privilege Escalation"))
+        security_page.add(security_group)
 
-        self.custom_dns_servers_entry = Adw.EntryRow(
-            title=_("DNS Servers")
+        self.helper_status_row = Adw.ActionRow(
+            title=_("Helper Execution Mode"),
+            subtitle=_("PolicyKit (Linux) / osascript (macOS)")
         )
-        network_group.add(self.custom_dns_servers_entry)
+        security_group.add(self.helper_status_row)
+
+        self.elevation_timeout_row = Adw.ActionRow(
+            title=_("Elevated Session Timeout (s)"),
+            subtitle=_("Cached helper elevation timeout duration")
+        )
+        elev_spin = Gtk.SpinButton.new_with_range(5, 60, 5)
+        self.elev_spin = elev_spin
+        self.elevation_timeout_row.add_suffix(elev_spin)
+        security_group.add(self.elevation_timeout_row)
 
         self.load_initial_settings()
 
@@ -101,6 +156,10 @@ class Preferences(Adw.PreferencesWindow):
         self.font_scale_combo_row.connect("notify::selected", self._on_font_scale_changed)
         self.custom_dns_switch.connect("notify::active", self._on_custom_dns_enabled_changed)
         self.custom_dns_servers_entry.connect("changed", self._on_custom_dns_servers_changed)
+        self.auto_refresh_switch.connect("notify::active", self._on_auto_refresh_changed)
+        self.desktop_notif_switch.connect("notify::active", self._on_desktop_notif_changed)
+        self.dns_spin.connect("value-changed", self._on_dns_timeout_changed)
+        self.elev_spin.connect("value-changed", self._on_elev_timeout_changed)
 
     def load_initial_settings(self):
         """Loads settings from GSettings and applies them to the UI widgets and application state."""
@@ -142,6 +201,11 @@ class Preferences(Adw.PreferencesWindow):
         self.custom_dns_servers_entry.set_text(custom_dns_servers)
         self.custom_dns_servers_entry.set_sensitive(custom_dns_enabled)
 
+        self.auto_refresh_switch.set_active(self.settings.get_boolean('auto-refresh'))
+        self.desktop_notif_switch.set_active(self.settings.get_boolean('desktop-notifications'))
+        self.dns_spin.set_value(float(self.settings.get_int('dns-timeout')))
+        self.elev_spin.set_value(float(self.settings.get_int('elevation-timeout')))
+
     def get_font_scale(self) -> float:
         """
         Retrieves the saved font scale factor from GSettings.
@@ -150,6 +214,18 @@ class Preferences(Adw.PreferencesWindow):
             float: The saved font scale factor.
         """
         return self.settings.get_double('font-scale')
+
+    def _on_auto_refresh_changed(self, switch, _gparam):
+        self.settings.set_boolean('auto-refresh', switch.get_active())
+
+    def _on_desktop_notif_changed(self, switch, _gparam):
+        self.settings.set_boolean('desktop-notifications', switch.get_active())
+
+    def _on_dns_timeout_changed(self, spin):
+        self.settings.set_int('dns-timeout', int(spin.get_value()))
+
+    def _on_elev_timeout_changed(self, spin):
+        self.settings.set_int('elevation-timeout', int(spin.get_value()))
 
     def _on_theme_preference_changed(self, combo_row, _gparam):
         """Handles changes in the theme preference Adw.ComboRow and saves the new setting to GSettings."""

@@ -21,5 +21,25 @@
 			<summary>Custom DNS server addresses</summary>
 			<description>Comma-separated list of custom DNS server IP addresses.</description>
 		</key>
+		<key name='auto-refresh' type='b'>
+			<default>false</default>
+			<summary>Automatic hosts refresh</summary>
+			<description>Whether to automatically re-read hosts file when changed.</description>
+		</key>
+		<key name='desktop-notifications' type='b'>
+			<default>true</default>
+			<summary>Enable desktop notifications</summary>
+			<description>Whether to show desktop notifications for operations.</description>
+		</key>
+		<key name='dns-timeout' type='i'>
+			<default>5</default>
+			<summary>DNS Query Timeout</summary>
+			<description>Timeout in seconds for DNS queries.</description>
+		</key>
+		<key name='elevation-timeout' type='i'>
+			<default>15</default>
+			<summary>Elevation session timeout</summary>
+			<description>Timeout in seconds for elevated operations.</description>
+		</key>
 	</schema>
 </schemalist>

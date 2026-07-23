@@ -1,54 +1,62 @@
 using Gtk 4.0;
 using Adw 1;
 
-template $AkamaiStagingWindow: Adw.ApplicationWindow {
-  default-height: 800;
+template $AkamaiStagingWindow : Adw.ApplicationWindow {
   default-width: 850;
+  default-height: 800;
   title: _("Akamai Staging Network Spoof");
 
-  Adw.ToolbarView {
+  content: Adw.ToolbarView {
     [top]
     Adw.HeaderBar {
       [end]
-      MenuButton {
+      Gtk.MenuButton {
         icon-name: "open-menu-symbolic";
         menu-model: primary_menu;
         tooltip-text: _("Main Menu");
       }
     }
 
-    Adw.ToastOverlay toast_overlay {
-      ScrolledWindow {
+    content: Adw.ToastOverlay toast_overlay {
+      child: Gtk.ScrolledWindow {
         hscrollbar-policy: never;
         min-content-width: 400;
 
-        Adw.Clamp {
+        child: Adw.Clamp {
           maximum-size: 800;
 
-          Box {
-            margin-bottom: 24;
-            margin-end: 24;
-            margin-start: 24;
-            margin-top: 24;
+          child: Gtk.Box {
             orientation: vertical;
             spacing: 24;
+            margin-top: 24;
+            margin-bottom: 24;
+            margin-start: 24;
+            margin-end: 24;
 
             Adw.PreferencesGroup {
-              description: _("Enter a domain to resolve its Akamai staging IP and add it to your hosts file.");
               title: _("Add Host");
+              description: _("Enter a domain to resolve its Akamai staging IP and add it to your hosts file.");
 
               Adw.EntryRow entry_domain {
-                activates-default: true;
                 title: _("Domain/URL");
+                activates-default: true;
+
+                [prefix]
+                Gtk.Image {
+                  icon-name: "network-transmit-symbolic";
+                }
 
                 [suffix]
-                Button button_add_ip {
-                  css-classes: [
-                    "suggested-action",
-                  ];
+                Gtk.Box {
+                  spacing: 6;
 
-                  label: _("Add");
-                  tooltip-text: _("Add to Hosts");
+                  Gtk.Spinner spinner_dns {}
+
+                  Gtk.Button button_add_ip {
+                    label: _("Add");
+                    css-classes: ["suggested-action", "pill"];
+                    tooltip-text: _("Add to Hosts");
+                  }
                 }
               }
             }
@@ -57,52 +65,49 @@ template $AkamaiStagingWindow: Adw.ApplicationWindow {
               title: _("Managed Hosts");
 
               [header-suffix]
-              SearchEntry search_entry_hosts {
+              Gtk.SearchEntry search_entry_hosts {
                 placeholder-text: _("Search hosts…");
                 width-chars: 20;
               }
 
               Adw.ViewSwitcher hosts_view_switcher {
-                margin-bottom: 10;
                 margin-top: 20;
+                margin-bottom: 10;
                 vexpand: true;
 
-                ScrolledWindow scrolled_window_hosts_list {
+                Gtk.ScrolledWindow scrolled_window_hosts_list {
                   min-content-height: 200;
 
-                  ColumnView column_view_entries {
+                  Gtk.ColumnView column_view_entries {
                     show-column-separators: true;
                     show-row-separators: true;
                   }
                 }
 
                 Adw.StatusPage empty_hosts_status_page {
-                  description: _("Add a domain to get started, or adjust your search filter.");
-                  icon-name: "edit-find-symbolic";
-                  title: _("No Host Entries");
+                  title: _("No Staging Mappings");
+                  description: _("Enter a production domain above to discover its Akamai staging IP and map it in your hosts file.");
+                  icon-name: "network-server-symbolic";
                 }
               }
 
               Adw.ActionRow {
-                margin-bottom: 20;
-                margin-top: 20;
                 title: _("Select a host entry to edit/delete.");
+                margin-top: 20;
+                margin-bottom: 20;
 
                 [suffix]
-                Box {
+                Gtk.Box {
                   spacing: 6;
 
-                  Button button_edit_host {
+                  Gtk.Button button_edit_host {
                     label: _("Edit…");
                     tooltip-text: _("Edit Selected Entry");
                   }
 
-                  Button button_delete {
-                    css-classes: [
-                      "destructive-action",
-                    ];
-
+                  Gtk.Button button_delete {
                     label: _("Delete");
+                    css-classes: ["destructive-action"];
                     tooltip-text: _("Delete Selected Entry");
                   }
                 }
@@ -112,43 +117,41 @@ template $AkamaiStagingWindow: Adw.ApplicationWindow {
             Adw.PreferencesGroup {
               title: _("Status Log");
 
-              ScrolledWindow {
+              Gtk.ScrolledWindow {
                 hscrollbar-policy: never;
                 min-content-height: 100;
 
-                TextView textview_status {
-                  bottom-margin: 6;
-                  cursor-visible: false;
+                Gtk.TextView textview_status {
                   editable: false;
+                  cursor-visible: false;
+                  wrap-mode: word_char;
                   left-margin: 12;
                   right-margin: 12;
                   top-margin: 6;
-                  wrap-mode: word_char;
+                  bottom-margin: 6;
                 }
               }
             }
-          }
-        }
-      }
-    }
-  }
+          };
+        };
+      };
+    };
+  };
 }
 
 menu primary_menu {
   section {
     item {
-      action: "app.preferences";
       label: _("_Preferences");
+      action: "app.preferences";
     }
-
     item {
-      action: "win.show-help-overlay";
       label: _("_Keyboard Shortcuts");
+      action: "win.show-help-overlay";
     }
-
     item {
-      action: "app.about";
       label: _("_About…");
+      action: "app.about";
     }
   }
 }

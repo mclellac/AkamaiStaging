@@ -44,6 +44,23 @@ configure_file(
 
 gnome = import('gnome')
 
+blueprint_compiler = find_program('blueprint-compiler', required: false)
+if blueprint_compiler.found()
+  message('Found blueprint-compiler: compiling .blp templates to .ui XML')
+  custom_target('window.ui',
+    input: 'gtk/window.blp',
+    output: 'window.ui',
+    command: [blueprint_compiler, 'compile', '--output', '@OUTPUT@', '@INPUT@'],
+    build_by_default: true
+  )
+  custom_target('help-overlay.ui',
+    input: 'gtk/help-overlay.blp',
+    output: 'help-overlay.ui',
+    command: [blueprint_compiler, 'compile', '--output', '@OUTPUT@', '@INPUT@'],
+    build_by_default: true
+  )
+endif
+
 # Compile GNOME resources from an XML file. This bundles resources into a single binary file.
 gnome.compile_resources('akamaistaging',
   'akamaistaging.gresource.xml',

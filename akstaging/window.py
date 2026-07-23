@@ -9,7 +9,9 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib, GObject, Gtk
+from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
+
+Adw.init()
 
 from akstaging.aklib import sanitize_domain, print_to_textview
 from akstaging.defs import APP_NAME, COPYRIGHT, RESOURCE_PATH, VERSION
@@ -72,6 +74,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     column_view_entries: Gtk.ColumnView = Gtk.Template.Child()
     textview_status: Gtk.TextView = Gtk.Template.Child()
     entry_domain: Adw.EntryRow = Gtk.Template.Child()
+    spinner_dns: Gtk.Spinner = Gtk.Template.Child()
     toast_overlay: Adw.ToastOverlay = Gtk.Template.Child()
     search_entry_hosts: Gtk.SearchEntry = Gtk.Template.Child()
     hosts_view_switcher: Adw.ViewSwitcher = Gtk.Template.Child()
@@ -107,7 +110,10 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Initializes application-wide and window-specific actions."""
         self.create_action("quit", lambda *_: self.get_application().quit(), ["<primary>q"])
         self.create_action("about", self.on_about_action)
-        self.create_action("preferences", self.on_preferences_action)
+        self.create_action("preferences", self.on_preferences_action, ["<primary>comma"])
+        self.create_action("focus-search", lambda *_: self.search_entry_hosts.grab_focus(), ["<primary>f"])
+        self.create_action("focus-domain", lambda *_: self.entry_domain.grab_focus(), ["<primary>n"])
+        self.create_action("refresh", lambda *_: self.populate_store(self.store), ["<primary>r"])
 
     def _initialize_store(self):
         """Initializes the Gio.ListStore and the Gtk.ColumnView's model chain."""
@@ -180,11 +186,51 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         hostname_column.set_expand(True)
         self.column_view_entries.append_column(hostname_column)
 
+        action_factory = Gtk.SignalListItemFactory()
+        action_factory.connect("setup", self._setup_action_column_cell)
+        action_factory.connect("bind", self._bind_action_column_cell_data)
+        action_column = Gtk.ColumnViewColumn(title=_("Actions"), factory=action_factory)
+        self.column_view_entries.append_column(action_column)
+
         self.populate_store(self.store)
+
+    def _setup_action_column_cell(self, _factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem):
+        """Sets up the Quick Copy button for a row in the ColumnView."""
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        copy_btn = Gtk.Button(icon_name="edit-copy-symbolic", tooltip_text=_("Quick Copy Entry"))
+        copy_btn.add_css_class("flat")
+        box.append(copy_btn)
+        list_item.set_child(box)
+
+    def _bind_action_column_cell_data(self, _factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem):
+        """Binds Quick Copy action data to the row button."""
+        box = list_item.get_child()
+        if not box:
+            return
+        copy_btn = box.get_first_child()
+        obj = list_item.get_item()
+        if copy_btn and obj:
+            entry_text = f"{obj.ip} {obj.hostname}"
+            # Disconnect any old signal connections if recycled
+            try:
+                copy_btn.disconnect_by_func(self._on_copy_btn_clicked)
+            except (TypeError, ValueError):
+                pass
+            copy_btn.connect("clicked", self._on_copy_btn_clicked, entry_text)
+
+    def _on_copy_btn_clicked(self, _btn: Gtk.Button, entry_text: str):
+        self._copy_to_clipboard(entry_text)
+
+    def _copy_to_clipboard(self, text: str):
+        """Copies text to system clipboard and shows a toast notification."""
+        clipboard = Gdk.Display.get_default().get_clipboard()
+        clipboard.set(text)
+        self.show_toast(_("Copied '{text}' to clipboard.").format(text=text))
 
     def _setup_column_cell(self, _factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem):
         """Sets up the widget (a Gtk.Label) for a cell in the ColumnView."""
         label = Gtk.Label(xalign=0)
+        label.add_css_class("monospace")
         list_item.set_child(label)
 
     def _bind_column_cell_data(self, _factory: Gtk.SignalListItemFactory, list_item: Gtk.ListItem, column_type: str):
@@ -282,17 +328,23 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             self.show_toast(_("Invalid domain format entered."))
             return
 
-        ip, cname, err_msg = self._perform_staging_ip_lookup(domain)
-        if not ip:
-            print_to_textview(self.textview_status, err_msg)
-            self.show_toast(err_msg)
-            return
+        if self.spinner_dns:
+            self.spinner_dns.start()
+        try:
+            ip, cname, err_msg = self._perform_staging_ip_lookup(domain)
+            if not ip:
+                print_to_textview(self.textview_status, err_msg)
+                self.show_toast(err_msg)
+                return
 
-        status_msg = _("Found IP {ip} for {name}. Adding to hosts file...").format(
-            ip=ip, name=cname or domain
-        )
-        print_to_textview(self.textview_status, status_msg)
-        self._update_hosts_and_ui(ip, domain)
+            status_msg = _("Found IP {ip} for {name}. Adding to hosts file...").format(
+                ip=ip, name=cname or domain
+            )
+            print_to_textview(self.textview_status, status_msg)
+            self._update_hosts_and_ui(ip, domain)
+        finally:
+            if self.spinner_dns:
+                self.spinner_dns.stop()
 
     def on_delete_button_clicked(self, _button: Gtk.Button):
         """Handles the 'Delete' button click event."""
@@ -302,25 +354,39 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             return
         self._item_to_delete = item
         entry_display = f"{item.ip} {item.hostname}"
-        dialog = Adw.MessageDialog.new(self.get_root(), _("Confirm Deletion"),
-                                       _("Delete the entry:\n'{entry}'?").format(entry=entry_display))
-        dialog.add_response("cancel", _("Cancel"))
-        dialog.add_response("delete", _("Delete"))
-        dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
-        dialog.connect("response", self._on_delete_confirmation_response)
-        dialog.present()
+        if hasattr(Adw, "AlertDialog"):
+            dialog = Adw.AlertDialog.new(_("Remove Host Mapping?"), _("Are you sure you want to remove the staging entry for '{entry}'?").format(entry=entry_display))
+            dialog.add_response("cancel", _("Cancel"))
+            dialog.add_response("delete", _("Remove"))
+            dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
+            dialog.connect("response", self._on_delete_confirmation_response)
+            dialog.present(self)
+        else:
+            dialog = Adw.MessageDialog.new(self.get_root(), _("Confirm Deletion"),
+                                           _("Delete the entry:\n'{entry}'?").format(entry=entry_display))
+            dialog.add_response("cancel", _("Cancel"))
+            dialog.add_response("delete", _("Remove"))
+            dialog.set_response_appearance("delete", Adw.ResponseAppearance.DESTRUCTIVE)
+            dialog.connect("response", self._on_delete_confirmation_response)
+            dialog.present()
 
-    def _on_delete_confirmation_response(self, _dialog: Adw.MessageDialog, response_id: str):
+    def _on_delete_confirmation_response(self, _dialog, response_id: str):
         """Handles the response from the delete confirmation dialog."""
         if response_id == "delete" and hasattr(self, "_item_to_delete"):
             item = self._item_to_delete
             entry = f"{item.ip} {item.hostname}"
             status, msg = self.hosts_editor.remove_hosts_entry(entry)
             print_to_textview(self.textview_status, msg)
-            toast = self._get_toast_message_for_delete_status(status, entry)
+            toast_msg = self._get_toast_message_for_delete_status(status, entry)
             if status == Status.SUCCESS:
                 self.populate_store(self.store)
-            self.show_toast(toast)
+                self.show_toast(
+                    toast_msg,
+                    button_label=_("Undo"),
+                    on_button_clicked=lambda ip=item.ip, host=item.hostname: self._update_hosts_and_ui(ip, host)
+                )
+            else:
+                self.show_toast(toast_msg)
         else:
             self.show_toast(_("Deletion cancelled."))
         if hasattr(self, "_item_to_delete"):
@@ -333,18 +399,52 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             self.show_toast(_("No entry selected to edit."))
             return
 
-        dialog = Adw.MessageDialog(transient_for=self, heading=_("Edit Host Entry"))
-        self.edit_ip_entry_row = Adw.EntryRow(title=_("IP Address"), text=item.ip)
-        self.edit_hostname_entry_row = Adw.EntryRow(title=_("Hostname"), text=item.hostname)
-        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        content.append(self.edit_ip_entry_row)
-        content.append(self.edit_hostname_entry_row)
-        dialog.set_extra_child(content)
-        dialog.add_response("cancel", _("Cancel"))
-        dialog.add_response("save", _("Save"))
-        dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
-        dialog.connect("response", self._on_edit_dialog_response, item)
-        dialog.present()
+        if hasattr(Adw, "Dialog"):
+            dialog = Adw.Dialog(title=_("Edit Host Entry"))
+            self.edit_ip_entry_row = Adw.EntryRow(title=_("IP Address"), text=item.ip)
+            self.edit_hostname_entry_row = Adw.EntryRow(title=_("Hostname"), text=item.hostname)
+            pref_group = Adw.PreferencesGroup()
+            pref_group.add(self.edit_ip_entry_row)
+            pref_group.add(self.edit_hostname_entry_row)
+            pref_page = Adw.PreferencesPage()
+            pref_page.add(pref_group)
+
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+            header = Adw.HeaderBar()
+            box.append(header)
+            box.append(pref_page)
+
+            save_btn = Gtk.Button(label=_("Save"), css_classes=["suggested-action"])
+            save_btn.connect("clicked", lambda _b: self._on_edit_dialog_saved(dialog, item))
+            header.pack_end(save_btn)
+
+            dialog.set_child(box)
+            dialog.present(self)
+        else:
+            dialog = Adw.MessageDialog(transient_for=self, heading=_("Edit Host Entry"))
+            self.edit_ip_entry_row = Adw.EntryRow(title=_("IP Address"), text=item.ip)
+            self.edit_hostname_entry_row = Adw.EntryRow(title=_("Hostname"), text=item.hostname)
+            content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+            content.append(self.edit_ip_entry_row)
+            content.append(self.edit_hostname_entry_row)
+            dialog.set_extra_child(content)
+            dialog.add_response("cancel", _("Cancel"))
+            dialog.add_response("save", _("Save"))
+            dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
+            dialog.connect("response", self._on_edit_dialog_response, item)
+            dialog.present()
+
+    def _on_edit_dialog_saved(self, dialog: Adw.Dialog, item: DataObject):
+        new_ip = self.edit_ip_entry_row.get_text().strip()
+        new_hostname = self.edit_hostname_entry_row.get_text().strip()
+        if not new_ip or not new_hostname:
+            self.show_toast(_("IP and hostname cannot be empty."))
+        elif item.ip == new_ip and item.hostname == new_hostname:
+            self.show_toast(_("No changes detected."))
+        else:
+            self._handle_save_edit(item, new_ip, new_hostname)
+        dialog.close()
+        self.edit_ip_entry_row = self.edit_hostname_entry_row = None
 
     def _handle_save_edit(self, original_item: DataObject, new_ip: str, new_hostname: str):
         """Handles the logic for saving an edited host entry."""
@@ -410,7 +510,12 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             case _:
                 return _("Failed to save changes for '{entry}'.").format(entry=entry)
 
-    def show_toast(self, message: str, timeout: int = 3):
+    def show_toast(self, message: str, timeout: int = 3, button_label: str | None = None, on_button_clicked: callable | None = None):
         """Displays a toast notification."""
         if self.toast_overlay:
-            self.toast_overlay.add_toast(Adw.Toast(title=message, timeout=timeout))
+            toast = Adw.Toast(title=message, timeout=timeout)
+            if button_label:
+                toast.set_button_label(button_label)
+            if on_button_clicked:
+                toast.connect("button-clicked", lambda _t: on_button_clicked())
+            self.toast_overlay.add_toast(toast)

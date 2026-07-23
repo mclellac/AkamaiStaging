@@ -1,0 +1,34 @@
+[build-system]
+requires = ["meson-python"]
+build-backend = "mesonpy"
+
+[project]
+name = "akamaistaging"
+version = "1.0.0"
+description = "Manage Akamai staging environments via hosts file modifications"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C"]
+ignore = ["E402", "E501", "C901"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+
+[tool.pytest.ini_options]
+testpaths = ["akstaging/tests"]
+
+[tool.pyright]
+pythonVersion = "3.10"
+extraPaths = [".", "build", "akstaging"]
+reportAttributeAccessIssue = false
+reportMissingImports = false
+reportGeneralTypeIssues = false
+reportOptionalMemberAccess = false
+reportCallIssue = false
+
