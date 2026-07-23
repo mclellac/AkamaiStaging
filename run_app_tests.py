@@ -6,6 +6,9 @@ import logging
 # This script is in /app
 module_base_dir = os.path.abspath(os.path.dirname(__file__)) # /app
 sys.path.insert(0, module_base_dir)
+build_dir = os.path.join(module_base_dir, "build")
+if os.path.exists(build_dir):
+    sys.path.insert(0, build_dir)
 
 
 # Configure basic logging for the test script
@@ -17,7 +20,7 @@ import gi
 gi.require_version("Gdk", "4.0")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio, GLib
+from gi.repository import Adw, Gio
 
 RESOURCE_PATH_FROM_DEFS = None
 try:
@@ -27,22 +30,21 @@ except ImportError:
     logger.warning("Test Script: Could not import RESOURCE_PATH from akstaging.defs.")
 
 ABS_RESOURCE_PATH = os.path.join(module_base_dir, "build", "akstaging", "akamaistaging.gresource")
-logger.info(f"Test Script: Attempting to load Gio resource from: {ABS_RESOURCE_PATH}")
+resource_loaded = False
 
-try:
-    resource = Gio.Resource.load(ABS_RESOURCE_PATH)
-    Gio.resources_register(resource)
-    logger.info("Test Script: Gio Resource loaded and registered successfully.")
-except GLib.Error as e:
-    logger.error(f"Test Script: Failed to load Gio resource from {ABS_RESOURCE_PATH}: {e}")
-    # Attempt path relative to CWD if that fails (e.g. if CWD is /app/build)
-    # This alternative logic might be needed if the script's CWD changes.
-    # For `python /app/run_app_tests.py` run from /app, ABS_RESOURCE_PATH should be correct.
-    # If it was run from /app/build, then "akstaging/akamaistaging.gresource" would be correct.
-    # The current setup assumes CWD=/app for the `run_in_bash_session` execution of the script.
-    sys.exit(1)
-except Exception as e_generic:
-    logger.error(f"Test Script: Generic exception loading Gio resource: {e_generic}", exc_info=True)
+for path in [ABS_RESOURCE_PATH, RESOURCE_PATH_FROM_DEFS, "/usr/local/share/akamaistaging/akamaistaging.gresource"]:
+    if path and os.path.exists(path):
+        try:
+            resource = Gio.Resource.load(path)
+            Gio.resources_register(resource)
+            logger.info(f"Test Script: Gio Resource loaded and registered successfully from {path}.")
+            resource_loaded = True
+            break
+        except Exception as e:
+            logger.warning(f"Test Script: Could not load resource from {path}: {e}")
+
+if not resource_loaded:
+    logger.error("Test Script: Failed to load Gio resource from any path.")
     sys.exit(1)
 
 

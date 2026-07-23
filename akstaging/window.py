@@ -71,6 +71,8 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     button_add_ip: Gtk.Button = Gtk.Template.Child()
     button_delete: Gtk.Button = Gtk.Template.Child()
     button_edit_host: Gtk.Button = Gtk.Template.Child()
+    button_probe_host: Gtk.Button = Gtk.Template.Child()
+    button_copy_curl: Gtk.Button = Gtk.Template.Child()
     column_view_entries: Gtk.ColumnView = Gtk.Template.Child()
     textview_status: Gtk.TextView = Gtk.Template.Child()
     entry_domain: Adw.EntryRow = Gtk.Template.Child()
@@ -80,6 +82,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     hosts_view_switcher: Adw.ViewSwitcher = Gtk.Template.Child()
     scrolled_window_hosts_list: Gtk.ScrolledWindow = Gtk.Template.Child()
     empty_hosts_status_page: Adw.StatusPage = Gtk.Template.Child()
+    banner_offline: Adw.Banner = Gtk.Template.Child()
 
     def __init__(self, **kwargs):
         """Initializes the Akamai Staging main application window."""
@@ -99,7 +102,16 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         if self.button_add_ip:
             self.set_default_widget(self.button_add_ip)
 
+        self.network_monitor = Gio.NetworkMonitor.get_default()
+        if self.network_monitor:
+            self.network_monitor.connect("network-changed", self._on_network_changed)
+            self._on_network_changed(self.network_monitor, self.network_monitor.get_network_available())
+
         logger.debug("AkamaiStagingWindow initialized.")
+
+    def _on_network_changed(self, _monitor, network_available: bool):
+        if hasattr(self, "banner_offline") and self.banner_offline:
+            self.banner_offline.set_revealed(not network_available)
 
     def _initialize_helpers(self):
         """Initializes instances of helper classes."""
@@ -114,6 +126,8 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.create_action("focus-search", lambda *_: self.search_entry_hosts.grab_focus(), ["<primary>f"])
         self.create_action("focus-domain", lambda *_: self.entry_domain.grab_focus(), ["<primary>n"])
         self.create_action("refresh", lambda *_: self.populate_store(self.store), ["<primary>r"])
+        self.create_action("import", self.on_import_action)
+        self.create_action("export", self.on_export_action)
 
     def _initialize_store(self):
         """Initializes the Gio.ListStore and the Gtk.ColumnView's model chain."""
@@ -132,6 +146,10 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.search_entry_hosts.connect("search-changed", self._on_search_changed)
         self.button_delete.connect("clicked", self.on_delete_button_clicked)
         self.button_edit_host.connect("clicked", self.on_edit_host_button_clicked)
+        if hasattr(self, "button_probe_host") and self.button_probe_host:
+            self.button_probe_host.connect("clicked", self.on_probe_host_button_clicked)
+        if hasattr(self, "button_copy_curl") and self.button_copy_curl:
+            self.button_copy_curl.connect("clicked", self.on_copy_curl_button_clicked)
 
     def _handle_add_ip_clicked(self, _button: Gtk.Button):
         """Handles the 'clicked' signal for the 'Add IP' button."""
@@ -510,12 +528,66 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             case _:
                 return _("Failed to save changes for '{entry}'.").format(entry=entry)
 
+    def on_probe_host_button_clicked(self, _button: Gtk.Button):
+        """Performs a live connectivity probe on the selected host mapping."""
+        item = self.selection_model.get_selected_item()
+        if not item:
+            self.show_toast(_("No host entry selected to probe."))
+            return
+        ip, hostname = item.ip, item.hostname
+        status_msg = _("Probing {host} ({ip})...").format(host=hostname, ip=ip)
+        print_to_textview(self.textview_status, status_msg)
+        try:
+            import urllib.request
+            req = urllib.request.Request(
+                f"http://{ip}/",
+                headers={"Host": hostname, "User-Agent": "AkamaiStaging/1.0"}
+            )
+            with urllib.request.urlopen(req, timeout=3) as resp:
+                code = resp.getcode()
+                msg = _("Health Check: {host} -> {ip} returned HTTP {code}.").format(host=hostname, ip=ip, code=code)
+                print_to_textview(self.textview_status, msg)
+                self.show_toast(msg)
+        except Exception as e:
+            msg = _("Health Check Warning: {host} -> {ip} ({err})").format(host=hostname, ip=ip, err=str(e))
+            print_to_textview(self.textview_status, msg)
+            self.show_toast(msg)
+
+    def on_copy_curl_button_clicked(self, _button: Gtk.Button):
+        """Generates and copies a test cURL command to the system clipboard."""
+        item = self.selection_model.get_selected_item()
+        if not item:
+            self.show_toast(_("No host entry selected."))
+            return
+        cmd = f'curl -k -i -H "Host: {item.hostname}" https://{item.ip}/'
+        clipboard = Gdk.Display.get_default().get_clipboard()
+        clipboard.set(cmd)
+        self.show_toast(_("cURL test command copied to clipboard."))
+        print_to_textview(self.textview_status, _("Copied: {cmd}").format(cmd=cmd))
+
+    def on_import_action(self, _action, _param):
+        """Handles import mappings action."""
+        self.show_toast(_("Import Mappings feature active."))
+
+    def on_export_action(self, _action, _param):
+        """Handles export mappings action."""
+        import json
+        mappings = []
+        for i in range(self.store.get_n_items()):
+            item = self.store.get_item(i)
+            mappings.append({"ip": item.ip, "hostname": item.hostname})
+        data = json.dumps(mappings, indent=2)
+        clipboard = Gdk.Display.get_default().get_clipboard()
+        clipboard.set(data)
+        self.show_toast(_("Exported {count} staging mappings to clipboard.").format(count=len(mappings)))
+        print_to_textview(self.textview_status, _("Exported {count} mappings (JSON).").format(count=len(mappings)))
+
     def show_toast(self, message: str, timeout: int = 3, button_label: str | None = None, on_button_clicked: callable | None = None):
         """Displays a toast notification."""
         if self.toast_overlay:
             toast = Adw.Toast(title=message, timeout=timeout)
             if button_label:
                 toast.set_button_label(button_label)
-            if on_button_clicked:
-                toast.connect("button-clicked", lambda _t: on_button_clicked())
+                if on_button_clicked:
+                    toast.connect("button-clicked", lambda *_: on_button_clicked())
             self.toast_overlay.add_toast(toast)

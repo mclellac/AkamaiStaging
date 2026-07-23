@@ -17,6 +17,12 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
       }
     }
 
+    [top]
+    Adw.Banner banner_offline {
+      title: _("Network connection is offline. Staging DNS queries are paused.");
+      revealed: false;
+    }
+
     content: Adw.ToastOverlay toast_overlay {
       child: Gtk.ScrolledWindow {
         hscrollbar-policy: never;
@@ -92,13 +98,23 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
               }
 
               Adw.ActionRow {
-                title: _("Select a host entry to edit/delete.");
+                title: _("Select a host entry to edit/delete/probe.");
                 margin-top: 20;
                 margin-bottom: 20;
 
                 [suffix]
                 Gtk.Box {
                   spacing: 6;
+
+                  Gtk.Button button_probe_host {
+                    icon-name: "network-wireless-symbolic";
+                    tooltip-text: _("Health Check Selected Host");
+                  }
+
+                  Gtk.Button button_copy_curl {
+                    icon-name: "edit-copy-symbolic";
+                    tooltip-text: _("Copy cURL Test Command");
+                  }
 
                   Gtk.Button button_edit_host {
                     label: _("Edit…");
@@ -141,6 +157,14 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
 
 menu primary_menu {
   section {
+    item {
+      label: _("_Import Mappings…");
+      action: "app.import";
+    }
+    item {
+      label: _("_Export Mappings…");
+      action: "app.export";
+    }
     item {
       label: _("_Preferences");
       action: "app.preferences";

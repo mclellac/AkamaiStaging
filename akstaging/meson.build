@@ -53,12 +53,6 @@ if blueprint_compiler.found()
     command: [blueprint_compiler, 'compile', '--output', '@OUTPUT@', '@INPUT@'],
     build_by_default: true
   )
-  custom_target('help-overlay.ui',
-    input: 'gtk/help-overlay.blp',
-    output: 'help-overlay.ui',
-    command: [blueprint_compiler, 'compile', '--output', '@OUTPUT@', '@INPUT@'],
-    build_by_default: true
-  )
 endif
 
 # Compile GNOME resources from an XML file. This bundles resources into a single binary file.
