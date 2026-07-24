@@ -11,15 +11,15 @@ try:
     import importlib
 
     print("Importing akstaging.dns_utils...")
-    importlib.import_module("akstaging.dns_utils")
+    _ = importlib.import_module("akstaging.dns_utils")
     print("Successfully imported akstaging.dns_utils.")
 
     print("Importing akstaging.hosts...")
-    importlib.import_module("akstaging.hosts")
+    _ = importlib.import_module("akstaging.hosts")
     print("Successfully imported akstaging.hosts.")
 
     print("Importing akstaging.window (will likely fail at Gtk/Adw imports)...")
-    importlib.import_module("akstaging.window")
+    _ = importlib.import_module("akstaging.window")
     print("Successfully imported AkamaiStagingWindow class (syntax and non-Gtk import checks passed).")
 
 except ModuleNotFoundError as mnfe:

@@ -55,12 +55,12 @@ except Exception as e_gen_import:
 
 # Dummy Application class for the window
 class DummyApp(Adw.Application):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
         print("DummyApp initialized.")
 
 
-def main():
+def main() -> None:
     print("main(): Creating DummyApp...")
     app = DummyApp(application_id="com.github.mclellac.AkamaiStaging.TestGranularPerms")
 
@@ -69,7 +69,8 @@ def main():
         # Instantiation will trigger _initialize_helpers (incl. hfe()),
         # then _initialize_store(), then populate_store(), which calls
         # self.hosts_editor.read_hosts_file_content_privileged()
-        _window = AkamaiStagingWindow(application=app)
+        window = AkamaiStagingWindow(application=app)
+        assert window is not None
         print("main(): AkamaiStagingWindow instantiated successfully.")
         print("main(): Startup error checks (Gtk-CRITICAL, Assertions in _verify_ui_elements) passed.")
         print(

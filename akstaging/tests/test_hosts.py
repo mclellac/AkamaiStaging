@@ -1,7 +1,10 @@
 import os
 import unittest
 from datetime import datetime
+from typing import Any
 from unittest.mock import MagicMock, mock_open, patch
+
+from akstaging.status_codes import Status
 
 # Attempt to import HostsFileEdit from the correct location
 # This assumes your project structure allows this import from the test directory
@@ -15,11 +18,18 @@ except ImportError:
 
 
 class TestHostsFileEdit(unittest.TestCase):
+    hfe: HostsFileEdit
+    mock_hosts_file_path: str
+    hosts_file_patch: Any
+    initial_hosts_content: str
+    mock_backup_dir_path: str
+
     def setUp(self):
         self.hfe = HostsFileEdit()
 
         # 1. Mock HOSTS_FILE path
         self.mock_hosts_file_path = "/mocked/etc/hosts"
+        self.mock_backup_dir_path = "/mocked/backup/dir"
         self.hosts_file_patch = patch.object(HostsFileEdit, "HOSTS_FILE", self.mock_hosts_file_path)
         self.hosts_file_patch.start()
 
@@ -137,7 +147,7 @@ class TestHostsFileEdit(unittest.TestCase):
 
     @patch("akstaging.hosts.shutil.copy2", side_effect=PermissionError("Permission denied copying file"))
     @patch("akstaging.hosts.os.makedirs")  # Mock makedirs to prevent it from erroring
-    def test_create_backup_copy_permission_error(self, mock_makedirs, mock_copy2):
+    def test_create_backup_copy_permission_error(self, _mock_makedirs, mock_copy2):
         with self.assertRaises(PermissionError) as context:
             self.hfe.create_backup()
         self.assertIn("Permission denied when trying to read", str(context.exception))
@@ -145,7 +155,7 @@ class TestHostsFileEdit(unittest.TestCase):
 
     @patch("akstaging.hosts.shutil.copy2", side_effect=FileNotFoundError("Source file not found"))
     @patch("akstaging.hosts.os.makedirs")
-    def test_create_backup_copy_source_not_found_error(self, mock_makedirs, mock_copy2):
+    def test_create_backup_copy_source_not_found_error(self, _mock_makedirs, mock_copy2):
         with self.assertRaises(FileNotFoundError) as context:
             self.hfe.create_backup()
         self.assertIn(f"Error backing up {self.mock_hosts_file_path}: Source file not found", str(context.exception))
@@ -153,7 +163,7 @@ class TestHostsFileEdit(unittest.TestCase):
 
     @patch("akstaging.hosts.shutil.copy2", side_effect=OSError("Some other OS error during copy"))
     @patch("akstaging.hosts.os.makedirs")
-    def test_create_backup_copy_os_error(self, mock_makedirs, mock_copy2):
+    def test_create_backup_copy_os_error(self, _mock_makedirs, mock_copy2):
         with self.assertRaises(IOError) as context:
             self.hfe.create_backup()
         self.assertIn(f"Error copying {self.mock_hosts_file_path}", str(context.exception))  # Part of the message
@@ -283,14 +293,14 @@ class TestHostsFileEdit(unittest.TestCase):
         mock_os_isfile.assert_any_call(full_newest_backup_path)
 
     @patch("akstaging.hosts.os.path.isdir", return_value=False)
-    def test_restore_backup_backup_dir_not_found(self, mock_os_isdir):
+    def test_restore_backup_backup_dir_not_found(self, _mock_os_isdir):
         with self.assertRaises(FileNotFoundError) as context:
             self.hfe.restore_backup("any_backup.txt")
         self.assertIn(f"Backup directory {self.mock_backup_dir_path} not found", str(context.exception))
 
     @patch("akstaging.hosts.os.path.isdir", return_value=True)
     @patch("akstaging.hosts.os.path.isfile", return_value=False)
-    def test_restore_backup_specific_file_not_found(self, mock_os_isfile, mock_os_isdir):
+    def test_restore_backup_specific_file_not_found(self, _mock_os_isfile, _mock_os_isdir):
         backup_to_restore = "non_existent_backup.txt"
         full_backup_path = os.path.join(self.mock_backup_dir_path, backup_to_restore)
         with self.assertRaises(FileNotFoundError) as context:
@@ -299,7 +309,7 @@ class TestHostsFileEdit(unittest.TestCase):
 
     @patch("akstaging.hosts.os.path.isdir", return_value=True)
     @patch.object(HostsFileEdit, "list_backups", return_value=[])  # No backups available
-    def test_restore_backup_no_backups_available_for_most_recent(self, mock_list_backups, mock_os_isdir):
+    def test_restore_backup_no_backups_available_for_most_recent(self, _mock_list_backups, _mock_os_isdir):
         with self.assertRaises(FileNotFoundError) as context:
             self.hfe.restore_backup()  # No filename, tries most recent
         self.assertIn("No backups available to restore", str(context.exception))
@@ -309,7 +319,7 @@ class TestHostsFileEdit(unittest.TestCase):
     @patch("akstaging.hosts.os.path.isdir", return_value=True)
     @patch("akstaging.hosts.os.path.isfile", return_value=True)
     def test_restore_backup_pre_restore_backup_fails(
-        self, mock_isfile, mock_isdir, mock_list_backups, mock_hfe_create_backup
+        self, _mock_isfile, _mock_isdir, _mock_list_backups, mock_hfe_create_backup
     ):
         with self.assertRaises(IOError) as context:
             self.hfe.restore_backup()
@@ -322,7 +332,7 @@ class TestHostsFileEdit(unittest.TestCase):
     @patch("akstaging.hosts.os.path.isdir", return_value=True)
     @patch("akstaging.hosts.os.path.isfile", return_value=True)
     def test_restore_backup_permission_error_on_final_copy(
-        self, mock_isfile, mock_isdir, mock_list_backups, mock_hfe_create_backup, mock_shutil_copy2
+        self, _mock_isfile, _mock_isdir, _mock_list_backups, mock_hfe_create_backup, mock_shutil_copy2
     ):
         with self.assertRaises(PermissionError) as context:
             self.hfe.restore_backup()
@@ -413,7 +423,7 @@ class TestHostsFileEdit(unittest.TestCase):
             mock_hfe_create_backup.assert_called_once()  # Backup is attempted before write
 
     @patch("builtins.open", side_effect=FileNotFoundError("Hosts file not found for read"))
-    def test_remove_hosts_entry_read_file_not_found(self, mock_file):
+    def test_remove_hosts_entry_read_file_not_found(self, _mock_file):
         with self.assertRaises(FileNotFoundError) as context:
             self.hfe.remove_hosts_entry("1.1.1.1 example.com")
         self.assertIn(f"Error related to {self.mock_hosts_file_path}", str(context.exception))
@@ -554,5 +564,3 @@ class TestHostsFileEdit(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 
-# Need to import Status for the tests to run
-from akstaging.status_codes import Status

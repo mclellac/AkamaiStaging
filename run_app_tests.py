@@ -23,10 +23,11 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gio
 
-RESOURCE_PATH_FROM_DEFS = None
+RESOURCE_PATH_FROM_DEFS: str | None = None
 try:
-    from akstaging.defs import RESOURCE_PATH as RESOURCE_PATH_FROM_DEFS
+    from akstaging.defs import RESOURCE_PATH as _resource_path_defs
 
+    RESOURCE_PATH_FROM_DEFS = _resource_path_defs
     logger.info(f"Test Script: Imported RESOURCE_PATH from akstaging.defs: {RESOURCE_PATH_FROM_DEFS}")
 except ImportError:
     logger.warning("Test Script: Could not import RESOURCE_PATH from akstaging.defs.")
@@ -202,7 +203,7 @@ def run_all_tests(app_instance):
     window.selection_model.select_item(selected_idx, True)
 
     window._item_to_delete = window.selection_model.get_selected_item()
-    window._on_delete_confirmation_response(dialog=None, response_id="delete")
+    window._on_delete_confirmation_response(None, "delete")
 
     status_messages_tc5 = get_textview_status_content(window)
     hosts_content_tc5 = read_hosts_file_content()
@@ -235,7 +236,7 @@ def run_all_tests(app_instance):
         logger.info(
             f"TC6: Simulating delete for already deleted item: {window._item_to_delete.ip} {window._item_to_delete.hostname.split('#')[0].strip()}"
         )
-        window._on_delete_confirmation_response(dialog=None, response_id="delete")
+        window._on_delete_confirmation_response(None, "delete")
     else:
         # If _item_to_delete is not what we expect, this path of the test is flawed.
         # For this test, we want to ensure that calling delete on an entry that's
@@ -243,7 +244,7 @@ def run_all_tests(app_instance):
         # results in the correct "not found" message.
         logger.warning("TC6: _item_to_delete not as expected. Manually creating DataObject for test.")
         window._item_to_delete = DataObject("1.2.3.4", "example-staging.com")  # Simulate it was selected
-        window._on_delete_confirmation_response(dialog=None, response_id="delete")
+        window._on_delete_confirmation_response(None, "delete")
 
     status_messages_tc6 = get_textview_status_content(window)
     hosts_content_tc6 = read_hosts_file_content()

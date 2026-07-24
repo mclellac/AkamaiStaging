@@ -2,6 +2,7 @@ import os
 import sys
 import tempfile
 import unittest
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 # --- Start of Aggressive Mocking ---
@@ -22,34 +23,34 @@ mock_gi_repository.Adw = MagicMock()
 
 # --- Define Mock Base Classes ---
 class MockGObjectClass:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *_args: Any, **_kwargs: Any):
         super().__init__()
 
     __gsignals__ = {}
     _instance_init = MagicMock()
 
     @classmethod
-    def bind_property(cls, *args, **kwargs):
+    def bind_property(cls, *_args: Any, **_kwargs: Any):
         pass
 
     @classmethod
-    def GObject(cls, *args, **kwargs):
+    def GObject(cls, *args: Any, **kwargs: Any):
         return cls(*args, **kwargs)
 
     @classmethod
-    def new_template(cls, *args, **kwargs):
+    def new_template(cls, *_args: Any, **_kwargs: Any):
         pass
 
     @classmethod
-    def set_template_from_resource(cls, *args, **kwargs):
+    def set_template_from_resource(cls, *_args: Any, **_kwargs: Any):
         pass
 
     @classmethod
-    def bind_template_child_full(cls, *args, **kwargs):
+    def bind_template_child_full(cls, *_args: Any, **_kwargs: Any):
         pass
 
     @classmethod
-    def get_template_child(cls, *args, **kwargs):
+    def get_template_child(cls, *_args: Any, **_kwargs: Any):
         return MagicMock()
 
 
@@ -169,6 +170,8 @@ class MockHFEInstanceForTest:
 
 
 class TestAkamaiStagingWindow(unittest.TestCase):
+    hfe_mock_instance: Any
+
     def setUp(self):
         mock_list_store_instance.reset_mock()
         mock_list_store_instance.append.reset_mock()
@@ -182,7 +185,6 @@ class TestAkamaiStagingWindow(unittest.TestCase):
         self.hfe_mock_instance.update_hosts_file_content.reset_mock()
 
     def test_populate_store(self):
-        global mock_list_store_instance
         mock_list_store_instance.append.reset_mock()
         mock_list_store_instance.remove_all.reset_mock()
 
@@ -266,7 +268,7 @@ class TestAkamaiStagingWindow(unittest.TestCase):
             window_instance.get_root = MagicMock()  # Mock get_root for Adw.MessageDialog
 
             window_instance.on_delete_button_clicked(
-                None, None
+                None
             )  # This will internally call _on_delete_confirmation_response after dialog setup
 
             # Simulate clicking "delete" on the dialog.

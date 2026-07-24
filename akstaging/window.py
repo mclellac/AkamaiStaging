@@ -1,7 +1,9 @@
 import logging
 import re
 import sys
+from collections.abc import Callable
 from socket import gaierror
+from typing import Any
 
 import gi
 from dns.exception import DNSException
@@ -249,13 +251,14 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Handles the 'clicked' signal for the 'Add IP' button."""
         self.on_get_ip_button_clicked()
 
-    def create_action(self, name: str, callback: callable, shortcuts: list[str] | None = None):
+    def create_action(self, name: str, callback: Callable[..., Any], shortcuts: list[str] | None = None) -> None:
         """Creates a Gio.SimpleAction and connects it to a callback."""
         action = Gio.SimpleAction.new(name, None)
-        action.connect("activate", callback)
-        self.get_application().add_action(action)
-        if shortcuts:
-            self.get_application().set_accels_for_action(f"app.{name}", shortcuts)
+        _ = action.connect("activate", callback)
+        if self.get_application():
+            self.get_application().add_action(action)
+            if shortcuts:
+                self.get_application().set_accels_for_action(f"app.{name}", shortcuts)
 
     def on_about_action(self, _action: Gio.SimpleAction, _param: GLib.Variant | None):
         """Handles the 'about' action activation."""
@@ -436,7 +439,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             self.entry_domain.set_text("")
         self.show_toast(toast)
 
-    def on_get_ip_button_clicked(self, *args):
+    def on_get_ip_button_clicked(self, *_args: Any):
         """Handles the 'Get Staging IP & Add to Hosts' button click."""
         if hasattr(self, "textview_status") and self.textview_status:
             self.textview_status.get_buffer().set_text("")
@@ -490,23 +493,26 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             dialog.connect("response", self._on_delete_confirmation_response)
             dialog.present()
 
-    def _on_delete_confirmation_response(self, _dialog, response_id: str):
+    def _on_delete_confirmation_response(self, _dialog: Any, response_id: str) -> None:
         """Handles the response from the delete confirmation dialog."""
         if response_id == "delete" and hasattr(self, "_item_to_delete"):
-            item = self._item_to_delete
-            entry = f"{item.ip} {item.hostname}"
-            status, msg = self.hosts_editor.remove_hosts_entry(entry)
-            self.log_status(msg)
-            toast_msg = self._get_toast_message_for_delete_status(status, entry)
-            if status == Status.SUCCESS:
-                self.populate_store(self.store)
-                self.show_toast(
-                    toast_msg,
-                    button_label=_("Undo"),
-                    on_button_clicked=lambda ip=item.ip, host=item.hostname: self._update_hosts_and_ui(ip, host),
-                )
-            else:
-                self.show_toast(toast_msg)
+            item = getattr(self, "_item_to_delete", None)
+            if item and hasattr(item, "ip") and hasattr(item, "hostname"):
+                ip_val = str(item.ip)
+                host_val = str(item.hostname)
+                entry = f"{ip_val} {host_val}"
+                status, msg = self.hosts_editor.remove_hosts_entry(entry)
+                self.log_status(msg)
+                toast_msg = self._get_toast_message_for_delete_status(status, entry)
+                if status == Status.SUCCESS:
+                    self.populate_store(self.store)
+                    self.show_toast(
+                        toast_msg,
+                        button_label=_("Undo"),
+                        on_button_clicked=lambda i=ip_val, h=host_val: self._update_hosts_and_ui(i, h),
+                    )
+                else:
+                    self.show_toast(toast_msg)
         else:
             self.show_toast(_("Deletion cancelled."))
         if hasattr(self, "_item_to_delete"):
@@ -554,16 +560,18 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             dialog.connect("response", self._on_edit_dialog_response, item)
             dialog.present()
 
-    def _on_edit_dialog_saved(self, dialog: Adw.Dialog, item: DataObject):
-        new_ip = self.edit_ip_entry_row.get_text().strip()
-        new_hostname = self.edit_hostname_entry_row.get_text().strip()
-        if not new_ip or not new_hostname:
-            self.show_toast(_("IP and hostname cannot be empty."))
-        elif item.ip == new_ip and item.hostname == new_hostname:
-            self.show_toast(_("No changes detected."))
-        else:
-            self._handle_save_edit(item, new_ip, new_hostname)
-        dialog.close()
+    def _on_edit_dialog_saved(self, dialog: Any, item: DataObject) -> None:
+        if self.edit_ip_entry_row and self.edit_hostname_entry_row:
+            new_ip = self.edit_ip_entry_row.get_text().strip()
+            new_hostname = self.edit_hostname_entry_row.get_text().strip()
+            if not new_ip or not new_hostname:
+                self.show_toast(_("IP and hostname cannot be empty."))
+            elif item.ip == new_ip and item.hostname == new_hostname:
+                self.show_toast(_("No changes detected."))
+            else:
+                self._handle_save_edit(item, new_ip, new_hostname)
+        if hasattr(dialog, "close"):
+            dialog.close()
         self.edit_ip_entry_row = self.edit_hostname_entry_row = None
 
     def _handle_save_edit(self, original_item: DataObject, new_ip: str, new_hostname: str):
@@ -581,17 +589,18 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         if add_status == Status.SUCCESS:
             self.populate_store(self.store)
 
-    def _on_edit_dialog_response(self, dialog: Adw.MessageDialog, response_id: str, item: DataObject):
+    def _on_edit_dialog_response(self, dialog: Any, response_id: str, item: DataObject) -> None:
         """Handles the response from the edit host entry dialog."""
         if response_id == "save":
-            new_ip = self.edit_ip_entry_row.get_text().strip()
-            new_hostname = self.edit_hostname_entry_row.get_text().strip()
-            if not new_ip or not new_hostname:
-                self.show_toast(_("IP and hostname cannot be empty."))
-            elif item.ip == new_ip and item.hostname == new_hostname:
-                self.show_toast(_("No changes detected."))
-            else:
-                self._handle_save_edit(item, new_ip, new_hostname)
+            if self.edit_ip_entry_row and self.edit_hostname_entry_row:
+                new_ip = self.edit_ip_entry_row.get_text().strip()
+                new_hostname = self.edit_hostname_entry_row.get_text().strip()
+                if not new_ip or not new_hostname:
+                    self.show_toast(_("IP and hostname cannot be empty."))
+                elif item.ip == new_ip and item.hostname == new_hostname:
+                    self.show_toast(_("No changes detected."))
+                else:
+                    self._handle_save_edit(item, new_ip, new_hostname)
         else:
             self.show_toast(_("Edit operation cancelled."))
         dialog.close()
@@ -617,7 +626,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             case _:
                 return _("Failed to remove '{entry}'.").format(entry=entry)
 
-    def _get_toast_message_for_edit_remove_status(self, status: Status, entry: str) -> str:
+    def _get_toast_message_for_edit_remove_status(self, _status: Status, entry: str) -> str:
         """Generates a toast message for the removal part of an edit operation."""
         return _("Failed to remove old entry '{entry}'. Edit aborted.").format(entry=entry)
 
@@ -684,8 +693,12 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         self.log_status(_("Exported {count} mappings (JSON).").format(count=len(mappings)), level="success")
 
     def show_toast(
-        self, message: str, timeout: int = 3, button_label: str | None = None, on_button_clicked: callable | None = None
-    ):
+        self,
+        message: str,
+        timeout: int = 3,
+        button_label: str | None = None,
+        on_button_clicked: Callable[[], None] | None = None,
+    ) -> None:
         """Displays a toast notification."""
         if self.toast_overlay:
             toast = Adw.Toast(title=message, timeout=timeout)

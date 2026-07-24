@@ -18,7 +18,7 @@ print("Attempting to import core AkamaiStagingWindow module...")
 try:
     import importlib
 
-    importlib.import_module("akstaging.window")
+    _ = importlib.import_module("akstaging.window")
     print("Successfully imported AkamaiStagingWindow class (syntax check).")
     # Further instantiation will likely fail due to _gi error.
 except ImportError as e_import:

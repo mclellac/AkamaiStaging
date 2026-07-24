@@ -1,9 +1,10 @@
-# akstaging/hosts.py
 import os
 import platform
 import subprocess
 import tempfile
 import traceback
+from collections.abc import Callable
+from typing import Any, ClassVar
 
 import akstaging
 from akstaging.config import HELPER_EXECUTABLE_PATH, MACOS_HELPER_EXECUTABLE_PATH
@@ -17,10 +18,10 @@ class HostsFileEdit:
     including adding, updating, and removing host entries.
     """
 
-    HOSTS_FILE = "/etc/hosts"
-    OSASCRIPT_ERROR_LOG = "/tmp/akamai_staging_osascript_error.log"
+    HOSTS_FILE: ClassVar[str] = "/etc/hosts"
+    OSASCRIPT_ERROR_LOG: ClassVar[str] = "/tmp/akamai_staging_osascript_error.log"
 
-    _MODULE_PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(akstaging.__file__)))
+    _MODULE_PARENT_DIR: ClassVar[str] = os.path.dirname(os.path.dirname(os.path.realpath(akstaging.__file__)))
 
     def __init__(self, logger_func=None):
         """
@@ -586,7 +587,9 @@ class HostsFileEdit:
 
         return current_status, message
 
-    def _execute_operation(self, operation_func: callable, operation_type: str, op_kwargs: dict) -> tuple[Status, str]:
+    def _execute_operation(
+        self, operation_func: Callable[..., Any], operation_type: str, op_kwargs: dict[str, Any]
+    ) -> tuple[Status, str]:
         """
         Executes a host file write operation (update, remove), handling direct execution
         and attempting privilege escalation if a PermissionError occurs.
@@ -849,7 +852,7 @@ class HostsFileEdit:
             delete_str = str(kwargs.get("delete", False)).lower()
             cmd_args.extend(["--ip", staging_ip, "--domain", sanitized_domain, "--delete", delete_str])
         elif operation_type == "remove":
-            entry_to_remove = kwargs.get("entry_to_remove")
+            entry_to_remove = str(kwargs.get("entry_to_remove") or "")
             parts = entry_to_remove.split(maxsplit=1)
             if len(parts) != 2:
                 return (
@@ -1006,7 +1009,7 @@ class HostsFileEdit:
                 ]
             )
         elif operation_type == "remove":
-            entry_to_remove = kwargs.get("entry_to_remove")
+            entry_to_remove = str(kwargs.get("entry_to_remove") or "")
             parts = entry_to_remove.split(maxsplit=1)
             ip_to_remove = ""
             domain_to_remove = entry_to_remove
@@ -1146,7 +1149,7 @@ class HostsFileEdit:
                 ]
             )
         elif operation_type == "remove":
-            entry_to_remove = kwargs.get("entry_to_remove")
+            entry_to_remove = str(kwargs.get("entry_to_remove") or "")
             parts = entry_to_remove.split(maxsplit=1)
             ip_to_remove = ""
             domain_to_remove = entry_to_remove
@@ -1315,6 +1318,48 @@ class HostsFileEdit:
             raise RuntimeError(
                 f"An unexpected error occurred while reading '{self.HOSTS_FILE}': {e_generic}"
             ) from e_generic
+
+    def create_backup(self) -> str:
+        """Creates a backup copy of the hosts file."""
+        import shutil
+        from datetime import datetime
+
+        backup_dir = getattr(self, "mock_backup_dir_path", "/tmp/akstaging_backups")
+        os.makedirs(backup_dir, exist_ok=True)
+        backup_file = os.path.join(backup_dir, f"hosts_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt")
+        shutil.copy2(self.HOSTS_FILE, backup_file)
+        return backup_file
+
+    def list_backups(self) -> list[str]:
+        """Lists available backup files sorted from newest to oldest."""
+        backup_dir = getattr(self, "mock_backup_dir_path", "/tmp/akstaging_backups")
+        if not os.path.isdir(backup_dir):
+            return []
+        try:
+            files = [f for f in os.listdir(backup_dir) if os.path.isfile(os.path.join(backup_dir, f))]
+            return sorted(files, reverse=True)
+        except OSError:
+            return []
+
+    def restore_backup(self, backup_file: str | None = None) -> bool:
+        """Restores a hosts file backup."""
+        import shutil
+
+        backup_dir = getattr(self, "mock_backup_dir_path", "/tmp/akstaging_backups")
+        if not os.path.isdir(backup_dir):
+            raise FileNotFoundError(f"Backup directory {backup_dir} not found")
+        if backup_file:
+            full_path = os.path.join(backup_dir, backup_file)
+            if not os.path.isfile(full_path):
+                raise FileNotFoundError(f"Specified backup file {full_path} not found")
+        else:
+            backups = self.list_backups()
+            if not backups:
+                raise FileNotFoundError("No backups available to restore")
+            full_path = os.path.join(backup_dir, backups[0])
+        self.create_backup()
+        shutil.copy2(full_path, self.HOSTS_FILE)
+        return True
 
 
 # Ensure a single newline at the end of the file

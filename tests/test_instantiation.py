@@ -37,17 +37,18 @@ from akstaging.window import AkamaiStagingWindow
 
 # Dummy Application class for the window
 class DummyApp(Adw.Application):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
 
 
-def main():
+def main() -> None:
     app = DummyApp(application_id="com.github.mclellac.AkamaiStaging.Test")
 
     print("Attempting to instantiate AkamaiStagingWindow...")
     try:
         # The AkamaiStagingWindow constructor calls _verify_ui_elements internally.
-        _window = AkamaiStagingWindow(application=app)
+        window = AkamaiStagingWindow(application=app)
+        assert window is not None
         print("AkamaiStagingWindow instantiated successfully.")
         print("Startup error checks (Gtk-CRITICAL, Assertions in _verify_ui_elements) passed.")
     except Exception as e:

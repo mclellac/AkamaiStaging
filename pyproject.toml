@@ -23,11 +23,13 @@ ignore = ["E402", "E501"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
-[tool.pyright]
+[tool.basedpyright]
 pythonVersion = "3.10"
+typeCheckingMode = "standard"
 extraPaths = [".", "build", "akstaging", "tests"]
 reportAttributeAccessIssue = false
 reportMissingImports = false
+reportMissingTypeStubs = false
 reportGeneralTypeIssues = false
 reportOptionalMemberAccess = false
 reportCallIssue = false

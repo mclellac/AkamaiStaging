@@ -4,19 +4,26 @@ import gettext
 import locale
 import os
 import sys
+from collections.abc import Callable
 
+_app_id: str
+_locale_dir: str
 try:
-    from akstaging.defs import APP_ID, LOCALE_DIR
+    from akstaging.defs import APP_ID as _app_id
+    from akstaging.defs import LOCALE_DIR as _locale_dir
 except ImportError as e:
     print(f"CRITICAL: Could not import APP_ID/LOCALE_DIR from akstaging.defs for i18n setup: {e}", file=sys.stderr)
-    APP_ID = "com.github.mclellac.AkamaiStaging.fallback"
-    LOCALE_DIR = "/usr/local/share/locale"
+    _app_id = "com.github.mclellac.AkamaiStaging.fallback"
+    _locale_dir = "/usr/local/share/locale"
 
-_current_translation = None
-_translation_func = gettext.gettext
+APP_ID: str = _app_id
+LOCALE_DIR: str = _locale_dir
+
+_current_translation: gettext.NullTranslations | gettext.GNUTranslations | None = None
+_translation_func: Callable[[str], str] = gettext.gettext
 
 
-def set_language(lang_str: str = "system"):
+def set_language(lang_str: str = "system") -> None:
     """Sets the active application language ('system', 'en', 'fr') across Python gettext and C GLib/GTK textdomains."""
     global _translation_func, _current_translation
 
@@ -31,8 +38,8 @@ def set_language(lang_str: str = "system"):
         languages = ["fr", "fr_CA"]
         c_locales = [b"fr_CA.UTF-8", b"fr_CA.utf8", b"fr_FR.UTF-8", b"fr"]
     else:
-        os.environ.pop("LANGUAGE", None)
-        os.environ.pop("LC_ALL", None)
+        _ = os.environ.pop("LANGUAGE", None)
+        _ = os.environ.pop("LC_ALL", None)
         languages = None
         c_locales = [b""]
 
@@ -58,15 +65,15 @@ def set_language(lang_str: str = "system"):
         for domain in ["akamaistaging", APP_ID]:
             for ldir in search_dirs:
                 if os.path.exists(ldir):
-                    bindtextdomain(domain.encode("utf-8"), ldir.encode("utf-8"))
+                    _ = bindtextdomain(domain.encode("utf-8"), ldir.encode("utf-8"))
 
-        libc.textdomain(b"akamaistaging")
+        _ = libc.textdomain(b"akamaistaging")
     except Exception as e:
         print(f"Warning: Could not bind C libc textdomain: {e}", file=sys.stderr)
 
     # Set Python gettext
     domains = ["akamaistaging", APP_ID]
-    found_translation = None
+    found_translation: gettext.NullTranslations | gettext.GNUTranslations | None = None
     for domain in domains:
         for ldir in search_dirs:
             if os.path.exists(ldir):
@@ -100,7 +107,7 @@ def set_language(lang_str: str = "system"):
 
 try:
     try:
-        locale.setlocale(locale.LC_ALL, "")
+        _ = locale.setlocale(locale.LC_ALL, "")
     except Exception:
         pass
     set_language("system")
@@ -108,6 +115,7 @@ except Exception as e:
     print(f"Error initializing i18n: {e}", file=sys.stderr)
 
 
-def get_translator():
+def get_translator() -> Callable[[str], str]:
     """Returns the configured translator instance."""
     return lambda msg: _translation_func(msg)
+

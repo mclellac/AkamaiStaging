@@ -4,6 +4,7 @@ import datetime
 import os
 import sys
 import traceback
+from typing import Any, NoReturn
 
 LOG_FILE_PATH = "/tmp/akstaging_helper_debug.log"
 
@@ -106,7 +107,7 @@ except ImportError as e_cli_import:
     sys.exit(0)
 
 
-def _print_status_and_exit(status_code: Status, message: any):
+def _print_status_and_exit(status_code: Any, message: Any) -> NoReturn:
     """Ensures status_code is Status, message is string, then logs, prints, and exits."""
     final_message_str = str(message)
 

@@ -46,18 +46,19 @@ except Exception as e_gen_import:
 
 
 class DummyApp(Adw.Application):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: object) -> None:
         super().__init__(**kwargs)
         print("DummyApp initialized.")
 
 
-def main():
+def main() -> None:
     print("main(): Creating DummyApp...")
     app = DummyApp(application_id="com.github.mclellac.AkamaiStaging.TestFinalUIUpdates")
 
     print("main(): Attempting to instantiate AkamaiStagingWindow...")
     try:
-        _window = AkamaiStagingWindow(application=app)
+        window = AkamaiStagingWindow(application=app)
+        assert window is not None
         print("main(): AkamaiStagingWindow instantiated successfully.")
         # Verify the 'Add' button (button_add_ip) label if possible (requires widget access)
         # For now, successful instantiation is the main test given environment.

@@ -22,7 +22,7 @@ distros = {
 }
 
 # Package data for different OS and distributions
-package_data = {
+package_data: dict[str, dict[str, dict[str, str | list[str]]]] = {
     "Linux": {
         "debian": {
             "manager": "apt",
@@ -98,7 +98,7 @@ package_data = {
 }
 
 
-def run_command(cmd):
+def run_command(cmd: list[str]) -> None:
     """Run a system command and handle errors."""
     try:
         result = subprocess.run(cmd, check=True, text=True, capture_output=True)
@@ -109,13 +109,13 @@ def run_command(cmd):
         sys.exit(1)
 
 
-def detect_os_and_distro():
+def detect_os_and_distro() -> tuple[str, str]:
     os_type = platform.system()
     if os_type == "Linux":
         try:
             with open("/etc/os-release") as f:
                 lines = f.readlines()
-                distro_info = {}
+                distro_info: dict[str, str] = {}
                 for line in lines:
                     line = line.strip()
                     if line and not line.startswith("#") and "=" in line:
@@ -137,17 +137,21 @@ def detect_os_and_distro():
     return os_type, distro
 
 
-def install_packages():
+def install_packages() -> None:
     os_type, distro = detect_os_and_distro()
     distro_key = distros.get(distro, None)  # Map distro to its config key
 
-    if os_type in package_data and distro_key in package_data[os_type]:
+    if os_type in package_data and distro_key and distro_key in package_data[os_type]:
         data = package_data[os_type][distro_key]
-        manager = data["manager"]
-        update_cmd = [manager] + data["update"]
-        install_cmd = [manager] + data["options"] + data["packages"]
+        manager = str(data["manager"])
+        update_opts = data["update"] if isinstance(data["update"], list) else [str(data["update"])]
+        options_opts = data["options"] if isinstance(data["options"], list) else [str(data["options"])]
+        packages_opts = data["packages"] if isinstance(data["packages"], list) else [str(data["packages"])]
 
-        if os_type == "Linux" and os.geteuid():
+        update_cmd: list[str] = [manager] + update_opts
+        install_cmd: list[str] = [manager] + options_opts + packages_opts
+
+        if os_type == "Linux" and hasattr(os, "geteuid") and os.geteuid() != 0:
             update_cmd.insert(0, "sudo")
             install_cmd.insert(0, "sudo")
 

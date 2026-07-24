@@ -173,7 +173,7 @@ class DNSUtils:
 
             answers = resolver_instance.resolve(staging_cname_to_resolve, "A")
             if answers:
-                staging_ip = answers[0].address
+                staging_ip = str(answers[0].address)
                 logger.info("Found Akamai staging IP for %s (via %s): %s", domain, staging_cname_to_resolve, staging_ip)
                 return staging_ip, staging_cname_to_resolve
 
