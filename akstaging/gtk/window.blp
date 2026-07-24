@@ -133,18 +133,64 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
             Adw.PreferencesGroup {
               title: _("Status Log");
 
-              Gtk.ScrolledWindow {
-                hscrollbar-policy: never;
-                min-content-height: 100;
+              Adw.ExpanderRow expander_status_log {
+                title: _("Latest Activity");
+                subtitle: _("No actions performed yet.");
 
-                Gtk.TextView textview_status {
-                  editable: false;
-                  cursor-visible: false;
-                  wrap-mode: word_char;
-                  left-margin: 12;
-                  right-margin: 12;
-                  top-margin: 6;
-                  bottom-margin: 6;
+                [prefix]
+                Gtk.Image image_status_icon {
+                  icon-name: "dialog-information-symbolic";
+                  css-classes: ["accent"];
+                }
+
+                [suffix]
+                Gtk.Box {
+                  spacing: 6;
+                  valign: center;
+
+                  Gtk.Label label_status_time {
+                    css-classes: ["dim-label", "caption"];
+                  }
+
+                  Gtk.Button button_copy_log {
+                    icon-name: "edit-copy-symbolic";
+                    tooltip-text: _("Copy Log");
+                    css-classes: ["flat"];
+                  }
+
+                  Gtk.Button button_clear_log {
+                    icon-name: "edit-clear-all-symbolic";
+                    tooltip-text: _("Clear Log");
+                    css-classes: ["flat"];
+                  }
+                }
+
+                Gtk.Box {
+                  orientation: vertical;
+                  margin-top: 12;
+                  margin-bottom: 16;
+                  margin-start: 16;
+                  margin-end: 16;
+                  hexpand: true;
+
+                  Gtk.ScrolledWindow {
+                    hscrollbar-policy: never;
+                    min-content-height: 140;
+                    max-content-height: 250;
+                    hexpand: true;
+                    css-classes: ["card"];
+
+                    Gtk.TextView textview_status {
+                      editable: false;
+                      cursor-visible: false;
+                      wrap-mode: word_char;
+                      left-margin: 16;
+                      right-margin: 16;
+                      top-margin: 14;
+                      bottom-margin: 14;
+                      css-classes: ["monospace"];
+                    }
+                  }
                 }
               }
             }

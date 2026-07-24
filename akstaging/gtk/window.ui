@@ -156,18 +156,70 @@ pill</property>
                           <object class="AdwPreferencesGroup">
                             <property name="title" translatable="yes">Status Log</property>
                             <child>
-                              <object class="GtkScrolledWindow">
-                                <property name="hscrollbar-policy">2</property>
-                                <property name="min-content-height">100</property>
+                              <object class="AdwExpanderRow" id="expander_status_log">
+                                <property name="title" translatable="yes">Latest Activity</property>
+                                <property name="subtitle" translatable="yes">No actions performed yet.</property>
+                                <child type="prefix">
+                                  <object class="GtkImage" id="image_status_icon">
+                                    <property name="icon-name">dialog-information-symbolic</property>
+                                    <property name="css-classes">accent</property>
+                                  </object>
+                                </child>
+                                <child type="suffix">
+                                  <object class="GtkBox">
+                                    <property name="spacing">6</property>
+                                    <property name="valign">3</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label_status_time">
+                                        <property name="css-classes">dim-label
+caption</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_copy_log">
+                                        <property name="icon-name">edit-copy-symbolic</property>
+                                        <property name="tooltip-text" translatable="yes">Copy Log</property>
+                                        <property name="css-classes">flat</property>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="button_clear_log">
+                                        <property name="icon-name">edit-clear-all-symbolic</property>
+                                        <property name="tooltip-text" translatable="yes">Clear Log</property>
+                                        <property name="css-classes">flat</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
                                 <child>
-                                  <object class="GtkTextView" id="textview_status">
-                                    <property name="editable">false</property>
-                                    <property name="cursor-visible">false</property>
-                                    <property name="wrap-mode">3</property>
-                                    <property name="left-margin">12</property>
-                                    <property name="right-margin">12</property>
-                                    <property name="top-margin">6</property>
-                                    <property name="bottom-margin">6</property>
+                                  <object class="GtkBox">
+                                    <property name="orientation">1</property>
+                                    <property name="margin-top">12</property>
+                                    <property name="margin-bottom">16</property>
+                                    <property name="margin-start">16</property>
+                                    <property name="margin-end">16</property>
+                                    <property name="hexpand">true</property>
+                                    <child>
+                                      <object class="GtkScrolledWindow">
+                                        <property name="hscrollbar-policy">2</property>
+                                        <property name="min-content-height">140</property>
+                                        <property name="max-content-height">250</property>
+                                        <property name="hexpand">true</property>
+                                        <property name="css-classes">card</property>
+                                        <child>
+                                          <object class="GtkTextView" id="textview_status">
+                                            <property name="editable">false</property>
+                                            <property name="cursor-visible">false</property>
+                                            <property name="wrap-mode">3</property>
+                                            <property name="left-margin">16</property>
+                                            <property name="right-margin">16</property>
+                                            <property name="top-margin">14</property>
+                                            <property name="bottom-margin">14</property>
+                                            <property name="css-classes">monospace</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
                                   </object>
                                 </child>
                               </object>

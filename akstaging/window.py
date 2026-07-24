@@ -78,6 +78,11 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     button_copy_curl: Gtk.Button = Gtk.Template.Child()
     column_view_entries: Gtk.ColumnView = Gtk.Template.Child()
     textview_status: Gtk.TextView = Gtk.Template.Child()
+    expander_status_log: Adw.ExpanderRow = Gtk.Template.Child()
+    image_status_icon: Gtk.Image = Gtk.Template.Child()
+    label_status_time: Gtk.Label = Gtk.Template.Child()
+    button_copy_log: Gtk.Button = Gtk.Template.Child()
+    button_clear_log: Gtk.Button = Gtk.Template.Child()
     entry_domain: Adw.EntryRow = Gtk.Template.Child()
     spinner_dns: Gtk.Spinner = Gtk.Template.Child()
     toast_overlay: Adw.ToastOverlay = Gtk.Template.Child()
@@ -153,6 +158,10 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             self.button_probe_host.connect("clicked", self.on_probe_host_button_clicked)
         if hasattr(self, "button_copy_curl") and self.button_copy_curl:
             self.button_copy_curl.connect("clicked", self.on_copy_curl_button_clicked)
+        if hasattr(self, "button_copy_log") and self.button_copy_log:
+            self.button_copy_log.connect("clicked", self.on_copy_log_clicked)
+        if hasattr(self, "button_clear_log") and self.button_clear_log:
+            self.button_clear_log.connect("clicked", self.on_clear_log_clicked)
 
     def _handle_add_ip_clicked(self, _button: Gtk.Button):
         """Handles the 'clicked' signal for the 'Add IP' button."""
@@ -280,7 +289,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                 store.append(DataObject(ip, hostname))
         else:
             logger.error(f"Failed to read hosts file: {status.name} - {file_content}")
-            print_to_textview(self.textview_status, _("Error loading hosts entries: {file_content}"))
+            self.log_status(_("Error loading hosts entries: {file_content}"), level="error")
 
         self._update_hosts_view_visibility()
 
@@ -312,11 +321,11 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         """Sanitizes and validates a domain name input string."""
         sanitized_domain = sanitize_domain(domain_input)
         if domain_input != sanitized_domain:
-            print_to_textview(
-                self.textview_status,
-                _("Notice: Input '{domain_input}' sanitized to '{sanitized_domain}'.\n").format(
+            self.log_status(
+                _("Notice: Input '{domain_input}' sanitized to '{sanitized_domain}'.").format(
                     domain_input=domain_input, sanitized_domain=sanitized_domain
                 ),
+                level="warning",
             )
         if not re.match(r"^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", sanitized_domain):
             return False, sanitized_domain, _("Invalid domain format.")
@@ -336,7 +345,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     def _update_hosts_and_ui(self, staging_ip: str, domain: str):
         """Updates the system hosts file and refreshes the UI."""
         status, message = self.hosts_editor.update_hosts_file_content(staging_ip, domain, delete=False)
-        print_to_textview(self.textview_status, message)
+        self.log_status(message)
         toast = self._get_toast_message_for_add_status(status, domain)
         if status == Status.SUCCESS:
             self.populate_store(self.store)
@@ -345,10 +354,11 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
 
     def on_get_ip_button_clicked(self, *args):
         """Handles the 'Get Staging IP & Add to Hosts' button click."""
-        self.textview_status.get_buffer().set_text("")
+        if hasattr(self, "textview_status") and self.textview_status:
+            self.textview_status.get_buffer().set_text("")
         is_valid, domain, err_msg = self._validate_domain_input(self.entry_domain.get_text())
         if not is_valid:
-            print_to_textview(self.textview_status, err_msg)
+            self.log_status(err_msg, level="error")
             self.show_toast(_("Invalid domain format entered."))
             return
 
@@ -357,12 +367,12 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         try:
             ip, cname, err_msg = self._perform_staging_ip_lookup(domain)
             if not ip:
-                print_to_textview(self.textview_status, err_msg)
+                self.log_status(err_msg, level="error")
                 self.show_toast(err_msg)
                 return
 
             status_msg = _("Found IP {ip} for {name}. Adding to hosts file...").format(ip=ip, name=cname or domain)
-            print_to_textview(self.textview_status, status_msg)
+            self.log_status(status_msg, level="info")
             self._update_hosts_and_ui(ip, domain)
         finally:
             if self.spinner_dns:
@@ -402,7 +412,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             item = self._item_to_delete
             entry = f"{item.ip} {item.hostname}"
             status, msg = self.hosts_editor.remove_hosts_entry(entry)
-            print_to_textview(self.textview_status, msg)
+            self.log_status(msg)
             toast_msg = self._get_toast_message_for_delete_status(status, entry)
             if status == Status.SUCCESS:
                 self.populate_store(self.store)
@@ -482,7 +492,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             return
 
         add_status, msg = self.hosts_editor.update_hosts_file_content(new_ip, new_hostname, delete=False)
-        print_to_textview(self.textview_status, msg)
+        self.log_status(msg)
         self.show_toast(self._get_toast_message_for_edit_add_status(add_status, new_ip, new_hostname))
         if add_status == Status.SUCCESS:
             self.populate_store(self.store)
@@ -544,7 +554,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             return
         ip, hostname = item.ip, item.hostname
         status_msg = _("Probing {host} ({ip})...").format(host=hostname, ip=ip)
-        print_to_textview(self.textview_status, status_msg)
+        self.log_status(status_msg, level="info")
         try:
             import urllib.request
 
@@ -552,11 +562,11 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             with urllib.request.urlopen(req, timeout=3) as resp:
                 code = resp.getcode()
                 msg = _("Health Check: {host} -> {ip} returned HTTP {code}.").format(host=hostname, ip=ip, code=code)
-                print_to_textview(self.textview_status, msg)
+                self.log_status(msg, level="success")
                 self.show_toast(msg)
         except Exception as e:
             msg = _("Health Check Warning: {host} -> {ip} ({err})").format(host=hostname, ip=ip, err=str(e))
-            print_to_textview(self.textview_status, msg)
+            self.log_status(msg, level="warning")
             self.show_toast(msg)
 
     def on_copy_curl_button_clicked(self, _button: Gtk.Button):
@@ -569,7 +579,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         clipboard = Gdk.Display.get_default().get_clipboard()
         clipboard.set(cmd)
         self.show_toast(_("cURL test command copied to clipboard."))
-        print_to_textview(self.textview_status, _("Copied: {cmd}").format(cmd=cmd))
+        self.log_status(_("Copied: {cmd}").format(cmd=cmd), level="info")
 
     def on_import_action(self, _action, _param):
         """Handles import mappings action."""
@@ -587,7 +597,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         clipboard = Gdk.Display.get_default().get_clipboard()
         clipboard.set(data)
         self.show_toast(_("Exported {count} staging mappings to clipboard.").format(count=len(mappings)))
-        print_to_textview(self.textview_status, _("Exported {count} mappings (JSON).").format(count=len(mappings)))
+        self.log_status(_("Exported {count} mappings (JSON).").format(count=len(mappings)), level="success")
 
     def show_toast(
         self, message: str, timeout: int = 3, button_label: str | None = None, on_button_clicked: callable | None = None
@@ -600,3 +610,83 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
                 if on_button_clicked:
                     toast.connect("button-clicked", lambda *_: on_button_clicked())
             self.toast_overlay.add_toast(toast)
+
+    def log_status(self, message: str, level: str = "info"):
+        """Logs a status message to the status log expander and console text view."""
+        import datetime
+
+        now_str = datetime.datetime.now().strftime("%H:%M:%S")
+        msg_clean = message.strip()
+        if not msg_clean:
+            return
+
+        msg_lower = msg_clean.lower()
+        if level == "info":
+            if any(term in msg_lower for term in ["error", "failed", "permission denied"]):
+                level = "error"
+            elif any(term in msg_lower for term in ["warning", "notice", "invalid"]):
+                level = "warning"
+            elif any(term in msg_lower for term in ["success", "added", "removed", "updated", "copied", "exported", "found ip", "http 2", "http 3"]):
+                level = "success"
+
+        if hasattr(self, "expander_status_log") and self.expander_status_log:
+            summary = msg_clean.split("\n")[0]
+            self.expander_status_log.set_subtitle(summary)
+
+        if hasattr(self, "label_status_time") and self.label_status_time:
+            self.label_status_time.set_text(now_str)
+
+        if hasattr(self, "image_status_icon") and self.image_status_icon:
+            for cls in ["accent", "success", "warning", "error"]:
+                self.image_status_icon.remove_css_class(cls)
+
+            if level == "error":
+                self.image_status_icon.set_from_icon_name("dialog-error-symbolic")
+                self.image_status_icon.add_css_class("error")
+            elif level == "warning":
+                self.image_status_icon.set_from_icon_name("dialog-warning-symbolic")
+                self.image_status_icon.add_css_class("warning")
+            elif level == "success":
+                self.image_status_icon.set_from_icon_name("emblem-ok-symbolic")
+                self.image_status_icon.add_css_class("success")
+            else:
+                self.image_status_icon.set_from_icon_name("dialog-information-symbolic")
+                self.image_status_icon.add_css_class("accent")
+
+        formatted_msg = f"[{now_str}] [{level.upper()}] {msg_clean}"
+        if hasattr(self, "textview_status") and self.textview_status:
+            print_to_textview(self.textview_status, formatted_msg)
+            try:
+                buffer = self.textview_status.get_buffer()
+                mark = buffer.create_mark(None, buffer.get_end_iter(), False)
+                self.textview_status.scroll_to_mark(mark, 0.0, True, 0.0, 1.0)
+            except Exception:
+                pass
+
+    def on_copy_log_clicked(self, _button: Gtk.Button):
+        """Copies the entire status log content to system clipboard."""
+        if hasattr(self, "textview_status") and self.textview_status:
+            buffer = self.textview_status.get_buffer()
+            text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
+            if text.strip():
+                clipboard = Gdk.Display.get_default().get_clipboard()
+                clipboard.set(text)
+                self.show_toast(_("Status log copied to clipboard."))
+            else:
+                self.show_toast(_("Status log is empty."))
+
+    def on_clear_log_clicked(self, _button: Gtk.Button):
+        """Clears the status log buffer and resets summary indicators."""
+        if hasattr(self, "textview_status") and self.textview_status:
+            buffer = self.textview_status.get_buffer()
+            buffer.set_text("")
+        if hasattr(self, "expander_status_log") and self.expander_status_log:
+            self.expander_status_log.set_subtitle(_("No actions performed yet."))
+        if hasattr(self, "label_status_time") and self.label_status_time:
+            self.label_status_time.set_text("")
+        if hasattr(self, "image_status_icon") and self.image_status_icon:
+            for cls in ["accent", "success", "warning", "error"]:
+                self.image_status_icon.remove_css_class(cls)
+            self.image_status_icon.set_from_icon_name("dialog-information-symbolic")
+            self.image_status_icon.add_css_class("accent")
+        self.show_toast(_("Status log cleared."))
