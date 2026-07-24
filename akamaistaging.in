@@ -19,6 +19,8 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
+from akstaging.i18n import get_translator, set_language
+from akstaging.preferences import Preferences, apply_theme
 from akstaging.window import AkamaiStagingWindow
 
 # This import will now work correctly
@@ -38,12 +40,23 @@ class AkamaiApp(Adw.Application):
         self.settings.connect(
             "changed::font-scale", lambda s, k: self.apply_font_scaling()
         )
+        self.settings.connect(
+            "changed::language", lambda s, k: self.apply_language()
+        )
 
     def do_startup(self):
         """Called when the application starts, before activate."""
         Adw.Application.do_startup(self)
+        self.apply_language()
         self.apply_theme()
         self.apply_font_scaling()
+
+    def apply_language(self):
+        """Applies language scheme across C GLib/GTK textdomains and retranslates active window."""
+        lang_str = self.settings.get_string("language")
+        set_language(lang_str)
+        if self.window and hasattr(self.window, "retranslate_ui"):
+            self.window.retranslate_ui()
 
     def do_activate(self):
         """Handles the 'activate' signal of the Adw.Application."""
@@ -53,17 +66,8 @@ class AkamaiApp(Adw.Application):
 
     def apply_theme(self):
         """Applies the color scheme based on the 'theme' GSettings key."""
-        style_manager = self.get_style_manager()
         theme_str = self.settings.get_string("theme")
-
-        match theme_str:
-            case "dark":
-                style_manager.set_color_scheme(Adw.ColorScheme.PREFER_DARK)
-            case "light":
-                style_manager.set_color_scheme(Adw.ColorScheme.PREFER_LIGHT)
-            case _:  # "system" or any other fallback
-                style_manager.set_color_scheme(Adw.ColorScheme.DEFAULT)
-
+        apply_theme(theme_str, Gdk.Display.get_default())
         logging.info("Applied theme: %s", theme_str)
 
     def apply_font_scaling(self, scale_factor=None):

@@ -93,6 +93,7 @@ def run_all_tests(app_instance):
     logger.info("Starting AkamaiStaging UI tests (simulated).")
 
     window = AkamaiStagingWindow(application=app_instance)
+    window.ns.get_staging_ip = lambda domain: ("1.2.3.4", None)
 
     logger.info("--- Test Case 1: Initial State ---")
     clear_hosts_file_for_test()

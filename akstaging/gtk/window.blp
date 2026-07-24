@@ -39,7 +39,7 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
             margin-start: 24;
             margin-end: 24;
 
-            Adw.PreferencesGroup {
+            Adw.PreferencesGroup group_add_host {
               title: _("Add Host");
               description: _("Enter a domain to resolve its Akamai staging IP and add it to your hosts file.");
 
@@ -67,7 +67,7 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
               }
             }
 
-            Adw.PreferencesGroup {
+            Adw.PreferencesGroup group_managed_hosts {
               title: _("Managed Hosts");
 
               [header-suffix]
@@ -97,7 +97,7 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
                 }
               }
 
-              Adw.ActionRow {
+              Adw.ActionRow row_select_host {
                 title: _("Select a host entry to edit/delete/probe.");
                 margin-top: 20;
                 margin-bottom: 20;
@@ -130,7 +130,7 @@ template $AkamaiStagingWindow : Adw.ApplicationWindow {
               }
             }
 
-            Adw.PreferencesGroup {
+            Adw.PreferencesGroup group_status_log {
               title: _("Status Log");
 
               Adw.ExpanderRow expander_status_log {

@@ -6,6 +6,11 @@
 			<summary>Application theme</summary>
 			<description>The theme to use for the application: 'light', 'dark', or 'system'.</description>
 		</key>
+		<key name='language' type='s'>
+			<default>'system'</default>
+			<summary>Application display language</summary>
+			<description>The language to use for the application interface: 'system', 'en', or 'fr'.</description>
+		</key>
 		<key name='font-scale' type='d'>
 			<default>1.0</default>
 			<summary>Font scaling factor</summary>

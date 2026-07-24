@@ -15,39 +15,35 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 Adw.init()
 
 from akstaging.aklib import print_to_textview, sanitize_domain
-from akstaging.defs import APP_NAME, COPYRIGHT, RESOURCE_PATH, VERSION
+from akstaging.defs import APP_NAME, COPYRIGHT, RESOURCE_PATH, SETTINGS_ID, VERSION
 from akstaging.dns_utils import DNSUtils as ns
 from akstaging.hosts import HostsFileEdit as hfe
-from akstaging.i18n import get_translator
-from akstaging.preferences import Preferences
+from akstaging.i18n import get_translator, set_language
+from akstaging.preferences import Preferences, apply_theme
 from akstaging.status_codes import Status
 
 _ = get_translator()
 
-# Load and register the resource bundle
-resource_path = RESOURCE_PATH
-try:
-    resource = Gio.Resource.load(resource_path)
-    Gio.resources_register(resource)
-except GLib.Error as e:
-    # If resource is already registered or available in build tree, use it
-    try:
-        Gio.resources_lookup_data("/com/github/mclellac/AkamaiStaging/gtk/window.ui", Gio.ResourceLookupFlags.NONE)
-    except GLib.Error:
-        import os
+import os
 
-        _project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        _in_tree_resource = os.path.join(_project_root, "build", "akstaging", "akamaistaging.gresource")
-        if os.path.exists(_in_tree_resource):
-            try:
-                resource = Gio.Resource.load(_in_tree_resource)
-                Gio.resources_register(resource)
-            except GLib.Error:
-                logging.error("Failed to load resource: %s", e)
-                sys.exit(1)
-        else:
-            logging.error("Failed to load resource: %s", e)
-            sys.exit(1)
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_in_tree_resource = os.path.join(_project_root, "build", "akstaging", "akamaistaging.gresource")
+
+logger = logging.getLogger(__name__)
+
+if os.path.exists(_in_tree_resource):
+    try:
+        resource = Gio.Resource.load(_in_tree_resource)
+        Gio.resources_register(resource)
+    except GLib.Error as e:
+        logger.warning("Could not register build-tree resource: %s", e)
+else:
+    try:
+        resource = Gio.Resource.load(RESOURCE_PATH)
+        Gio.resources_register(resource)
+    except GLib.Error as e:
+        logger.error("Could not register Gio resource from %s: %s", RESOURCE_PATH, e)
+        sys.exit(1)
 
 
 class DataObject(GObject.Object):
@@ -92,6 +88,11 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     empty_hosts_status_page: Adw.StatusPage = Gtk.Template.Child()
     banner_offline: Adw.Banner = Gtk.Template.Child()
 
+    group_add_host: Adw.PreferencesGroup = Gtk.Template.Child()
+    group_managed_hosts: Adw.PreferencesGroup = Gtk.Template.Child()
+    row_select_host: Adw.ActionRow = Gtk.Template.Child()
+    group_status_log: Adw.PreferencesGroup = Gtk.Template.Child()
+
     def __init__(self, **kwargs):
         """Initializes the Akamai Staging main application window."""
         super().__init__(**kwargs)
@@ -114,6 +115,87 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
         if self.network_monitor:
             self.network_monitor.connect("network-changed", self._on_network_changed)
             self._on_network_changed(self.network_monitor, self.network_monitor.get_network_available())
+
+        try:
+            self.settings = Gio.Settings.new(SETTINGS_ID)
+            self.settings.connect("changed::theme", lambda s, k: apply_theme(s.get_string("theme"), self.get_display()))
+            self.settings.connect(
+                "changed::language", lambda s, k: (set_language(s.get_string("language")), self.retranslate_ui())
+            )
+            apply_theme(self.settings.get_string("theme"), self.get_display())
+            set_language(self.settings.get_string("language"))
+            self.retranslate_ui()
+        except Exception as e:
+            logger.warning("Could not load GSettings theme/language in AkamaiStagingWindow: %s", e)
+
+        logger.debug("AkamaiStagingWindow initialized.")
+
+    def retranslate_ui(self):
+        """Dynamically updates all window titles, labels, tooltips, buttons, and placeholders to the active language."""
+        self.set_title(_("Akamai Staging Network Spoof"))
+
+        if hasattr(self, "banner_offline") and self.banner_offline:
+            self.banner_offline.set_title(_("Network connection is offline. Staging DNS queries are paused."))
+
+        if hasattr(self, "group_add_host") and self.group_add_host:
+            self.group_add_host.set_title(_("Add Host"))
+            self.group_add_host.set_description(
+                _("Enter a domain to resolve its Akamai staging IP and add it to your hosts file.")
+            )
+
+        if hasattr(self, "entry_domain") and self.entry_domain:
+            self.entry_domain.set_title(_("Domain/URL"))
+
+        if hasattr(self, "button_add_ip") and self.button_add_ip:
+            self.button_add_ip.set_label(_("Add"))
+            self.button_add_ip.set_tooltip_text(_("Add to Hosts"))
+
+        if hasattr(self, "group_managed_hosts") and self.group_managed_hosts:
+            self.group_managed_hosts.set_title(_("Managed Hosts"))
+
+        if hasattr(self, "search_entry_hosts") and self.search_entry_hosts:
+            self.search_entry_hosts.set_placeholder_text(_("Search hosts…"))
+
+        if hasattr(self, "empty_hosts_status_page") and self.empty_hosts_status_page:
+            self.empty_hosts_status_page.set_title(_("No Staging Mappings"))
+            self.empty_hosts_status_page.set_description(
+                _("Enter a production domain above to discover its Akamai staging IP and map it in your hosts file.")
+            )
+
+        if hasattr(self, "row_select_host") and self.row_select_host:
+            self.row_select_host.set_title(_("Select a host entry to edit/delete/probe."))
+
+        if hasattr(self, "button_probe_host") and self.button_probe_host:
+            self.button_probe_host.set_tooltip_text(_("Health Check Selected Host"))
+
+        if hasattr(self, "button_copy_curl") and self.button_copy_curl:
+            self.button_copy_curl.set_tooltip_text(_("Copy cURL Test Command"))
+
+        if hasattr(self, "button_edit_host") and self.button_edit_host:
+            self.button_edit_host.set_label(_("Edit…"))
+            self.button_edit_host.set_tooltip_text(_("Edit Selected Entry"))
+
+        if hasattr(self, "button_delete") and self.button_delete:
+            self.button_delete.set_label(_("Delete"))
+            self.button_delete.set_tooltip_text(_("Delete Selected Entry"))
+
+        if hasattr(self, "group_status_log") and self.group_status_log:
+            self.group_status_log.set_title(_("Status Log"))
+
+        if hasattr(self, "expander_status_log") and self.expander_status_log:
+            self.expander_status_log.set_title(_("Latest Activity"))
+            curr_sub = self.expander_status_log.get_subtitle()
+            if not curr_sub or curr_sub in (
+                "No actions performed yet.",
+                "Aucune action effectuée pour le moment.",
+            ):
+                self.expander_status_log.set_subtitle(_("No actions performed yet."))
+
+        if hasattr(self, "button_copy_log") and self.button_copy_log:
+            self.button_copy_log.set_tooltip_text(_("Copy Log"))
+
+        if hasattr(self, "button_clear_log") and self.button_clear_log:
+            self.button_clear_log.set_tooltip_text(_("Clear Log"))
 
         logger.debug("AkamaiStagingWindow initialized.")
 
@@ -194,6 +276,8 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
     def on_preferences_action(self, _action: Gio.SimpleAction, _param: GLib.Variant | None):
         """Handles the 'preferences' action activation."""
         preferences_window = Preferences(parent_window=self)
+        preferences_window.set_default_size(820, 600)
+        preferences_window.set_size_request(780, 560)
         preferences_window.present()
 
     def create_column_view_columns(self):
