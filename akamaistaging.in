@@ -12,6 +12,10 @@ python_site_packages_path = "@PYTHON_SITE_PACKAGES@"
 if python_site_packages_path not in sys.path:
     sys.path.insert(0, python_site_packages_path)
 
+from akstaging import get_gio_settings, setup_gsettings_schema_dirs
+
+setup_gsettings_schema_dirs()
+
 import gi
 
 gi.require_version("Gdk", "4.0")
@@ -34,7 +38,7 @@ class AkamaiApp(Adw.Application):
         super().__init__(**kwargs)
         self.window = None
 
-        self.settings = Gio.Settings.new(SETTINGS_ID)
+        self.settings = get_gio_settings(SETTINGS_ID)
         self.settings.connect("changed::theme", lambda s, k: self.apply_theme())
         self.settings.connect(
             "changed::language", lambda s, k: self.apply_language()

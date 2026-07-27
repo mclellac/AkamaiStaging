@@ -7,6 +7,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gdk, Gio, Gtk
 
+from akstaging import get_gio_settings
 from akstaging.i18n import get_translator, set_language
 
 _ = get_translator()
@@ -92,7 +93,7 @@ class Preferences(Adw.PreferencesWindow):
         self.set_size_request(780, 560)
         self.style_manager = Adw.StyleManager.get_default()
 
-        self.settings = Gio.Settings.new(SETTINGS_ID)
+        self.settings = get_gio_settings(SETTINGS_ID)
 
         # Page 1: General & Behavior
         self.general_page = Adw.PreferencesPage(title=_("General"), icon_name="preferences-system-symbolic")

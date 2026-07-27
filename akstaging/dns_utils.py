@@ -10,6 +10,8 @@ from dns.resolver import Timeout as DNSTimeout
 gi.require_version("Gio", "2.0")
 from gi.repository import Gio
 
+from akstaging import get_gio_settings
+
 logger = logging.getLogger(__name__)
 
 SETTINGS_ID = "com.github.mclellac.AkamaiStaging"
@@ -102,7 +104,7 @@ class DNSUtils:
             and the resolved Akamai staging CNAME (or None if not determined).
             Raises dns.exception.DNSException for various DNS errors.
         """
-        settings = Gio.Settings.new(SETTINGS_ID)
+        settings = get_gio_settings(SETTINGS_ID)
         custom_dns_enabled = settings.get_boolean("custom-dns-enabled")
         custom_dns_servers_str = settings.get_string("custom-dns-servers")
 

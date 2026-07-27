@@ -16,6 +16,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 Adw.init()
 
+from akstaging import get_gio_settings
 from akstaging.aklib import print_to_textview, sanitize_domain
 from akstaging.defs import APP_NAME, COPYRIGHT, RESOURCE_PATH, SETTINGS_ID, VERSION
 from akstaging.dns_utils import DNSUtils as ns
@@ -119,7 +120,7 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
             self._on_network_changed(self.network_monitor, self.network_monitor.get_network_available())
 
         try:
-            self.settings = Gio.Settings.new(SETTINGS_ID)
+            self.settings = get_gio_settings(SETTINGS_ID)
             self.settings.connect("changed::theme", lambda s, k: apply_theme(s.get_string("theme"), self.get_display()))
             self.settings.connect(
                 "changed::language", lambda s, k: (set_language(s.get_string("language")), self.retranslate_ui())
