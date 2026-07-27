@@ -890,7 +890,9 @@ class HostsFileEdit:
         def sh_quote(s_val):
             return "'" + s_val.replace("'", "'\\''") + "'"
 
-        shell_cmd_str = " ".join([sh_quote(arg) for arg in cmd_args])
+        pkg_parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(akstaging.__file__)))
+        raw_cmd = " ".join([sh_quote(arg) for arg in cmd_args])
+        shell_cmd_str = f"PYTHONPATH={sh_quote(pkg_parent_dir)}:$PYTHONPATH {raw_cmd}"
         osascript_cmd_str = f'do shell script "{shell_cmd_str}" with administrator privileges'
 
         self._log_debug(f'Executing macOS osascript command: osascript -e "{osascript_cmd_str}"')

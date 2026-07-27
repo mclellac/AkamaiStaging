@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import glob
 import os
 import sys
 import traceback
@@ -31,12 +32,16 @@ def adjust_python_path(logger_func):
         script_path = os.path.realpath(__file__)
         script_dir = os.path.dirname(script_path)
 
-        # If helper is inside the akstaging package directory itself (e.g. repo layout)
+        # 1. Check parent directory if helper is in akstaging
         if os.path.exists(os.path.join(script_dir, "hosts.py")):
             parent_dir = os.path.dirname(script_dir)
             candidate_paths.append(parent_dir)
 
-        # Derived prefix site-packages (e.g. PREFIX/libexec/akamaistaging -> PREFIX/lib/python3.X/site-packages)
+        # 2. Check parent directory of libexec
+        parent_script_dir = os.path.dirname(script_dir)
+        candidate_paths.append(parent_script_dir)
+
+        # 3. Derived prefix site-packages
         prefix_dir = os.path.dirname(os.path.dirname(os.path.dirname(script_path)))
         python_version_dir = f"python{sys.version_info.major}.{sys.version_info.minor}"
         prefix_site_packages = os.path.join(prefix_dir, "lib", python_version_dir, "site-packages")
@@ -45,6 +50,19 @@ def adjust_python_path(logger_func):
 
     except Exception as e:
         logger_func(f"adjust_python_path: Error analyzing script paths: {e}")
+
+    # 4. Glob scan all site-packages across Homebrew, /usr/local, /usr, ~/.local
+    search_patterns = [
+        "/opt/homebrew/lib/python*/site-packages",
+        "/usr/local/lib/python*/site-packages",
+        "/usr/lib/python*/site-packages",
+        "/Library/Python/*/site-packages",
+        os.path.expanduser("~/.local/lib/python*/site-packages"),
+    ]
+    for pattern in search_patterns:
+        for matched_dir in glob.glob(pattern):
+            if os.path.isdir(matched_dir) and matched_dir not in candidate_paths:
+                candidate_paths.append(matched_dir)
 
     for path_item in candidate_paths:
         if path_item not in sys.path:
@@ -67,19 +85,13 @@ try:
     from akstaging.status_codes import Status
 
     write_log_stderr("Import of akstaging.hosts.HostsFileEdit and akstaging.status_codes.Status successful.")
-except ImportError as e:
-    error_message = (
-        f"ERROR_INTERNAL:Failed to import necessary modules. Ensure 'akstaging' package is in PYTHONPATH. Error: {e}\n"
-    )
+except Exception as e:
+    error_message = f"ERROR_INTERNAL:Failed to import necessary modules in helper: {e}"
     write_log_stderr(error_message)
+    sys.stderr.write(f"Traceback:\n{traceback.format_exc()}\n")
     sys.stderr.write(f"Python sys.path: {sys.path}\n")
     sys.stderr.write(f"Current working directory: {os.getcwd()}\n")
-    print("ERROR_INTERNAL:Failed to import modules in helper. Check stderr for details.")
-    sys.exit(0)
-except Exception as e_import_generic:
-    write_log_stderr(f"CRITICAL: Unexpected error during initial module import: {e_import_generic}")
-    # Main exception handler below will catch and log traceback if this occurs.
-    print("ERROR_INTERNAL:Unexpected import error in helper. Check stderr.")
+    print(f"ERROR_INTERNAL:Failed to import modules in helper: {e}")
     sys.exit(0)
 
 try:
