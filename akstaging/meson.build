@@ -10,20 +10,20 @@ conf.set('VERSION', meson.project_version())
 python_install_dir = python3.get_install_dir()
 message('Python install dir: ' + python_install_dir)
 
-# Use the correct method to get site-packages directory
-site_packages_dir = python3.get_install_dir(subdir: 'akstaging')
+# Use the correct method to get site-packages directory relative to prefix
+site_packages_dir = python3.get_install_dir(pure: true, subdir: 'akstaging')
 message('Site packages dir: ' + site_packages_dir)
 
 if is_flatpak_build
     conf.set('LOCALEDIR', join_paths(get_option('prefix'), 'share', 'locale'))
     conf.set('DATADIR', join_paths(get_option('prefix'), 'share'))
-    conf.set('AKSTAGINGDIR', site_packages_dir)
+    conf.set('AKSTAGINGDIR', join_paths(get_option('prefix'), site_packages_dir))
     conf.set('PKGDATADIR', join_paths(get_option('prefix'), 'share', meson.project_name()))
     resource_path = join_paths(get_option('prefix'), 'share', 'akamaistaging', 'akamaistaging.gresource')
 else
     conf.set('LOCALEDIR', join_paths(get_option('prefix'), get_option('datadir'), 'locale'))
     conf.set('DATADIR', join_paths(get_option('prefix'), get_option('datadir')))
-    conf.set('AKSTAGINGDIR', site_packages_dir)
+    conf.set('AKSTAGINGDIR', join_paths(get_option('prefix'), site_packages_dir))
     conf.set('PKGDATADIR', join_paths(get_option('prefix'), get_option('datadir'), meson.project_name()))
     resource_path = join_paths(get_option('prefix'), get_option('datadir'), 'akamaistaging', 'akamaistaging.gresource')
 endif

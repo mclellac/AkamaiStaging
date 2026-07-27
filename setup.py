@@ -257,28 +257,6 @@ def build_application(os_type):
 
     print("[Build] Installation complete!")
 
-    if os_type == "Darwin":
-        py_version_major = sys.version_info.major
-        py_version_minor = sys.version_info.minor
-
-        incorrectly_installed_path = Path(
-            f"/usr/local/usr/local/lib/python{py_version_major}.{py_version_minor}/site-packages/akstaging"
-        )
-        correct_install_path = Path(
-            f"/usr/local/lib/python{py_version_major}.{py_version_minor}/site-packages/akstaging"
-        )
-
-        if correct_install_path.exists():
-            print(f"[macOS Fix] Removing existing directory at correct location (if any): {correct_install_path}")
-            run_command(["sudo", "rm", "-rf", str(correct_install_path)])
-
-        if incorrectly_installed_path.exists():
-            print(f"[macOS Fix] Moving 'akstaging' from '{incorrectly_installed_path}' to '{correct_install_path}'...")
-            run_command(["sudo", "mkdir", "-p", str(correct_install_path.parent)])
-            run_command(["sudo", "mv", "-v", str(incorrectly_installed_path), str(correct_install_path)])
-        else:
-            print(f"[macOS Fix] Source directory '{incorrectly_installed_path}' not found. Cannot apply fix.")
-
 
 def check_homebrew() -> None:
     """Check if Homebrew is installed on macOS."""
