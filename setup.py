@@ -93,6 +93,7 @@ package_data: dict[str, dict[str, dict[str, str | list[str]]]] = {
                 "glib",
                 "pkg-config",
                 "gsettings-desktop-schemas",
+                "adwaita-icon-theme",
             ],
         }
     },

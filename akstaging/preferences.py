@@ -75,6 +75,13 @@ class Preferences(Adw.PreferencesWindow):
     LANGUAGE_STRING_MAP = ["system", "en", "fr"]
     DEFAULT_LANGUAGE_IDX = 0
 
+    @property
+    def FONT_SCALE_OPTIONS(self):
+        return [_("System Default (100%)"), _("110%"), _("120%"), _("130%"), _("140%"), _("150%")]
+
+    FONT_SCALE_VALUES = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+    DEFAULT_FONT_SCALE_IDX = 0
+
     DEFAULT_CUSTOM_DNS_ENABLED = False
     DEFAULT_CUSTOM_DNS_SERVERS = ""
 
@@ -150,6 +157,10 @@ class Preferences(Adw.PreferencesWindow):
         self.language_combo_row.set_model(Gtk.StringList.new(self.LANGUAGE_OPTIONS))
         self.appearance_group.add(self.language_combo_row)
 
+        self.font_scale_combo_row = Adw.ComboRow(title=_("Font Scale"), subtitle=_("Adjust application text size"))
+        self.font_scale_combo_row.set_model(Gtk.StringList.new(self.FONT_SCALE_OPTIONS))
+        self.appearance_group.add(self.font_scale_combo_row)
+
         # Page 4: Security & Privilege Escalation
         self.security_page = Adw.PreferencesPage(title=_("Security"), icon_name="dialog-password-symbolic")
         self.add(self.security_page)
@@ -176,6 +187,7 @@ class Preferences(Adw.PreferencesWindow):
         # or applying changes prematurely during initialization.
         self.theme_combo_row.connect("notify::selected", self._on_theme_preference_changed)
         self.language_combo_row.connect("notify::selected", self._on_language_changed)
+        self.font_scale_combo_row.connect("notify::selected", self._on_font_scale_changed)
         self.custom_dns_switch.connect("notify::active", self._on_custom_dns_enabled_changed)
         self.custom_dns_servers_entry.connect("changed", self._on_custom_dns_servers_changed)
         self.auto_refresh_switch.connect("notify::active", self._on_auto_refresh_changed)
@@ -211,6 +223,14 @@ class Preferences(Adw.PreferencesWindow):
         self.language_combo_row.set_selected(lang_idx)
         set_language(self.LANGUAGE_STRING_MAP[lang_idx])
 
+        # Load font scale
+        try:
+            scale_val = self.settings.get_double("font-scale")
+            font_scale_idx = self._get_font_scale_index(scale_val)
+        except Exception:
+            font_scale_idx = self.DEFAULT_FONT_SCALE_IDX
+        self.font_scale_combo_row.set_selected(font_scale_idx)
+
         # Load custom DNS settings
         custom_dns_enabled = self.settings.get_boolean("custom-dns-enabled")
         self.custom_dns_switch.set_active(custom_dns_enabled)
@@ -223,6 +243,12 @@ class Preferences(Adw.PreferencesWindow):
         self.desktop_notif_switch.set_active(self.settings.get_boolean("desktop-notifications"))
         self.dns_spin.set_value(float(self.settings.get_int("dns-timeout")))
         self.elev_spin.set_value(float(self.settings.get_int("elevation-timeout")))
+
+    def _get_font_scale_index(self, scale_val: float) -> int:
+        for idx, val in enumerate(self.FONT_SCALE_VALUES):
+            if abs(val - scale_val) < 0.05:
+                return idx
+        return 0
 
     def get_font_scale(self) -> float:
         """
@@ -258,6 +284,22 @@ class Preferences(Adw.PreferencesWindow):
             apply_theme(default_theme_str, self.parent_window.get_display() if self.parent_window else None)
             self.settings.set_string("theme", default_theme_str)
             self.theme_combo_row.set_selected(self.DEFAULT_THEME_IDX)
+
+    def _on_font_scale_changed(self, combo_row, _gparam):
+        """Handles changes in the font scale Adw.ComboRow and saves to GSettings."""
+        idx = combo_row.get_selected()
+        if 0 <= idx < len(self.FONT_SCALE_VALUES):
+            scale_val = self.FONT_SCALE_VALUES[idx]
+            try:
+                self.settings.set_double("font-scale", scale_val)
+            except Exception as e:
+                logger.warning("Failed to set font-scale setting: %s", e)
+            if self.parent_window:
+                app = self.parent_window.get_application()
+                if app and hasattr(app, "apply_font_scaling"):
+                    app.apply_font_scaling(scale_val)
+                elif hasattr(self.parent_window, "apply_font_scaling"):
+                    self.parent_window.apply_font_scaling(scale_val)
 
     def retranslate_ui(self):
         """Dynamically updates all Preferences page titles, group titles, row labels, and combo box models to active language."""
@@ -308,6 +350,11 @@ class Preferences(Adw.PreferencesWindow):
             if hasattr(self, "language_combo_row") and self.language_combo_row:
                 self.language_combo_row.set_title(_("Language"))
                 self.language_combo_row.set_subtitle(_("Choose the application display language"))
+
+            if hasattr(self, "font_scale_combo_row") and self.font_scale_combo_row:
+                self.font_scale_combo_row.set_title(_("Font Scale"))
+                self.font_scale_combo_row.set_subtitle(_("Adjust application text size"))
+                self.font_scale_combo_row.set_model(Gtk.StringList.new(self.FONT_SCALE_OPTIONS))
 
             if hasattr(self, "security_page") and self.security_page:
                 self.security_page.set_title(_("Security"))

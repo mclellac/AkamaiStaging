@@ -139,7 +139,7 @@ These are required for all operating systems (macOS, Linux, \*BSD):
 - **Core Build Tools & Libraries**:
 
   ```bash
-  brew install meson ninja gtk4 libadwaita pkg-config gsettings-desktop-schemas
+  brew install meson ninja gtk4 libadwaita pkg-config gsettings-desktop-schemas adwaita-icon-theme
   ```
 
 - **PyGObject**:

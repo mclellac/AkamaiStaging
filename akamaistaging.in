@@ -12,7 +12,7 @@ python_site_packages_path = "@PYTHON_SITE_PACKAGES@"
 if python_site_packages_path not in sys.path:
     sys.path.insert(0, python_site_packages_path)
 
-from akstaging import get_gio_settings, setup_gsettings_schema_dirs
+from akstaging import get_gio_settings, setup_gsettings_schema_dirs, setup_icon_theme_paths
 
 setup_gsettings_schema_dirs()
 
@@ -43,12 +43,18 @@ class AkamaiApp(Adw.Application):
         self.settings.connect(
             "changed::language", lambda s, k: self.apply_language()
         )
+        self.settings.connect(
+            "changed::font-scale", lambda s, k: self.apply_font_scaling()
+        )
 
     def do_startup(self):
         """Called when the application starts, before activate."""
         Adw.Application.do_startup(self)
+        display = Gdk.Display.get_default()
+        setup_icon_theme_paths(display)
         self.apply_language()
         self.apply_theme()
+        self.apply_font_scaling()
 
     def apply_language(self):
         """Applies language scheme across C GLib/GTK textdomains and retranslates active window."""
@@ -68,6 +74,22 @@ class AkamaiApp(Adw.Application):
         theme_str = self.settings.get_string("theme")
         apply_theme(theme_str, Gdk.Display.get_default())
         logging.info("Applied theme: %s", theme_str)
+
+    def apply_font_scaling(self, scale_factor=None):
+        """Applies font scaling factor via GtkSettings across Linux, macOS, and BSD."""
+        if scale_factor is None:
+            try:
+                scale_factor = self.settings.get_double("font-scale")
+            except Exception:
+                scale_factor = 1.0
+
+        logging.info("Applying font scale factor: %s", scale_factor)
+        display = Gdk.Display.get_default()
+        if display:
+            settings = Gtk.Settings.get_for_display(display)
+            if settings:
+                dpi_value = int(96 * 1024 * scale_factor) if abs(scale_factor - 1.0) > 0.01 else -1
+                settings.set_property("gtk-xft-dpi", dpi_value)
 
 
 if __name__ == "__main__":

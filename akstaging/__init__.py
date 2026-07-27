@@ -84,3 +84,34 @@ def get_gio_settings(settings_id: str) -> Any:
                 except Exception:
                     pass
         raise
+
+
+def setup_icon_theme_paths(display: Any = None) -> None:
+    """Ensures macOS, BSD, and custom install icon paths are added to Gtk.IconTheme."""
+    try:
+        from gi.repository import Gdk, Gtk
+
+        if not display:
+            display = Gdk.Display.get_default()
+        if display:
+            icon_theme = Gtk.IconTheme.get_for_display(display)
+            candidate_icon_dirs = [
+                "/opt/homebrew/share/icons",
+                "/usr/local/share/icons",
+                "/usr/share/icons",
+                os.path.expanduser("~/.local/share/icons"),
+            ]
+            try:
+                from akstaging.defs import DATA_DIR
+
+                if DATA_DIR:
+                    candidate_icon_dirs.insert(0, os.path.join(DATA_DIR, "icons"))
+            except Exception:
+                pass
+
+            search_paths = list(icon_theme.get_search_path())
+            for idir in candidate_icon_dirs:
+                if os.path.isdir(idir) and idir not in search_paths:
+                    icon_theme.add_search_path(idir)
+    except Exception:
+        pass

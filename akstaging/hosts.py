@@ -617,8 +617,8 @@ class HostsFileEdit:
             if current_os == "Darwin":
                 self._log_debug("macOS detected. Using osascript for escalation.")
                 return self._run_macos_elevated(operation_type, **op_kwargs)
-            if current_os == "Linux":
-                self._log_debug("Linux (non-Flatpak) detected. Using pkexec for escalation.")
+            if current_os in ("Linux", "FreeBSD", "OpenBSD", "NetBSD", "DragonFly") or "BSD" in current_os:
+                self._log_debug(f"{current_os} (non-Flatpak) detected. Using pkexec for escalation.")
                 return self._run_linux_elevated(operation_type, **op_kwargs)
             self._log_debug(f"Unsupported OS for privilege escalation: {current_os}")
             return (
@@ -839,12 +839,18 @@ class HostsFileEdit:
         """
         macos_helper_script_path = MACOS_HELPER_EXECUTABLE_PATH
         if not os.path.exists(macos_helper_script_path):
-            return (
-                Status.ERROR_INTERNAL,
-                f"macOS helper script not found at configured path: {macos_helper_script_path}",
-            )
+            pkg_dir = os.path.dirname(os.path.realpath(__file__))
+            local_helper = os.path.join(pkg_dir, "akstaging_macos_helper.py")
+            if os.path.exists(local_helper):
+                macos_helper_script_path = local_helper
+            else:
+                return (
+                    Status.ERROR_INTERNAL,
+                    f"macOS helper script not found at path: {macos_helper_script_path}",
+                )
 
-        cmd_args = ["python3", macos_helper_script_path, operation_type]
+        python_bin = sys.executable or "python3"
+        cmd_args = [python_bin, macos_helper_script_path, operation_type]
 
         if operation_type == "update":
             staging_ip = kwargs.get("staging_ip")
@@ -873,19 +879,6 @@ class HostsFileEdit:
     def _run_macos_elevated(self, operation_type: str, **kwargs) -> tuple[Status, str]:
         """
         Executes a hosts file operation on macOS with administrator privileges using osascript.
-
-        It constructs a shell command to run the Python helper script (`macos_helper.py`)
-        and executes it via AppleScript's "do shell script ... with administrator privileges".
-
-        Args:
-            operation_type: The type of operation ("read", "update", "remove").
-            **kwargs: Arguments for the operation (e.g., ip, domain for "update").
-
-        Returns:
-            A tuple (Status, message_or_content):
-            - Status: The outcome of the operation.
-            - message_or_content: For "read" on success, the content of the hosts file as a string.
-                                 For other operations or errors, a descriptive message.
         """
         cmd_args_or_error = self._build_macos_command_args(operation_type, **kwargs)
         if isinstance(cmd_args_or_error, tuple):
@@ -906,7 +899,7 @@ class HostsFileEdit:
                 capture_output=True,
                 text=True,
                 check=False,
-                timeout=10,
+                timeout=15,
             )
             stdout_cleaned = process.stdout.strip()
             stderr_cleaned = process.stderr.strip()
@@ -917,7 +910,7 @@ class HostsFileEdit:
                     if stderr_cleaned
                     else f"osascript failed with exit code {process.returncode} and no stderr."
                 )
-                if "User cancelled" in error_details_str or "(-128)" in error_details_str or process.returncode == 1:
+                if "User cancelled" in error_details_str or "User canceled" in error_details_str or "(-128)" in error_details_str:
                     op_details = kwargs.get("entry_to_remove", kwargs.get("sanitized_domain", "operation"))
                     return Status.USER_CANCELLED, f"Operation cancelled by user for '{op_details}'."
 
