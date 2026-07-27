@@ -33,13 +33,9 @@ class AkamaiApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.window = None
-        self.font_css_provider = None
 
         self.settings = Gio.Settings.new(SETTINGS_ID)
         self.settings.connect("changed::theme", lambda s, k: self.apply_theme())
-        self.settings.connect(
-            "changed::font-scale", lambda s, k: self.apply_font_scaling()
-        )
         self.settings.connect(
             "changed::language", lambda s, k: self.apply_language()
         )
@@ -49,7 +45,6 @@ class AkamaiApp(Adw.Application):
         Adw.Application.do_startup(self)
         self.apply_language()
         self.apply_theme()
-        self.apply_font_scaling()
 
     def apply_language(self):
         """Applies language scheme across C GLib/GTK textdomains and retranslates active window."""
@@ -69,31 +64,6 @@ class AkamaiApp(Adw.Application):
         theme_str = self.settings.get_string("theme")
         apply_theme(theme_str, Gdk.Display.get_default())
         logging.info("Applied theme: %s", theme_str)
-
-    def apply_font_scaling(self, scale_factor=None):
-        """Applies a font scaling factor to the entire application."""
-        if scale_factor is None:
-            scale_factor = self.settings.get_double("font-scale")
-
-        logging.info("Applying font scale factor: %s", scale_factor)
-        display = Gdk.Display.get_default()
-        if display is None:
-            logging.error("Cannot get GDK Display to apply font scaling.")
-            return
-
-        if self.font_css_provider is not None:
-            Gtk.StyleContext.remove_provider_for_display(
-                display, self.font_css_provider
-            )
-            self.font_css_provider = None
-
-        if abs(scale_factor - 1.0) > 0.01:
-            self.font_css_provider = Gtk.CssProvider()
-            css_data = f"* {{ font-size: {scale_factor}rem; }}".encode()
-            self.font_css_provider.load_from_data(css_data)
-            Gtk.StyleContext.add_provider_for_display(
-                display, self.font_css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER
-            )
 
 
 if __name__ == "__main__":

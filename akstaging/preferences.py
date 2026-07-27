@@ -19,7 +19,7 @@ _theme_css_provider = None
 
 
 def apply_theme(theme_str: str, display=None):
-    """Applies theme color scheme across Libadwaita StyleManager, GtkSettings, and CSS providers."""
+    """Applies theme color scheme across Libadwaita StyleManager without custom CSS overrides."""
     global _theme_css_provider
 
     scheme_map = {
@@ -41,48 +41,12 @@ def apply_theme(theme_str: str, display=None):
         if sm_display:
             sm_display.set_color_scheme(scheme)
 
-    if display:
         if _theme_css_provider is not None:
             try:
                 Gtk.StyleContext.remove_provider_for_display(display, _theme_css_provider)
             except Exception:
                 pass
             _theme_css_provider = None
-
-        if theme_str in ("light", "dark"):
-            _theme_css_provider = Gtk.CssProvider()
-            if theme_str == "light":
-                css_data = """
-                @define-color window_bg_color #fafafa;
-                @define-color window_fg_color rgba(0, 0, 0, 0.87);
-                @define-color card_bg_color #ffffff;
-                @define-color card_fg_color rgba(0, 0, 0, 0.87);
-                @define-color headerbar_bg_color #f6f6f6;
-                @define-color headerbar_fg_color rgba(0, 0, 0, 0.87);
-                @define-color dialog_bg_color #ffffff;
-                @define-color dialog_fg_color rgba(0, 0, 0, 0.87);
-                @define-color popover_bg_color #ffffff;
-                @define-color popover_fg_color rgba(0, 0, 0, 0.87);
-                @define-color view_bg_color #ffffff;
-                @define-color view_fg_color rgba(0, 0, 0, 0.87);
-                """
-            else:
-                css_data = """
-                @define-color window_bg_color #242424;
-                @define-color window_fg_color #ffffff;
-                @define-color card_bg_color #303030;
-                @define-color card_fg_color #ffffff;
-                @define-color headerbar_bg_color #303030;
-                @define-color headerbar_fg_color #ffffff;
-                @define-color dialog_bg_color #303030;
-                @define-color dialog_fg_color #ffffff;
-                @define-color popover_bg_color #303030;
-                @define-color popover_fg_color #ffffff;
-                @define-color view_bg_color #1e1e1e;
-                @define-color view_fg_color #ffffff;
-                """
-            _theme_css_provider.load_from_data(css_data.encode())
-            Gtk.StyleContext.add_provider_for_display(display, _theme_css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
 
 class Preferences(Adw.PreferencesWindow):
@@ -109,13 +73,6 @@ class Preferences(Adw.PreferencesWindow):
 
     LANGUAGE_STRING_MAP = ["system", "en", "fr"]
     DEFAULT_LANGUAGE_IDX = 0
-
-    @property
-    def FONT_SCALE_OPTIONS(self):
-        return [_("System Default"), _("110%"), _("120%"), _("130%"), _("140%"), _("150%")]
-
-    FONT_SCALE_VALUES = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
-    DEFAULT_FONT_SCALE_IDX = 0
 
     DEFAULT_CUSTOM_DNS_ENABLED = False
     DEFAULT_CUSTOM_DNS_SERVERS = ""
@@ -192,10 +149,6 @@ class Preferences(Adw.PreferencesWindow):
         self.language_combo_row.set_model(Gtk.StringList.new(self.LANGUAGE_OPTIONS))
         self.appearance_group.add(self.language_combo_row)
 
-        self.font_scale_combo_row = Adw.ComboRow(title=_("Font Scale"), subtitle=_("Adjust application font size"))
-        self.font_scale_combo_row.set_model(Gtk.StringList.new(self.FONT_SCALE_OPTIONS))
-        self.appearance_group.add(self.font_scale_combo_row)
-
         # Page 4: Security & Privilege Escalation
         self.security_page = Adw.PreferencesPage(title=_("Security"), icon_name="dialog-password-symbolic")
         self.add(self.security_page)
@@ -222,7 +175,6 @@ class Preferences(Adw.PreferencesWindow):
         # or applying changes prematurely during initialization.
         self.theme_combo_row.connect("notify::selected", self._on_theme_preference_changed)
         self.language_combo_row.connect("notify::selected", self._on_language_changed)
-        self.font_scale_combo_row.connect("notify::selected", self._on_font_scale_changed)
         self.custom_dns_switch.connect("notify::active", self._on_custom_dns_enabled_changed)
         self.custom_dns_servers_entry.connect("changed", self._on_custom_dns_servers_changed)
         self.auto_refresh_switch.connect("notify::active", self._on_auto_refresh_changed)
@@ -257,20 +209,6 @@ class Preferences(Adw.PreferencesWindow):
 
         self.language_combo_row.set_selected(lang_idx)
         set_language(self.LANGUAGE_STRING_MAP[lang_idx])
-
-        # Load and apply font scale.
-        font_scale_value = self.settings.get_double("font-scale")
-        try:
-            selected_font_scale_idx = self.FONT_SCALE_VALUES.index(font_scale_value)
-        except ValueError:
-            logger.warning("Invalid font_scale value '%s' from GSettings. Reverting to default.", font_scale_value)
-            selected_font_scale_idx = self.DEFAULT_FONT_SCALE_IDX
-            # Optionally, save the default back to GSettings
-            # self.settings.set_double('font-scale', self.FONT_SCALE_VALUES[self.DEFAULT_FONT_SCALE_IDX])
-
-        self.font_scale_combo_row.set_selected(selected_font_scale_idx)
-        if hasattr(self.parent_window, "apply_font_scaling"):
-            self.parent_window.apply_font_scaling(self.FONT_SCALE_VALUES[selected_font_scale_idx])
 
         # Load custom DNS settings
         custom_dns_enabled = self.settings.get_boolean("custom-dns-enabled")
@@ -370,10 +308,6 @@ class Preferences(Adw.PreferencesWindow):
                 self.language_combo_row.set_title(_("Language"))
                 self.language_combo_row.set_subtitle(_("Choose the application display language"))
 
-            if hasattr(self, "font_scale_combo_row") and self.font_scale_combo_row:
-                self.font_scale_combo_row.set_title(_("Font Scale"))
-                self.font_scale_combo_row.set_subtitle(_("Adjust application font size"))
-
             if hasattr(self, "security_page") and self.security_page:
                 self.security_page.set_title(_("Security"))
             if hasattr(self, "security_group") and self.security_group:
@@ -403,22 +337,6 @@ class Preferences(Adw.PreferencesWindow):
             if self.parent_window and hasattr(self.parent_window, "retranslate_ui"):
                 self.parent_window.retranslate_ui()
 
-    def _on_font_scale_changed(self, combo_row, _gparam):
-        """Handles changes in the font scale preference Adw.ComboRow and saves the new setting to GSettings."""
-        selected_idx = combo_row.get_selected()
-        if 0 <= selected_idx < len(self.FONT_SCALE_VALUES):
-            scale_factor = self.FONT_SCALE_VALUES[selected_idx]
-            self.settings.set_double("font-scale", scale_factor)
-            if hasattr(self.parent_window, "apply_font_scaling"):
-                self.parent_window.apply_font_scaling(scale_factor)
-        else:
-            logger.warning("Unexpected font scale index: %s. Reverting to default.", selected_idx)
-            default_scale_factor = self.FONT_SCALE_VALUES[self.DEFAULT_FONT_SCALE_IDX]
-            self.settings.set_double("font-scale", default_scale_factor)
-            if hasattr(self.parent_window, "apply_font_scaling"):
-                self.parent_window.apply_font_scaling(default_scale_factor)
-            self.font_scale_combo_row.set_selected(self.DEFAULT_FONT_SCALE_IDX)
-
     def _on_custom_dns_enabled_changed(self, switch, _gparam):
         is_active = switch.get_active()
         self.settings.set_boolean("custom-dns-enabled", is_active)
@@ -434,9 +352,6 @@ class Preferences(Adw.PreferencesWindow):
 
         if hasattr(self, "language_combo_row") and self.language_combo_row:
             self.language_combo_row.disconnect_by_func(self._on_language_changed)
-
-        if hasattr(self, "font_scale_combo_row") and self.font_scale_combo_row:
-            self.font_scale_combo_row.disconnect_by_func(self._on_font_scale_changed)
 
         if hasattr(self, "custom_dns_switch") and self.custom_dns_switch:
             self.custom_dns_switch.disconnect_by_func(self._on_custom_dns_enabled_changed)
