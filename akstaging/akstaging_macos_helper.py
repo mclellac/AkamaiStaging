@@ -12,54 +12,52 @@ def write_log_stderr(message: str):
 
 def adjust_python_path(logger_func):
     """
-    Adjusts sys.path to include the site-packages directory relative to the script's prefix.
-    This helps ensure that the 'akstaging' module can be imported if it's installed
-    in a standard location relative to this helper script.
+    Adjusts sys.path to ensure 'akstaging' module can be imported across all install layouts and dev environments.
     """
     logger_func("adjust_python_path: Started.")
-    initial_path_str = ":".join(sys.path)
-    logger_func(f"adjust_python_path: Initial sys.path: {initial_path_str}")
+
+    candidate_paths = []
+
+    try:
+        import sysconfig
+
+        purelib = sysconfig.get_path("purelib")
+        if purelib and os.path.isdir(purelib):
+            candidate_paths.append(purelib)
+    except Exception as e:
+        logger_func(f"adjust_python_path: Error getting sysconfig purelib: {e}")
 
     try:
         script_path = os.path.realpath(__file__)
-        logger_func(f"adjust_python_path: Script path: {script_path}")
+        script_dir = os.path.dirname(script_path)
 
-        # Determine prefix: e.g., PREFIX/libexec/akamaistaging/akstaging_macos_helper.py -> PREFIX
+        # If helper is inside the akstaging package directory itself (e.g. repo layout)
+        if os.path.exists(os.path.join(script_dir, "hosts.py")):
+            parent_dir = os.path.dirname(script_dir)
+            candidate_paths.append(parent_dir)
+
+        # Derived prefix site-packages (e.g. PREFIX/libexec/akamaistaging -> PREFIX/lib/python3.X/site-packages)
         prefix_dir = os.path.dirname(os.path.dirname(os.path.dirname(script_path)))
-        logger_func(f"adjust_python_path: Derived prefix_dir: {prefix_dir}")
-
         python_version_dir = f"python{sys.version_info.major}.{sys.version_info.minor}"
-        # Common path structure for site-packages relative to prefix
-        site_packages_path = os.path.join(prefix_dir, "lib", python_version_dir, "site-packages")
-        logger_func(f"adjust_python_path: Constructed site-packages path: {site_packages_path}")
-
-        if os.path.isdir(site_packages_path):
-            if site_packages_path not in sys.path:
-                sys.path.insert(0, site_packages_path)
-                logger_func(f"adjust_python_path: ADDED to sys.path: {site_packages_path}")
-            else:
-                logger_func("adjust_python_path: Site-packages path already in sys.path.")
-
-            # Test import
-            try:
-                import importlib
-
-                importlib.import_module("akstaging.hosts")
-                logger_func("adjust_python_path: Test import of 'akstaging.hosts' successful.")
-            except ModuleNotFoundError:
-                logger_func("adjust_python_path: FAILED to import 'akstaging.hosts' after path adjustment.")
-        else:
-            logger_func(
-                "adjust_python_path: Constructed site-packages path is not a directory. Path not added. Check Python/install layout."
-            )
+        prefix_site_packages = os.path.join(prefix_dir, "lib", python_version_dir, "site-packages")
+        if os.path.isdir(prefix_site_packages):
+            candidate_paths.append(prefix_site_packages)
 
     except Exception as e:
-        logger_func(f"adjust_python_path: Error during path adjustment: {e}")
-        # Traceback is already logged if logger_func is write_log_stderr and it includes it,
-        # or can be added to the main exception handler if critical.
+        logger_func(f"adjust_python_path: Error analyzing script paths: {e}")
 
-    final_path_str = ":".join(sys.path)
-    logger_func(f"adjust_python_path: Finished. Final sys.path: {final_path_str}")
+    for path_item in candidate_paths:
+        if path_item not in sys.path:
+            sys.path.insert(0, path_item)
+            logger_func(f"adjust_python_path: ADDED to sys.path: {path_item}")
+
+    try:
+        import importlib
+
+        importlib.import_module("akstaging.hosts")
+        logger_func("adjust_python_path: Import of 'akstaging.hosts' successful.")
+    except Exception as e_imp:
+        logger_func(f"adjust_python_path: Test import failed: {e_imp}")
 
 
 adjust_python_path(write_log_stderr)
