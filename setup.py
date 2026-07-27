@@ -92,6 +92,7 @@ package_data: dict[str, dict[str, dict[str, str | list[str]]]] = {
                 "pygobject3",
                 "glib",
                 "pkg-config",
+                "gsettings-desktop-schemas",
             ],
         }
     },
@@ -129,10 +130,10 @@ def find_executable(cmd_name: str) -> str:
     return cmd_name
 
 
-def run_command(cmd: list[str]) -> None:
+def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess[str] | None:
     """Run a system command and handle errors."""
     if not cmd:
-        return
+        return None
     resolved_cmd = [str(arg) for arg in cmd]
     if resolved_cmd[0] == "sudo" and len(resolved_cmd) > 1:
         resolved_cmd[1] = find_executable(resolved_cmd[1])
@@ -141,11 +142,16 @@ def run_command(cmd: list[str]) -> None:
 
     try:
         result = subprocess.run(resolved_cmd, check=True, text=True, capture_output=True)
-        print(result.stdout)
+        if result.stdout:
+            print(result.stdout, end="")
+        return result
     except subprocess.CalledProcessError as e:
-        print(f"Error: Command {' '.join(map(str, cmd))} failed.")  # Convert PosixPath to str
-        print(e.stderr)
-        sys.exit(1)
+        if check:
+            print(f"Error: Command {' '.join(map(str, cmd))} failed.")  # Convert PosixPath to str
+            if e.stderr:
+                print(e.stderr, end="")
+            sys.exit(1)
+        raise
 
 
 def detect_os_and_distro() -> tuple[str, str]:
@@ -204,18 +210,29 @@ def install_packages() -> None:
     try:
         import dns.resolver  # noqa: F401
     except ImportError:
-        print("[Dependencies] 'dns' (dnspython) module not found in Python environment. Installing via pip...")
+        print("[Dependencies] 'dns' (dnspython) module not found in Python environment. Installing...")
         req_file = Path(__file__).parent / "requirements.txt"
         target_args = ["-r", str(req_file)] if req_file.exists() else ["dnspython"]
-        try:
-            run_command([sys.executable, "-m", "pip", "install"] + target_args)
-        except SystemExit:
+        pip_options = [
+            [],
+            ["--user"],
+            ["--break-system-packages"],
+            ["--user", "--break-system-packages"],
+        ]
+        installed = False
+        for flags in pip_options:
+            pip_cmd = [sys.executable, "-m", "pip", "install"] + flags + target_args
             try:
-                print("[Dependencies] Retrying pip install with --break-system-packages...")
-                run_command([sys.executable, "-m", "pip", "install", "--break-system-packages"] + target_args)
-            except SystemExit:
-                print("[Dependencies] Retrying pip install with --user...")
-                run_command([sys.executable, "-m", "pip", "install", "--user"] + target_args)
+                run_command(pip_cmd, check=False)
+                installed = True
+                print("[Dependencies] Successfully installed Python requirements.")
+                break
+            except subprocess.CalledProcessError:
+                continue
+
+        if not installed:
+            print("Error: Failed to install Python dependencies via pip.")
+            sys.exit(1)
 
 
 def check_and_delete_directory(directory):
