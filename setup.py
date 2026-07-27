@@ -85,7 +85,6 @@ package_data: dict[str, dict[str, dict[str, str | list[str]]]] = {
             "options": ["install"],
             "packages": [
                 "meson",
-                "meson-python",
                 "ninja",
                 "gtk4",
                 "libadwaita",
@@ -98,10 +97,49 @@ package_data: dict[str, dict[str, dict[str, str | list[str]]]] = {
 }
 
 
+def ensure_macos_homebrew_path() -> None:
+    """Ensure Homebrew binary paths are included in PATH on macOS."""
+    if platform.system() == "Darwin":
+        brew_paths = [
+            "/opt/homebrew/bin",
+            "/opt/homebrew/sbin",
+            "/usr/local/bin",
+            "/usr/local/sbin",
+        ]
+        current_path = os.environ.get("PATH", "")
+        path_list = current_path.split(os.pathsep) if current_path else []
+        for p in brew_paths:
+            if os.path.isdir(p) and p not in path_list:
+                path_list.insert(0, p)
+        os.environ["PATH"] = os.pathsep.join(path_list)
+
+
+def find_executable(cmd_name: str) -> str:
+    """Finds an executable in PATH or standard macOS Homebrew locations."""
+    ensure_macos_homebrew_path()
+    path = shutil.which(cmd_name)
+    if path:
+        return path
+    if platform.system() == "Darwin":
+        for brew_dir in ["/opt/homebrew/bin", "/usr/local/bin"]:
+            candidate = os.path.join(brew_dir, cmd_name)
+            if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+                return candidate
+    return cmd_name
+
+
 def run_command(cmd: list[str]) -> None:
     """Run a system command and handle errors."""
+    if not cmd:
+        return
+    resolved_cmd = [str(arg) for arg in cmd]
+    if resolved_cmd[0] == "sudo" and len(resolved_cmd) > 1:
+        resolved_cmd[1] = find_executable(resolved_cmd[1])
+    else:
+        resolved_cmd[0] = find_executable(resolved_cmd[0])
+
     try:
-        result = subprocess.run(cmd, check=True, text=True, capture_output=True)
+        result = subprocess.run(resolved_cmd, check=True, text=True, capture_output=True)
         print(result.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Error: Command {' '.join(map(str, cmd))} failed.")  # Convert PosixPath to str
@@ -208,14 +246,16 @@ def build_application(os_type):
             print(f"[macOS Fix] Source directory '{incorrectly_installed_path}' not found. Cannot apply fix.")
 
 
-def check_homebrew():
+def check_homebrew() -> None:
     """Check if Homebrew is installed on macOS."""
-    if shutil.which("brew") is None:
+    brew_path = find_executable("brew")
+    if not os.path.isfile(brew_path) or not os.access(brew_path, os.X_OK):
         print(">> Homebrew not found. Please install it or install the dependencies manually.")
         sys.exit(1)
 
 
 def main():
+    ensure_macos_homebrew_path()
     parser = argparse.ArgumentParser(description="Dependency installer and application builder")
     parser.add_argument("-i", "--install-deps", action="store_true", help="Install dependencies")
     parser.add_argument("-b", "--build", action="store_true", help="Build and install the application")

@@ -116,9 +116,8 @@ def run_all_tests(app_instance):
     logger.info(f"TC2 Hosts Content:\n{hosts_content_tc2}")
 
     expected_msgs_tc2 = [
-        "Found staging IP 1.2.3.4 for example-staging.com.",
-        "Attempting to add to hosts file...",
-        f"Updated {HostsFileEdit.HOSTS_FILE}: Set example-staging.com to 1.2.3.4.",
+        "Found IP 1.2.3.4 for example-staging.com. Adding to hosts file...",
+        f"Updated '{HostsFileEdit.HOSTS_FILE}': Set example-staging.com to 1.2.3.4.",
     ]
     current_pos = 0
     for msg in expected_msgs_tc2:
@@ -141,9 +140,8 @@ def run_all_tests(app_instance):
     logger.info(f"TC3 Status Messages:\n{status_messages_tc3}")
 
     expected_msgs_tc3 = [
-        "Found staging IP 1.2.3.4 for example-staging.com.",
-        "Attempting to add to hosts file...",
-        f"Entry 1.2.3.4 example-staging.com already correctly configured in {HostsFileEdit.HOSTS_FILE}.",
+        "Found IP 1.2.3.4 for example-staging.com. Adding to hosts file...",
+        f"Entry '1.2.3.4 example-staging.com' already correctly configured in {HostsFileEdit.HOSTS_FILE}.",
     ]
     current_pos = 0
     for msg in expected_msgs_tc3:
@@ -171,9 +169,8 @@ def run_all_tests(app_instance):
     logger.info(f"TC4 Hosts Content:\n{hosts_content_tc4}")
 
     expected_msgs_tc4 = [
-        "Found staging IP 1.2.3.4 for example-staging.com.",
-        "Attempting to add to hosts file...",
-        f"Updated {HostsFileEdit.HOSTS_FILE}: Set example-staging.com to 1.2.3.4.",
+        "Found IP 1.2.3.4 for example-staging.com. Adding to hosts file...",
+        f"Updated '{HostsFileEdit.HOSTS_FILE}': Set example-staging.com to 1.2.3.4.",
     ]
     current_pos = 0
     for msg in expected_msgs_tc4:
