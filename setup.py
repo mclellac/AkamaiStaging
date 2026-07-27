@@ -91,6 +91,7 @@ package_data: dict[str, dict[str, dict[str, str | list[str]]]] = {
                 "desktop-file-utils",
                 "pygobject3",
                 "glib",
+                "dnspython",
             ],
         }
     },
@@ -199,6 +200,12 @@ def install_packages() -> None:
         run_command(install_cmd)
     else:
         raise ValueError(f"Unsupported OS or distribution: {os_type}, {distro}")
+
+    try:
+        import dns.resolver  # noqa: F401
+    except ImportError:
+        print("[Dependencies] 'dns' (dnspython) module not found in Python environment. Installing via pip...")
+        run_command([sys.executable, "-m", "pip", "install", "dnspython"])
 
 
 def check_and_delete_directory(directory):
