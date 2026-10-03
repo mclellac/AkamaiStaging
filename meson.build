@@ -23,9 +23,9 @@ endif
 # or be Meson's default for that platform.
 prefix_opt = get_option('prefix')
 
-dependency('glib-2.0', version: '>= 2.88.2')
-dependency('gtk4', version: '>= 4.22.4')
-dependency('libadwaita-1', version: '>= 1.9.2')
+dependency('glib-2.0', version: '>= 2.88.3')
+dependency('gtk4', version: '>= 4.22.5')
+dependency('libadwaita-1', version: '>= 1.9.4')
 dependency('pygobject-3.0', version: '>= 3.56.3')
 
 bindir = join_paths(prefix_opt, get_option('bindir'))

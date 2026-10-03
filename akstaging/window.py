@@ -263,19 +263,33 @@ class AkamaiStagingWindow(Adw.ApplicationWindow):
 
     def on_about_action(self, _action: Gio.SimpleAction, _param: GLib.Variant | None):
         """Handles the 'about' action activation."""
-        about = Adw.AboutWindow(
-            transient_for=self,
-            application_name=APP_NAME,
-            application_icon="com.github.mclellac.AkamaiStaging",
-            developer_name="Carey McLelland",
-            version=VERSION,
-            website="https://github.com/mclellac/AkamaiStaging",
-            issue_url="https://github.com/mclellac/AkamaiStaging/issues",
-            developers=["Carey McLelland <careymclelland@gmail.com>"],
-            copyright=COPYRIGHT,
-            license_type=Gtk.License.GPL_3_0_ONLY,
-        )
-        about.present()
+        if hasattr(Adw, "AboutDialog"):
+            about = Adw.AboutDialog(
+                application_name=APP_NAME,
+                application_icon="com.github.mclellac.AkamaiStaging",
+                developer_name="Carey McLelland",
+                version=VERSION,
+                website="https://github.com/mclellac/AkamaiStaging",
+                issue_url="https://github.com/mclellac/AkamaiStaging/issues",
+                developers=["Carey McLelland <careymclelland@gmail.com>"],
+                copyright=COPYRIGHT,
+                license_type=Gtk.License.GPL_3_0_ONLY,
+            )
+            about.present(self)
+        else:
+            about = Adw.AboutWindow(
+                transient_for=self,
+                application_name=APP_NAME,
+                application_icon="com.github.mclellac.AkamaiStaging",
+                developer_name="Carey McLelland",
+                version=VERSION,
+                website="https://github.com/mclellac/AkamaiStaging",
+                issue_url="https://github.com/mclellac/AkamaiStaging/issues",
+                developers=["Carey McLelland <careymclelland@gmail.com>"],
+                copyright=COPYRIGHT,
+                license_type=Gtk.License.GPL_3_0_ONLY,
+            )
+            about.present()
 
     def on_preferences_action(self, _action: Gio.SimpleAction, _param: GLib.Variant | None):
         """Handles the 'preferences' action activation."""

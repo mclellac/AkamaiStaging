@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
-	<id>com.github.mclellac.AkamaiStaging.desktop</id>
-	<metadata_license>CC0-1.0</metadata_license>
-	<project_license>GPL-3.0-or-later</project_license>
-	<description>
-	  <p>No description</p>
-	</description>
+<component type="desktop-application">
+  <id>com.github.mclellac.AkamaiStaging</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Akamai Staging</name>
+  <summary>Manage Akamai staging environments via hosts file modifications</summary>
+  <description>
+    <p>
+      Akamai Staging is an application designed to discover Akamai staging network IPs and easily manage hosts file entries for testing staging configurations.
+    </p>
+  </description>
+  <developer id="com.github.mclellac">
+    <name>Carey McLelland</name>
+  </developer>
+  <url type="homepage">https://github.com/mclellac/AkamaiStaging</url>
+  <url type="bugtracker">https://github.com/mclellac/AkamaiStaging/issues</url>
+  <launchable type="desktop-id">com.github.mclellac.AkamaiStaging.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/mclellac/AkamaiStaging/main/images/screenshot.png</image>
+      <caption>Akamai Staging Main Window</caption>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.0.0" date="2026-10-03"/>
+  </releases>
 </component>

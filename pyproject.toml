@@ -8,6 +8,11 @@ version = "1.0.0"
 description = "Manage Akamai staging environments via hosts file modifications"
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = [
+    "PyGObject>=3.56.3",
+    "pycairo>=1.29.1",
+    "dnspython>=2.8.0",
+]
 
 [tool.ruff]
 target-version = "py310"

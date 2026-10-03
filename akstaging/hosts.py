@@ -178,7 +178,7 @@ class HostsFileEdit:
             return None, [], [], stripped_line
 
         line_before_comment = stripped_line.split("#", 1)[0].strip()
-        trailing_comment_text = ""
+        trailing_comment_text = None
         if "#" in stripped_line:
             trailing_comment_text = stripped_line.split("#", 1)[1]
 
@@ -326,7 +326,7 @@ class HostsFileEdit:
 
         if not entry_found_and_removed:
             status = Status.ALREADY_EXISTS  # Or NOT_FOUND
-            message = f"Entry '{entry_to_remove}' not found in '{self.HOSTS_FILE}'. No changes made."
+            message = f"Entry '{entry_to_remove}' not found in {self.HOSTS_FILE}. No changes made."
             self._log_debug(f"Entry '{entry_to_remove}' not found. No changes needed. Returning {status.name}.")
             return status, message
 
@@ -334,7 +334,7 @@ class HostsFileEdit:
         status, message = self._write_lines_to_hosts_file(lines_to_keep)
 
         if status == Status.SUCCESS:
-            message = f"Successfully removed entry '{entry_to_remove}' from '{self.HOSTS_FILE}'."
+            message = f"Successfully removed entries matching '{entry_to_remove}' from {self.HOSTS_FILE}."
 
         self._log_debug(
             f"_remove_hosts_entry_direct returning: Status={status.name if hasattr(status, 'name') else status}, Message='{message}'"
@@ -576,7 +576,7 @@ class HostsFileEdit:
                 message = f"Updated '{self.HOSTS_FILE}': Corrected entries for {sanitized_domain} to {staging_ip}."
             else:
                 current_status = Status.ALREADY_EXISTS
-                message = f"Entry {staging_ip} {sanitized_domain} already correctly configured in '{self.HOSTS_FILE}'."
+                message = f"Entry '{staging_ip} {sanitized_domain}' already correctly configured in {self.HOSTS_FILE}."
 
         self._log_debug(f"Status after logic: {current_status.name}. Message: {message}")
 

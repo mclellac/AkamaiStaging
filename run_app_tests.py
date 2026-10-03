@@ -225,13 +225,14 @@ def run_all_tests(app_instance):
 
     # _item_to_delete should still hold the DataObject from the last successful deletion.
     # This simulates trying to delete the same logical entry again.
+    item_del = getattr(window, "_item_to_delete", None)
     if (
-        window._item_to_delete
-        and window._item_to_delete.ip == "1.2.3.4"
-        and window._item_to_delete.hostname.split("#")[0].strip() == "example-staging.com"
+        item_del
+        and item_del.ip == "1.2.3.4"
+        and item_del.hostname.split("#")[0].strip() == "example-staging.com"
     ):
         logger.info(
-            f"TC6: Simulating delete for already deleted item: {window._item_to_delete.ip} {window._item_to_delete.hostname.split('#')[0].strip()}"
+            f"TC6: Simulating delete for already deleted item: {item_del.ip} {item_del.hostname.split('#')[0].strip()}"
         )
         window._on_delete_confirmation_response(None, "delete")
     else:
